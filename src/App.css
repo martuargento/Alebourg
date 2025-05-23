@@ -49,4 +49,16 @@
   color: #888;
 }
 
+.producto-img {
+  transition: transform 0.3s ease;
+  /* Opcional: para que no se salga del contenedor si está dentro de uno con overflow */
+  display: block;
+  max-width: 100%;
+}
+
+.producto-img:hover {
+  transform: scale(1.05); /* agranda un 5% */
+  cursor: pointer; /* opcional, para indicar que es interactiva */
+}
+
 

@@ -6,7 +6,7 @@ const Novedades = () => {
   return (
     <div className="container">
       <h4 className="text-muted ms-4 titulosprincipales">Novedades</h4>
-      <ProductosLista category="novedades" />
+      <ProductosLista categoria="novedades" /> {/* <- esta es la línea corregida */}
     </div>
   );
 };
