@@ -4,7 +4,7 @@ import ProductosLista from './ProductosLista';
 const Home = () => {
   return (
     <div className="container">
-      <h4>Todos los productos</h4>
+      <h4 className="text-muted ms-4">Todos los productos</h4>
       <ProductosLista/>
     </div>
   );

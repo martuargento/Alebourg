@@ -4,7 +4,7 @@ import React from 'react';
 const VerPedido = () => {
   return (
     <div className="container">
-      <h1>Ver Pedido</h1>
+      <h4 className="text-muted ms-4">Ver Pedido</h4>
       {/* Por ahora vacío, luego lo vas a completar */}
     </div>
   );

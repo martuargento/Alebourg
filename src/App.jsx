@@ -5,6 +5,7 @@ import Header from './components/Header';
 import Home from './components/Home';
 import Novedades from './components/Novedades';
 import VerPedido from './components/VerPedido';
+import Footer from './components/Footer';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="/novedades" element={<Novedades />} />
         <Route path="/verpedido" element={<VerPedido />} />
       </Routes>
+      <Footer/>
     </>
   );
 }
