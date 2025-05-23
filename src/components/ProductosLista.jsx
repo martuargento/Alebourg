@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
-import ProductCard from './ProductCard';  // Importá el componente nuevo
+import ProductCard from './ProductCard';  
+import Swal from 'sweetalert2';
 
 const ProductosLista = ({ category = null }) => {
   const [productos, setProductos] = useState([]);
@@ -23,10 +24,14 @@ const ProductosLista = ({ category = null }) => {
       });
   }, [category]);
 
-  const agregarAlCarrito = (producto) => {
-    alert(`Producto "${producto.name}" agregado al carrito`);
-    // Acá después podés agregar lógica real para el carrito
-  };
+ const agregarAlCarrito = (producto) => {
+    Swal.fire({
+      title: '¡Producto agregado!',
+      text: `El producto "${producto.name}" se agregó al carrito.`,
+      icon: 'success',
+      confirmButtonText: 'Aceptar'
+    });
+};
 
   if (loading) return <div>Cargando productos...</div>;
 
