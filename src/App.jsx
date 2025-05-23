@@ -3,21 +3,17 @@ import { Routes, Route } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Header from './components/Header';
 import Home from './components/Home';
-// Importá más componentes si tenés más rutas
-// import Ofertas from './components/Ofertas';
-// import Infaltables from './components/Infaltables';
-// import Administracion from './components/Administracion';
+import Novedades from './components/Novedades';
+import VerPedido from './components/VerPedido';
 
 function App() {
   return (
     <>
       <Header />
-
       <Routes>
         <Route path="/" element={<Home />} />
-        {/* <Route path="/ofertas" element={<Ofertas />} />
-        <Route path="/infaltables" element={<Infaltables />} />
-        <Route path="/administracion" element={<Administracion />} /> */}
+        <Route path="/novedades" element={<Novedades />} />
+        <Route path="/verpedido" element={<VerPedido />} />
       </Routes>
     </>
   );

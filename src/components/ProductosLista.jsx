@@ -4,7 +4,7 @@ import { Container, Row, Col, Card } from 'react-bootstrap';
 
 // import ProductCard from './ProductCard';
 
-const ProductList = ({ category = null }) => 
+const ProductosLista = ({ category = null }) => 
 {
 
   const [productos,setProductos]=useState([])
@@ -12,17 +12,23 @@ const ProductList = ({ category = null }) =>
   const [loading,setLoading]=useState(true)
 
   useEffect(() => {
-    fetch('https://682f69eef504aa3c70f3f01a.mockapi.io/productos')
-        .then(res => res.json())
-        .then(data => {
-        setProductos(data)  
-        setLoading(false)
-        })
-        .catch(err => { 
-        console.error("Error de carga de API", err)
-        setLoading(false)
-        })
-    }, [])
+  fetch('https://682f69eef504aa3c70f3f01a.mockapi.io/productos')
+    .then(res => res.json())
+    .then(data => {
+      let filtrados = data;
+
+      if (category === 'novedades') {
+        filtrados = data.filter(producto => producto.Novedades === true);
+      }
+
+      setProductos(filtrados);
+      setLoading(false);
+    })
+    .catch(err => {
+      console.error("Error de carga de API", err);
+      setLoading(false);
+    });
+}, [category]);
 
 
   return (
@@ -52,4 +58,4 @@ const ProductList = ({ category = null }) =>
   )
   }
 
-  export default ProductList;
+  export default ProductosLista;

@@ -1,11 +1,11 @@
 import React from 'react';
-import ProductList from './ProductList';
+import ProductosLista from './ProductosLista';
 
 const Home = () => {
   return (
     <div className="container">
       <h1>Todos los productos</h1>
-      <ProductList/>
+      <ProductosLista/>
     </div>
   );
 };
