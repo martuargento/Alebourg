@@ -1,30 +1,30 @@
 import React from 'react';
-import { Card, Button } from 'react-bootstrap';
+import { Button, Card } from 'react-bootstrap';
+import { usarCarrito } from '../context/CarritoContexto';
+import Swal from 'sweetalert2';
 
-const ProductCard = ({ producto, agregarAlCarrito }) => {
+const ProductCard = ({ producto }) => {
+  const { agregarAlCarrito } = usarCarrito();
+
+  const manejarClick = () => {
+    agregarAlCarrito(producto);
+
+    Swal.fire({
+      icon: 'success',
+      title: 'Producto agregado',
+      text: `"${producto.name}" se agregó al carrito`,
+      timer: 1500,
+      showConfirmButton: false,
+    });
+  };
+
   return (
-    <Card className="h-100 d-flex flex-column m-2">
-      <Card.Img
-        variant="top"
-        src={producto.imagen}
-        alt={producto.name}
-        style={{ height: '200px', objectFit: 'cover' }}
-      />
-      <Card.Body className="d-flex flex-column">
+    <Card>
+      <Card.Img variant="top" src={producto.imagen} />
+      <Card.Body>
         <Card.Title>{producto.name}</Card.Title>
-        <Card.Text>
-          Categoria: {producto.Rubro || 'N/A'}
-        </Card.Text>
-        <Card.Text>
-          <strong>Precio: {producto.precio || 'N/A'}</strong>
-        </Card.Text>
-        <Button
-          variant="primary"
-          onClick={() => agregarAlCarrito(producto)}
-          className="mt-auto"
-        >
-          Agregar al carrito
-        </Button>
+        <Card.Text>Precio: ${producto.precio}</Card.Text>
+        <Button onClick={manejarClick}>Agregar al carrito</Button>
       </Card.Body>
     </Card>
   );

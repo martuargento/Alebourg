@@ -1,40 +1,72 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Navbar, Nav, Container, Button } from 'react-bootstrap';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faShoppingCart } from '@fortawesome/free-solid-svg-icons';
-import logo from '../assets/logo.png';
+import { Link, useNavigate } from 'react-router-dom';
+import { FaShoppingCart } from 'react-icons/fa';
+import { usarCarrito } from '../context/CarritoContexto';
 
 const Header = () => {
+  const { carrito } = usarCarrito();
+  const navigate = useNavigate();
+
+  const estaLogueado = localStorage.getItem('logueado') === 'true';
+
+  const manejarLogout = () => {
+    localStorage.removeItem('logueado');
+    navigate('/');
+  };
+
+  // Aquí sumamos todas las cantidades del carrito para mostrar en el badge
+  const cantidadTotal = carrito.reduce((total, producto) => total + (producto.cantidad || 1), 0);
+
   return (
-    <Navbar bg="dark" variant="dark" expand="lg" className="mb-4">
-      <Container>       
-        <Navbar.Brand as={Link} to="/" className="d-flex align-items-center">
-         <img
-          src={logo}
-          alt="Alebourg Logo"
-          className="d-inline-block align-top me-2"
-          style={{ width: '40px', height: 'auto' }}
-        />
-          <span>Alebourg</span>
-        </Navbar.Brand>
+    <nav className="navbar navbar-expand-lg navbar-light bg-light px-4">
+      <Link className="navbar-brand" to="/">Mi Tienda</Link>
 
-        <Nav className="ms-auto align-items-center">
-          <Nav.Link as={Link} to="/" className="me-3">Productos</Nav.Link>
-          <Nav.Link as={Link} to="/novedades" className="me-3">Novedades</Nav.Link>
-          <Nav.Link as={Link} to="/verpedido" className="me-3">Ver Pedido</Nav.Link>
+      <button
+        className="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span className="navbar-toggler-icon"></span>
+      </button>
 
-          <div className="d-flex align-items-center">
-            <Button variant="outline-light" as={Link} to="/" className="me-2">
-              Administración
-            </Button>
-            <Link to="/" className="text-white">
-              <FontAwesomeIcon icon={faShoppingCart} size="lg" />
+      <div className="collapse navbar-collapse" id="navbarNav">
+        <ul className="navbar-nav me-auto mb-2 mb-lg-0">
+          <li className="nav-item">
+            <Link className="nav-link" to="/">Productos</Link>
+          </li>
+          <li className="nav-item">
+            <Link className="nav-link" to="/novedades">Novedades</Link>
+          </li>
+          <li className="nav-item">
+            <Link className="nav-link" to="/verpedido">Ver Pedido</Link>
+          </li>
+        </ul>
+
+        <div className="d-flex align-items-center">
+          {estaLogueado ? (
+            <button className="btn btn-outline-danger me-3" onClick={manejarLogout}>
+              Cerrar sesión
+            </button>
+          ) : (
+            <Link to="/login" className="btn btn-outline-primary me-3">
+              Iniciar sesión
             </Link>
-          </div>
-        </Nav>
-      </Container>
-    </Navbar>
+          )}
+          <Link to="/verpedido" className="btn btn-outline-secondary position-relative">
+            <FaShoppingCart size={20} />
+            {cantidadTotal > 0 && (
+              <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                {cantidadTotal}
+              </span>
+            )}
+          </Link>
+        </div>
+      </div>
+    </nav>
   );
 };
 
