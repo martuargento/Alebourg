@@ -59,7 +59,7 @@ const Header = () => {
               Cerrar sesión
             </button>
           ) : (
-            <Link to="/login" className="btn btn-outline-primary me-3">
+            <Link to="/login" className="btn btn-outline-primary me-3 boton-login">
               Iniciar sesión
             </Link>
           )}

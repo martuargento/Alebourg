@@ -24,7 +24,7 @@ const ProductCard = ({ producto }) => {
       <Card.Body>
         <Card.Title>{producto.name}</Card.Title>
         <Card.Text>Precio: ${producto.precio}</Card.Text>
-        <Button onClick={manejarClick}>Agregar al carrito</Button>
+        <Button onClick={manejarClick} className="boton-productos">Agregar al carrito</Button>
       </Card.Body>
     </Card>
   );
