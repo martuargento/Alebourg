@@ -5,7 +5,7 @@ import ProductosLista from './ProductosLista';
 const Novedades = () => {
   return (
     <div className="container">
-      <h1>Novedades</h1>
+      <h4>Novedades</h4>
       <ProductosLista category="novedades" />
     </div>
   );

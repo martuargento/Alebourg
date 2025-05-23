@@ -3,17 +3,19 @@ import { Link } from 'react-router-dom';
 import { Navbar, Nav, Container, Button } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faShoppingCart } from '@fortawesome/free-solid-svg-icons';
+import logo from '../assets/logo.png';
 
 const Header = () => {
   return (
     <Navbar bg="dark" variant="dark" expand="lg" className="mb-4">
       <Container>       
         <Navbar.Brand as={Link} to="/" className="d-flex align-items-center">
-          <img
-            src="https://via.placeholder.com/40" 
-            alt=""
-            className="d-inline-block align-top me-2"
-          />
+         <img
+          src={logo}
+          alt="Alebourg Logo"
+          className="d-inline-block align-top me-2"
+          style={{ width: '40px', height: 'auto' }}
+        />
           <span>Alebourg</span>
         </Navbar.Brand>
 
