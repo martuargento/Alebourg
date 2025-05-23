@@ -18,12 +18,17 @@
 }
 
 .logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-  transform: scale(1.4); /* mejor empezar con algo más pequeño para probar */
+  filter: 
+    drop-shadow(0 0 2em #e20df58c) 
+    drop-shadow(0 0 1em #e20df57c) 
+    drop-shadow(0 0 0.5em #ff7fff95);
+  transform: scale(1.4);
 }
 
 .logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+  filter: 
+    drop-shadow(0 0 3em #ab29bc5e) 
+    drop-shadow(0 0 1.5em #ab29bc83);
 }
 
 @keyframes logo-spin {
