@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaShoppingCart } from 'react-icons/fa';
 import { usarCarrito } from '../context/CarritoContexto';
+import logo from '../assets/logo.png'; // <-- Importar el logo aquí
 
 const Header = () => {
   const { carrito } = usarCarrito();
@@ -14,12 +15,17 @@ const Header = () => {
     navigate('/');
   };
 
-  // Aquí sumamos todas las cantidades del carrito para mostrar en el badge
   const cantidadTotal = carrito.reduce((total, producto) => total + (producto.cantidad || 1), 0);
 
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-light px-4">
-      <Link className="navbar-brand" to="/">Mi Tienda</Link>
+      <Link className="navbar-brand" to="/">
+        <img 
+          src={logo} 
+          alt="Alebourg" 
+          style={{ height: '40px', objectFit: 'contain' }} 
+        />
+      </Link>
 
       <button
         className="navbar-toggler"
