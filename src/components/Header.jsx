@@ -20,11 +20,12 @@ const Header = () => {
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-light px-4">
       <Link className="navbar-brand" to="/">
-        <img 
-          src={logo} 
-          alt="Alebourg" 
-          style={{ height: '40px', objectFit: 'contain' }} 
-        />
+      <img 
+        src={logo} 
+        alt="Alebourg" 
+        className="logo"
+        style={{ height: '55px', objectFit: 'contain' }} 
+      />
       </Link>
 
       <button

@@ -18,7 +18,7 @@ const VerPedido = () => {
   return (
     <Container className="my-5 d-flex justify-content-center">
       <div style={{ maxWidth: '600px', width: '100%' }}>
-        <h4 className="mb-4 text-center">Tu pedido</h4>
+        <h4 className="mb-4 text-center titulosprincipales">Tu pedido</h4>
         <ListGroup>
           {carrito.map(producto => (
             <ListGroup.Item key={producto.id}>
