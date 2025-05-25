@@ -15,6 +15,9 @@ const ProductCard = ({ producto }) => {
       text: `"${producto.name}" se agregó al carrito`,
       timer: 1500,
       showConfirmButton: false,
+      background: '#1e1e1e',
+      color: '#fff',
+      confirmButtonColor: '#3085d6'
     });
   };
 

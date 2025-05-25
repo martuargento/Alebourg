@@ -121,7 +121,7 @@
 }
 
 body {
-  background-color: #121212 !important;
+  background-color: rgba(14,16,15,255) !important;
   color: #ffffff !important;
 }
 
@@ -136,8 +136,34 @@ button {
   color: #ffffff !important;
 }
 
-nav {
-  background-color: #161b22 !important;
-  color: #c9d1d9 !important;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.4) !important;
+
+
+.navbarestilo{
+  background-color: rgb(42, 45, 46) !important;
+}
+
+.botonCarritoEstilo{
+  background-color: rgba(250, 251, 251, 0.079) !important;
+  color: rgb(255, 255, 255) !important;
+}
+
+.botonCarritoEstilo:hover{
+  background-color: #b04a78 !important;
+  color: rgb(255, 255, 255) !important;
+}
+
+.inputForEstilos{
+  background-color: rgba(250, 251, 251, 0.079) !important;
+  color: rgb(255, 255, 255) !important;
+}
+
+.iniciarSesionEstilos{
+  background-color: rgba(250, 251, 251, 0.079) !important;
+  color: rgb(255, 255, 255) !important;
+}
+
+.verPedidosEstilos{
+  background-color: rgba(250, 251, 251, 0) !important;
+  color: rgb(255, 255, 255) !important;
+  border-color: rgba(250, 251, 251, 0.43) !important
 }

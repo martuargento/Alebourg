@@ -18,7 +18,7 @@ const Header = () => {
   const cantidadTotal = carrito.reduce((total, producto) => total + (producto.cantidad || 1), 0);
 
   return (
-  <nav className="navbar navbar-expand-lg px-4" style={{ backgroundColor: 'rgba(43, 43, 43, 0.45)', color: 'rgb(255, 255, 255)' }}>
+  <nav className="navbar navbar-expand-lg px-4 navbarestilo" style={{ backgroundColor: 'rgba(12, 188, 233, 0.98)', color: 'rgb(255, 255, 255)' }}>
 
 
       <Link className="navbar-brand" to="/">
@@ -65,7 +65,7 @@ const Header = () => {
               Iniciar sesión
             </Link>
           )}
-          <Link to="/verpedido" className="btn btn-outline-secondary position-relative">
+          <Link to="/verpedido" className="btn btn-outline-secondary position-relative botonCarritoEstilo">
             <FaShoppingCart size={20} />
             {cantidadTotal > 0 && (
               <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">

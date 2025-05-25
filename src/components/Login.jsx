@@ -13,10 +13,24 @@ const Login = () => {
     if (usuario === 'admin' && password === '1234') {
       // Guardamos estado de login en localStorage
       localStorage.setItem('logueado', 'true');
-      Swal.fire('¡Éxito!', 'Has iniciado sesión correctamente', 'success');
-      navigate('/'); // redirigimos al home o donde quieras
+      Swal.fire({
+      title: '¡Éxito!',
+      text: 'Has iniciado sesión correctamente',
+      icon: 'success',
+      background: '#1e1e1e',
+      color: '#fff',
+      confirmButtonColor: '#3085d6'
+    });
+      navigate('/'); // redirigimos al home
     } else {
-      Swal.fire('Error', 'Usuario o contraseña incorrectos', 'error');
+      Swal.fire({
+      title: 'Error',
+      text: 'Usuario o contraseña incorrectos',
+      icon: 'error',
+      background: '#1e1e1e',
+      color: '#fff',
+      confirmButtonColor: '#d33'  
+    });
     }
   };
 
@@ -28,7 +42,7 @@ const Login = () => {
           <label>Usuario</label>
           <input
             type="text"
-            className="form-control"
+            className="form-control inputForEstilos"
             value={usuario}
             onChange={e => setUsuario(e.target.value)}
             required
@@ -39,14 +53,14 @@ const Login = () => {
           <label>Contraseña</label>
           <input
             type="password"
-            className="form-control"
+            className="form-control inputForEstilos"
             value={password}
             onChange={e => setPassword(e.target.value)}
             required
           />
         </div>
 
-        <button type="submit" className="btn btn-primary w-100">
+        <button type="submit" className="btn btn-primary w-100 iniciarSesionEstilos">
           Iniciar sesión
         </button>
       </form>
