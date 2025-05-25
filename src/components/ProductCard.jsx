@@ -22,7 +22,7 @@ const ProductCard = ({ producto }) => {
   };
 
   return (
-    <Card>
+    <Card className='cardsEstilos'>
       <Card.Img variant="top" src={producto.imagen} />
       <Card.Body>
         <Card.Title>{producto.name}</Card.Title>
