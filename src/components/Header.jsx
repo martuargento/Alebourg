@@ -18,7 +18,9 @@ const Header = () => {
   const cantidadTotal = carrito.reduce((total, producto) => total + (producto.cantidad || 1), 0);
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-light bg-light px-4">
+  <nav className="navbar navbar-expand-lg px-4" style={{ backgroundColor: 'rgba(43, 43, 43, 0.45)', color: 'rgb(255, 255, 255)' }}>
+
+
       <Link className="navbar-brand" to="/">
       <img 
         src={logo} 
@@ -43,13 +45,13 @@ const Header = () => {
       <div className="collapse navbar-collapse" id="navbarNav">
         <ul className="navbar-nav me-auto mb-2 mb-lg-0">
           <li className="nav-item">
-            <Link className="nav-link" to="/">Productos</Link>
+            <Link className="nav-link text-white" to="/">Productos</Link>
           </li>
           <li className="nav-item">
-            <Link className="nav-link" to="/novedades">Novedades</Link>
+            <Link className="nav-link text-white" to="/novedades">Novedades</Link>
           </li>
           <li className="nav-item">
-            <Link className="nav-link" to="/verpedido">Ver Pedido</Link>
+            <Link className="nav-link text-white" to="/verpedido">Ver Pedido</Link>
           </li>
         </ul>
 
