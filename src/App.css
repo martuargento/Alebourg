@@ -198,10 +198,8 @@ button {
 
 
 @media (max-width: 576px) {
-  .cardsEstilos {
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
+  .card{
+    padding: 10px !important;
   }
 }
 
