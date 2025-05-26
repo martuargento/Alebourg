@@ -10,7 +10,7 @@ const ProductosLista = ({ categoria = null }) => {
   const { agregarAlCarrito } = usarCarrito();
 
   useEffect(() => {
-    fetch('https://raw.githubusercontent.com/martuargento/Alebourg/refs/heads/main/public/ProductosDistriKarmaConImagenreal.json')
+    fetch('https://raw.githubusercontent.com/martuargento/Alebourg/refs/heads/main/public/ProductosDistriKarmaConImagen111.json')
       .then(res => res.json())
       .then(data => {
         let filtrados = data;
@@ -31,7 +31,7 @@ const ProductosLista = ({ categoria = null }) => {
     Swal.fire({
       icon: 'success',
       title: 'Producto agregado',
-      text: `"${producto.producto}" se agregó al carrito`,
+      text: `"${producto.titulo}" se agregó al carrito`,
       timer: 1500,
       showConfirmButton: false,
     });
@@ -43,7 +43,7 @@ const ProductosLista = ({ categoria = null }) => {
     <Container className="mt-4">
       <Row>
         {productos.map(producto => (
-          <Col key={producto.FIELD1} md={4}>
+          <Col key={producto.id} md={4}>
             <ProductCard producto={producto} agregarAlCarrito={manejarAgregar} />
           </Col>
         ))}

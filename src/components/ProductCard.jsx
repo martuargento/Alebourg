@@ -12,7 +12,7 @@ const ProductCard = ({ producto }) => {
     Swal.fire({
       icon: 'success',
       title: 'Producto agregado',
-      text: `"${producto.name}" se agregó al carrito`,
+      text: `"${producto.titulo}" se agregó al carrito`,
       timer: 1500,
       showConfirmButton: false,
       background: '#1e1e1e',
@@ -23,10 +23,10 @@ const ProductCard = ({ producto }) => {
 
   return (
     <Card className='cardsEstilos'>
-      {/* <Card.Img variant="top" src={producto.imagen} /> */}
+      <Card.Img variant="top" src={producto.imagen} />
       <Card.Body>
-        <Card.Title>{producto.FIELD2}</Card.Title>
-        <Card.Text>Precio: ${producto.FIELD3}</Card.Text>
+        <Card.Title>{producto.titulo}</Card.Title>
+        <Card.Text>Precio: {producto.precio}</Card.Text>
         <Button onClick={manejarClick} className="boton-productos">Agregar al carrito</Button>
       </Card.Body>
     </Card>
