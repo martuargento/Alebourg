@@ -10,7 +10,7 @@ const ProductosLista = ({ categoria = null }) => {
   const { agregarAlCarrito } = usarCarrito();
 
   useEffect(() => {
-    fetch('https://raw.githubusercontent.com/martuargento/Alebourg/refs/heads/main/public/ProductosDistriKarmaConImagen111.json')
+    fetch('https://raw.githubusercontent.com/martuargento/Alebourg/refs/heads/main/public/productosalebourg.json')
       .then(res => res.json())
       .then(data => {
         let filtrados = data;

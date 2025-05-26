@@ -26,7 +26,10 @@ const ProductCard = ({ producto }) => {
       <Card.Img variant="top" src={producto.imagen} />
       <Card.Body>
         <Card.Title>{producto.titulo}</Card.Title>
-        <Card.Text>Precio: {producto.precio}</Card.Text>
+        <br></br>
+        <Card.Text><strong>Precio: ${producto.precio}</strong></Card.Text>
+        <br></br>
+        <Card.Text>Categoria: {producto.categoria}</Card.Text>
         <Button onClick={manejarClick} className="boton-productos">Agregar al carrito</Button>
       </Card.Body>
     </Card>
