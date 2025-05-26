@@ -11,6 +11,9 @@
   padding-left: 1.5rem;
 }
 
+.row>*{
+  margin-bottom: 10px;
+}
 
 .logo {
   will-change: filter, transform;
