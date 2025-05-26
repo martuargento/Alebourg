@@ -27,9 +27,9 @@ const ProductCard = ({ producto }) => {
       <Card.Body>
         <Card.Title>{producto.titulo}</Card.Title>
         <br></br>
-        <Card.Text><strong>Precio: ${producto.precio}</strong></Card.Text>
-        <br></br>
         <Card.Text>Categoria: {producto.categoria}</Card.Text>
+        <br></br>
+        <Card.Text><strong>Precio: ${producto.precio}</strong></Card.Text>
         <Button onClick={manejarClick} className="boton-productos">Agregar al carrito</Button>
       </Card.Body>
     </Card>
