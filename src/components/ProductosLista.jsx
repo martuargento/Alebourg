@@ -10,7 +10,7 @@ const ProductosLista = ({ categoria = null }) => {
   const { agregarAlCarrito } = usarCarrito();
 
   useEffect(() => {
-    fetch('https://682f69eef504aa3c70f3f01a.mockapi.io/productos')
+    fetch('https://raw.githubusercontent.com/martuargento/Alebourg/refs/heads/main/public/jsonproductosdistrikarma.json')
       .then(res => res.json())
       .then(data => {
         let filtrados = data;
@@ -31,7 +31,7 @@ const ProductosLista = ({ categoria = null }) => {
     Swal.fire({
       icon: 'success',
       title: 'Producto agregado',
-      text: `"${producto.name}" se agregó al carrito`,
+      text: `"${producto.FIELD2}" se agregó al carrito`,
       timer: 1500,
       showConfirmButton: false,
     });
@@ -43,7 +43,7 @@ const ProductosLista = ({ categoria = null }) => {
     <Container className="mt-4">
       <Row>
         {productos.map(producto => (
-          <Col key={producto.id} md={4}>
+          <Col key={producto.FIELD1} md={4}>
             <ProductCard producto={producto} agregarAlCarrito={manejarAgregar} />
           </Col>
         ))}

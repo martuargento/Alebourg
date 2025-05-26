@@ -21,11 +21,11 @@ const VerPedido = () => {
         <h4 className="mb-4 text-center titulosprincipales">Tu pedido</h4>
         <ListGroup >
           {carrito.map(producto => (
-            <ListGroup.Item key={producto.id} className='verPedidosEstilos'>
+            <ListGroup.Item key={producto.FIELD1} className='verPedidosEstilos'>
               <Row >
                 <Col>{producto.name}</Col>
                 <Col>Cantidad: {producto.cantidad}</Col>
-                <Col>Precio: ${producto.precio * producto.cantidad}</Col>
+                <Col>Precio: ${producto.FIELD3 * producto.cantidad}</Col>
               </Row>
             </ListGroup.Item>
           ))}

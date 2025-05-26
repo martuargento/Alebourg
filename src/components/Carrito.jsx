@@ -12,9 +12,9 @@ const Carrito = () => {
       <h4>Tu carrito</h4>
       <ListGroup>
         {carrito.map(producto => (
-          <ListGroup.Item key={producto.id} className="d-flex justify-content-between align-items-center">
-            {producto.name} - ${producto.precio}
-            <Button variant="danger" size="sm" onClick={() => eliminarDelCarrito(producto.id)}>Eliminar</Button>
+          <ListGroup.Item key={producto.FIELD1} className="d-flex justify-content-between align-items-center">
+            {producto.FIELD2} - ${producto.FIELD3}
+            <Button variant="danger" size="sm" onClick={() => eliminarDelCarrito(producto.FIELD1)}>Eliminar</Button>
           </ListGroup.Item>
         ))}
       </ListGroup>
