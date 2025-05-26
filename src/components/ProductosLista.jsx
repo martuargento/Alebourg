@@ -10,7 +10,7 @@ const ProductosLista = ({ categoria = null }) => {
   const { agregarAlCarrito } = usarCarrito();
 
   useEffect(() => {
-    fetch('https://raw.githubusercontent.com/martuargento/Alebourg/refs/heads/main/public/jsonproductosdistrikarma.json')
+    fetch('https://raw.githubusercontent.com/martuargento/Alebourg/refs/heads/main/public/ProductosDistriKarmaConImagenreal.json')
       .then(res => res.json())
       .then(data => {
         let filtrados = data;
@@ -31,7 +31,7 @@ const ProductosLista = ({ categoria = null }) => {
     Swal.fire({
       icon: 'success',
       title: 'Producto agregado',
-      text: `"${producto.FIELD2}" se agregó al carrito`,
+      text: `"${producto.producto}" se agregó al carrito`,
       timer: 1500,
       showConfirmButton: false,
     });
