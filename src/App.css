@@ -173,3 +173,22 @@ button {
   color: rgb(255, 255, 255) !important;
   border-color: rgba(250, 251, 251, 0.43) !important
 }
+
+@media (max-width: 768px) {
+  #root {
+    max-width: 100% !important; /* Usar todo el ancho de la pantalla */
+    padding: 1rem; /* Reducir el padding para aprovechar más espacio */
+  }
+  
+  .container {
+    max-width: 100% !important; /* Que el container use todo el ancho en móvil */
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  /* Opcional: Agrandar un poco los productos, si están dentro de columnas */
+  .col-md-4 {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+  }
+}

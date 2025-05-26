@@ -43,7 +43,7 @@ const ProductosLista = ({ categoria = null }) => {
     <Container className="mt-4">
       <Row>
         {productos.map(producto => (
-          <Col key={producto.id} md={4}>
+          <Col key={producto.id} xs={12} md={4}>
             <ProductCard producto={producto} agregarAlCarrito={manejarAgregar} />
           </Col>
         ))}
