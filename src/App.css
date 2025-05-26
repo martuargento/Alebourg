@@ -196,7 +196,7 @@ button {
 
 @media (max-width: 600px) {
   .card {
-    width: 100%;
-    max-width: none;
+    width: 100% !important;
+    max-width: none !important;
   }
 }
