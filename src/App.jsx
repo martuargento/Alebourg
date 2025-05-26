@@ -6,7 +6,7 @@ import VerPedido from './components/VerPedido';
 import Footer from './components/Footer';
 import Login from './components/Login';  
 import { ProveedorCarrito } from './context/CarritoContexto';
-import './app.css';
+import './App.css';
 
 
 function App() {
