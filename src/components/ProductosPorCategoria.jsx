@@ -10,9 +10,9 @@ const ProductosPorCategoria = () => {
 
   return (
     <div className="container mt-4">
-      <Row>
+      <Row className="justify-content-center">
         <Col>
-          <h4 className="text-white titulosprincipales">{nombreCategoria.toUpperCase()}</h4>
+          <h4 className="text-white titulosprincipales mb-4">{nombreCategoria.toUpperCase()}</h4>
           <ProductosLista categoria={nombreCategoria} />
         </Col>
       </Row>

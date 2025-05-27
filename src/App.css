@@ -324,3 +324,31 @@ button {
 
 .botonCarritoEstilo {
   transition: all 0.3s ease;
+}
+
+  /* App.css */
+/* Asegurar que las cards tengan tamaño consistente */
+.cardsEstilos {
+  width: 100%;
+  min-width: 250px;
+  max-width: 350px;
+  margin: 0 auto;
+}
+
+/* Forzar el mismo grid en todas las vistas */
+.justify-content-center > .col {
+  flex: 0 0 auto;
+  width: auto;
+  max-width: 100%;
+}
+
+/* Ajustar márgenes en mobile */
+@media (max-width: 768px) {
+  .mb-4.d-flex {
+    justify-content: center !important;
+  }
+  
+  .cardsEstilos {
+    max-width: 100%;
+  }
+}

@@ -55,14 +55,21 @@ const ProductosLista = ({ categoria = null }) => {
   if (loading) return <div>Cargando productos...</div>;
 
   return (
-    <Container className="mt-4">
-      <Row>
-        {productos.length > 0 ? (
-          productos.map(producto => (
-            <Col key={producto.id} xs={12} md={4} className="mb-4">
-              <ProductCard producto={producto} agregarAlCarrito={manejarAgregar} />
-            </Col>
-          ))
+    <Container fluid className="px-4">
+    <Row className="justify-content-center">
+      {productos.length > 0 ? (
+        productos.map(producto => (
+          <Col 
+            key={producto.id} 
+            xs={12} 
+            md={6} 
+            lg={4} 
+            xl={3} 
+            className="mb-4 d-flex justify-content-center"
+          >
+            <ProductCard producto={producto} agregarAlCarrito={manejarAgregar} />
+          </Col>
+        ))
         ) : (
           <div className="text-center py-5">
             <h4>No se encontraron productos en esta categoría</h4>
