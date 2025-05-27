@@ -1,13 +1,14 @@
+// src/App.jsx
 import { Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import Home from './components/Home';
 import Novedades from './components/Novedades';
 import VerPedido from './components/VerPedido';
 import Footer from './components/Footer';
-import Login from './components/Login';  
+import Login from './components/Login';
+import ProductosPorCategoria from './components/ProductosPorCategoria'; // Nuevo componente
 import { ProveedorCarrito } from './context/CarritoContexto';
 import './App.css';
-
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/novedades" element={<Novedades />} />
         <Route path="/verpedido" element={<VerPedido />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/categoria/:nombreCategoria" element={<ProductosPorCategoria />} />
       </Routes>
       <Footer />
     </ProveedorCarrito>
