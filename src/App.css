@@ -200,7 +200,7 @@ button {
 @media (max-width: 576px) {
 
   #root {
-    padding: 4px !important;
+    padding: 6px !important;
   }
 
   .card{
