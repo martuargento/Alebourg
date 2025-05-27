@@ -74,6 +74,7 @@
   background-color: rgba(178, 40, 118, 0.651) !important;
   border: none !important;
   color: white !important;
+  margin-top: 15px;
 }
 
 .boton-productos:hover {
