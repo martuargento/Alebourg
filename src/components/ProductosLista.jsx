@@ -15,23 +15,21 @@ const ProductosLista = ({ categoria = null }) => {
       .then(data => {
         let filtrados = data;
         
-        if (categoria === 'novedades') {
-          filtrados = data.filter(producto => producto.Novedades === true);
-        } else if (categoria) {
-          const categoriaNormalizada = categoria.toLowerCase()
-            .replace(/-/g, ' ')
+        if (categoria) {
+        const categoriaNormalizada = categoria.toLowerCase()
+          .replace(/-/g, ' ')
+          .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        
+        filtrados = data.filter(producto => {
+          const productCategory = producto.categoria.toLowerCase()
             .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
           
-          filtrados = data.filter(producto => {
-            const productCategory = producto.categoria.toLowerCase()
-              .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-            
-            return (
-              productCategory === categoriaNormalizada ||
-              productCategory.includes(categoriaNormalizada) ||
-              categoriaNormalizada.includes(productCategory)
-            );
-          });
+          return (
+            productCategory === categoriaNormalizada ||
+            productCategory.includes(categoriaNormalizada) ||
+            categoriaNormalizada.includes(productCategory)
+          );
+        });
         }
         
         setProductos(filtrados);

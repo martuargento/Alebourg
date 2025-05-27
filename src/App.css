@@ -274,3 +274,53 @@ button {
 .categorias-list::-webkit-scrollbar-thumb:hover {
   background: #555 !important;
 }
+
+
+
+
+
+/* Categories panel */
+.categories-panel {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: white;
+  z-index: 1050;
+  width: 300px;
+  max-height: 70vh;
+  overflow-y: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.category-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  color: #333;
+  text-decoration: none;
+  transition: background 0.2s;
+  border-bottom: 1px solid #eee;
+}
+
+.category-item:hover {
+  background: #f8f9fa;
+  text-decoration: none;
+}
+
+.category-item:last-child {
+  border-bottom: none;
+}
+
+/* Botones */
+.boton-login {
+  transition: all 0.3s ease;
+}
+
+.boton-login:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.botonCarritoEstilo {
+  transition: all 0.3s ease;
