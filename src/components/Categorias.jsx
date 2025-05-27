@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Accordion, Card } from 'react-bootstrap';
 
 const Categorias = () => {
   const [categorias, setCategorias] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeKey, setActiveKey] = useState('0'); // Estado para controlar apertura/cierre
 
   useEffect(() => {
-    fetch('https://raw.githubusercontent.com/martuargento/Alebourg/refs/heads/main/public/productosalebourg.json')
+    fetch('https://raw.githubusercontent.com/martuargento/Alebourg/main/public/productosalebourgactulizados.json')
       .then(res => res.json())
       .then(data => {
         const categoriasMap = {};
@@ -41,23 +43,32 @@ const Categorias = () => {
   if (loading) return <div>Cargando categorías...</div>;
 
   return (
-    <div className="categorias-container" style={{ backgroundColor: '#f8f9fa', padding: '20px', borderRadius: '5px' }}>
-      <h4 className="mb-4">Categorías</h4>
-      <ul className="list-unstyled">
-        {categorias.map((categoria, index) => (
-          <li key={index} className="mb-2">
-            <Link 
-              to={`/categoria/${formatCategoryForURL(categoria.nombre)}`}
-              className="text-decoration-none d-flex justify-content-between align-items-center categoria-link"
-              style={{ color: '#333', padding: '8px 12px', borderRadius: '4px', transition: 'all 0.3s' }}
-            >
-              <span>{categoria.nombre}</span>
-              <span className="badge bg-primary rounded-pill">{categoria.cantidad}</span>
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <Accordion activeKey={activeKey} onSelect={(e) => setActiveKey(e === activeKey ? null : e)}>
+      <Card className="shadow-sm">
+        <Accordion.Item eventKey="0">
+          <Accordion.Header as={Card.Header} className="categorias-header">
+            <h5 className="mb-0">Categorías</h5>
+          </Accordion.Header>
+          
+          <Accordion.Collapse eventKey="0">
+            <Card.Body className="p-2">
+              <div className="categorias-list" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
+                {categorias.map((categoria, index) => (
+                  <Link 
+                    key={index}
+                    to={`/categoria/${formatCategoryForURL(categoria.nombre)}`}
+                    className="d-flex justify-content-between align-items-center py-2 px-3 text-decoration-none text-dark categoria-item"
+                  >
+                    <span>{categoria.nombre}</span>
+                    <span className="badge bg-primary rounded-pill">{categoria.cantidad}</span>
+                  </Link>
+                ))}
+              </div>
+            </Card.Body>
+          </Accordion.Collapse>
+        </Accordion.Item>
+      </Card>
+    </Accordion>
   );
 };
 
