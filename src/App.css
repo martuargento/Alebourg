@@ -200,11 +200,11 @@ button {
 @media (max-width: 576px) {
 
   #root {
-    padding: 0px !important;
+    padding: 4px !important;
   }
 
   .card{
-    padding: 10px !important;
+    padding: 8px !important;
     width: 100% !important;
   }
   .row>* {
