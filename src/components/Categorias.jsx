@@ -6,7 +6,7 @@ const Categorias = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('https://raw.githubusercontent.com/martuargento/Alebourg/refs/heads/main/public/productosalebourg.json')
+    fetch('https://raw.githubusercontent.com/martuargento/Alebourg/refs/heads/main/public/productosalebourgactulizados.json')
       .then(res => res.json())
       .then(data => {
         const categoriasMap = {};
