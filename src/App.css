@@ -231,3 +231,46 @@ button {
   border-bottom: 2px solid #0cbce9;
   margin-bottom: 20px;
 }
+
+
+
+
+
+.categorias-accordion .categorias-header {
+  background-color: #f8f9fa !important;
+  border-bottom: 1px solid #dee2e6 !important;
+  cursor: pointer !important;
+  transition: background-color 0.3s !important;
+}
+
+.categorias-accordion .categorias-header:hover {
+  background-color: #e9ecef !important;
+}
+
+.categoria-item {
+  transition: all 0.2s !important;
+  border-radius: 4px !important;
+  margin: 2px 0 !important;
+}
+
+.categoria-item:hover {
+  background-color: #e9ecef !important;
+  transform: translateX(5px) !important;
+}
+
+.categorias-list::-webkit-scrollbar {
+  width: 8px !important;
+}
+
+.categorias-list::-webkit-scrollbar-track {
+  background: #f1f1f1 !important;
+}
+
+.categorias-list::-webkit-scrollbar-thumb {
+  background: #888 !important;
+  border-radius: 4px !important;
+}
+
+.categorias-list::-webkit-scrollbar-thumb:hover {
+  background: #555 !important;
+}
