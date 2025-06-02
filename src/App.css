@@ -198,7 +198,7 @@ button {
 }
 
 
-@media (max-width: 576px) {
+@media (max-width: 575px) {
 
   #root {
     padding: 6px !important;
@@ -352,4 +352,324 @@ button {
   .cardsEstilos {
     max-width: 100%;
   }
+}
+
+/* Botón flotante del carrito para móvil */
+.floating-cart-button {
+  position: fixed !important;
+  bottom: 20px !important;
+  right: 20px !important;
+  width: 56px !important;
+  height: 56px !important;
+  border-radius: 50% !important;
+  background-color: #fe99d3 !important;
+  color: white !important;
+  display: none !important; /* Por defecto oculto */
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 4px 12px rgba(254, 153, 211, 0.3) !important;
+  transition: transform 0.2s ease !important;
+  z-index: 1060 !important;
+  border: none !important;
+}
+
+.floating-cart-button:hover {
+  transform: scale(1.1) !important;
+}
+
+.floating-cart-button .badge {
+  position: absolute !important;
+  top: -8px !important;
+  right: -8px !important;
+  background-color: #dc3545 !important;
+  border: 2px solid #fe99d3 !important;
+  border-radius: 50% !important;
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.75rem !important;
+}
+
+/* Mostrar el botón flotante solo en xs */
+@media (max-width: 575px) {
+  .floating-cart-button {
+    display: flex !important;
+  }
+  
+  /* Ocultar el botón normal del carrito en móvil */
+  .botonCarritoEstilo {
+    display: none !important;
+  }
+}
+
+/* Estilos para el panel de categorías en tablet/desktop */
+@media (min-width: 576px) {
+  .categories-panel {
+    position: absolute !important;
+    top: 100% !important;
+    left: 0 !important;
+    background: rgb(10, 10, 11) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+    min-width: 250px !important;
+    z-index: 1050 !important;
+  }
+
+  .category-item {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 0.75rem 1rem !important;
+    color: rgba(255, 255, 255, 0.7) !important;
+    text-decoration: none !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03) !important;
+    background: transparent !important;
+    transition: background-color 0.2s ease !important;
+  }
+
+  .category-item:hover {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    color: white !important;
+  }
+}
+
+/* Menú móvil moderno */
+.mobile-menu {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100vh !important;
+  background-color: rgb(10, 10, 11) !important;
+  z-index: 2000 !important;
+  transform: translateY(-100%) !important;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  opacity: 0 !important;
+}
+
+.mobile-menu.show {
+  transform: translateY(0) !important;
+  opacity: 1 !important;
+}
+
+.mobile-menu-container {
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 0 !important;
+  background-color: rgb(10, 10, 11) !important;
+}
+
+.mobile-menu-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 1rem 1.5rem !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+  background-color: rgba(0, 0, 0, 0.3) !important;
+}
+
+.mobile-menu-close {
+  background: transparent !important;
+  border: none !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-size: 1.5rem !important;
+  padding: 0.5rem !important;
+  cursor: pointer !important;
+  transition: color 0.2s ease !important;
+  margin-right: -0.5rem !important;
+}
+
+.mobile-menu-close:hover {
+  color: white !important;
+}
+
+.mobile-menu-content {
+  flex: 1 !important;
+  overflow-y: auto !important;
+  padding: 1.5rem !important;
+  background-color: rgb(10, 10, 11) !important;
+}
+
+.mobile-menu-nav {
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.mobile-menu-item {
+  margin-bottom: 1rem !important;
+}
+
+.mobile-menu-link {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 1.2rem 1.25rem !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+  text-decoration: none !important;
+  font-size: 1.1rem !important;
+  border-radius: 12px !important;
+  transition: all 0.2s ease !important;
+  background: rgba(0, 0, 0, 0.4) !important;
+  border: none !important;
+  width: 100% !important;
+  text-align: left !important;
+}
+
+.mobile-menu-link:hover,
+.mobile-menu-link:active {
+  background: rgba(0, 0, 0, 0.6) !important;
+  color: white !important;
+}
+
+.mobile-menu-categories {
+  background: rgb(5, 5, 6) !important;
+  border-radius: 12px !important;
+  margin-top: 0.5rem !important;
+  overflow: hidden !important;
+  transition: all 0.3s ease !important;
+  max-height: calc(100vh - 250px) !important; /* Mucho más alto para mostrar más categorías */
+  overflow-y: auto !important;
+}
+
+.mobile-category-item {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 1rem 1.25rem !important;
+  color: rgba(255, 255, 255, 0.7) !important;
+  text-decoration: none !important;
+  font-size: 1rem !important;
+  transition: all 0.2s ease !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03) !important;
+  background: rgb(5, 5, 6) !important;
+}
+
+.mobile-category-item:last-child {
+  border-bottom: none !important;
+}
+
+.mobile-category-item:hover {
+  background: rgba(0, 0, 0, 0.6) !important;
+  color: white !important;
+}
+
+.mobile-category-count {
+  background: rgba(254, 153, 211, 0.1) !important;
+  color: #fe99d3 !important;
+  padding: 0.25rem 0.75rem !important;
+  border-radius: 20px !important;
+  font-size: 0.85rem !important;
+}
+
+.mobile-menu-footer {
+  padding: 1.5rem !important;
+  margin-top: auto !important;
+  background: rgb(5, 5, 6) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.03) !important;
+}
+
+.mobile-menu-divider {
+  width: 20% !important;
+  margin: 0 auto 1rem !important;
+  border: none !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.03) !important;
+}
+
+.mobile-menu-admin {
+  color: rgba(255, 255, 255, 0.3) !important;
+  text-decoration: none !important;
+  font-size: 0.75rem !important;
+  text-transform: lowercase !important;
+  letter-spacing: 2px !important;
+  display: block !important;
+  text-align: center !important;
+  transition: color 0.2s ease !important;
+}
+
+.mobile-menu-admin:hover {
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Personalización del scrollbar para el menú de categorías */
+.mobile-menu-categories::-webkit-scrollbar {
+  width: 4px !important;
+}
+
+.mobile-menu-categories::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02) !important;
+}
+
+.mobile-menu-categories::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-radius: 4px !important;
+}
+
+.mobile-menu-categories::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Navbar toggle button */
+.navbar-toggler {
+  border: none !important;
+  padding: 0.5rem !important;
+  color: white !important;
+  transition: opacity 0.2s ease !important;
+}
+
+.navbar-toggler:hover {
+  opacity: 0.8 !important;
+}
+
+.navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+}
+
+/* Contenedor para el área sensible al hover */
+.admin-hover-area {
+  position: relative !important;
+  padding: 1.5rem !important;
+  margin: -1.5rem -1.5rem -1.5rem 0 !important; /* Solo margen negativo a la derecha */
+  margin-right: 1rem !important; /* Espacio explícito con el carrito */
+}
+
+/* Estilos para el enlace admin en desktop */
+.admin-link {
+  color: rgba(255, 255, 255, 0.3) !important;
+  text-decoration: none !important;
+  font-size: 0.7rem !important;
+  text-transform: lowercase !important;
+  letter-spacing: 2px !important;
+  position: absolute !important;
+  top: 50% !important;
+  right: 0 !important; /* Alinear a la derecha en vez de centrar */
+  transform: translateY(-50%) !important; /* Solo transformar en Y */
+  padding: 0.5rem 0 !important;
+  opacity: 0 !important;
+  transition: opacity 0.3s ease !important;
+  white-space: nowrap !important;
+  pointer-events: none !important;
+}
+
+.admin-hover-area:hover .admin-link {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+.admin-link::after {
+  content: '' !important;
+  position: absolute !important;
+  bottom: 0.3rem !important;
+  left: 0 !important; /* Alinear línea a la izquierda */
+  width: 0 !important;
+  height: 1px !important;
+  background: rgba(254, 153, 211, 0.3) !important;
+  transition: all 0.3s ease !important;
+}
+
+.admin-link:hover {
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.admin-link:hover::after {
+  width: 100% !important;
 }
