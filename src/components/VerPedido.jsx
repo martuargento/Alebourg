@@ -22,9 +22,7 @@ const VerPedido = () => {
   // Función para enviar pedido por WhatsApp
   const enviarPedidoWhatsApp = () => {
     const numeroWhatsApp = "+5491133328382";
-    
-    // Crear el mensaje con el detalle del pedido
-    let mensaje = "Hola!, Quiero realizar el siguiente pedido:\n\n";
+    let mensaje = "Alebourg!, Quiero realizar el siguiente pedido:\n\n";
     
     carrito.forEach(producto => {
       const precioUnitario = ajustarPrecio(producto.precio);
@@ -33,11 +31,7 @@ const VerPedido = () => {
     });
     
     mensaje += `\nTotal: $${formatearPrecio(total)}`;
-
-    // Codificar el mensaje para la URL
     const mensajeCodificado = encodeURIComponent(mensaje);
-    
-    // Crear y abrir el enlace de WhatsApp
     const urlWhatsApp = `https://wa.me/${numeroWhatsApp}?text=${mensajeCodificado}`;
     window.open(urlWhatsApp, '_blank');
   };
