@@ -8,13 +8,13 @@ const ProductCard = ({ producto }) => {
   const { agregarAlCarrito } = usarCarrito();
 
   const manejarClick = () => {
-    // Crear una copia del producto con el precio ajustado
-    const productoConPrecioAjustado = {
+    // Crear una copia del producto con el precio original (sin formatear)
+    const productoParaCarrito = {
       ...producto,
-      precio: formatearPrecio(ajustarPrecio(producto.precio))
+      precio: producto.precio // Mantenemos el precio original para poder ajustarlo después
     };
     
-    agregarAlCarrito(productoConPrecioAjustado);
+    agregarAlCarrito(productoParaCarrito);
 
     Swal.fire({
       icon: 'success',
@@ -28,20 +28,32 @@ const ProductCard = ({ producto }) => {
     });
   };
 
-  // Calcular y formatear el precio ajustado
+  // Calcular y formatear el precio ajustado para mostrar
   const precioAjustado = formatearPrecio(ajustarPrecio(producto.precio));
 
   return (
-    <Card className='cardsEstilos'>
-      <Card.Img variant="top" src={producto.imagen} />
-      <Card.Body>
-        <Card.Title>{producto.titulo}</Card.Title>
-        <br></br>
-        {/* <Card.Text className="small">Categoria: {producto.categoria}</Card.Text> */}
-        {/* <br></br> */}
-        <Card.Text>Precio: <br></br><h4>${precioAjustado}</h4></Card.Text>
-        {/* <br></br> */}
-        <Button onClick={manejarClick} className="boton-productos">Agregar al carrito</Button>
+    <Card className='cardsEstilos' style={{ minHeight: '100%' }}>
+      <Card.Img 
+        variant="top" 
+        src={producto.imagen} 
+        style={{ 
+          height: '200px', 
+          objectFit: 'contain', 
+          padding: '10px' 
+        }} 
+      />
+      <Card.Body className="d-flex flex-column">
+        <Card.Title className="mb-3">{producto.titulo}</Card.Title>
+        <Card.Text className="mt-auto">
+          Precio: <br />
+          <h4>${precioAjustado}</h4>
+        </Card.Text>
+        <Button 
+          onClick={manejarClick} 
+          className="boton-productos mt-auto"
+        >
+          Agregar al carrito
+        </Button>
       </Card.Body>
     </Card>
   );
