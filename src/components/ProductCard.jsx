@@ -2,12 +2,19 @@ import React from 'react';
 import { Button, Card } from 'react-bootstrap';
 import { usarCarrito } from '../context/CarritoContexto';
 import Swal from 'sweetalert2';
+import { ajustarPrecio, formatearPrecio } from '../utils/preciosUtils';
 
 const ProductCard = ({ producto }) => {
   const { agregarAlCarrito } = usarCarrito();
 
   const manejarClick = () => {
-    agregarAlCarrito(producto);
+    // Crear una copia del producto con el precio ajustado
+    const productoConPrecioAjustado = {
+      ...producto,
+      precio: formatearPrecio(ajustarPrecio(producto.precio))
+    };
+    
+    agregarAlCarrito(productoConPrecioAjustado);
 
     Swal.fire({
       icon: 'success',
@@ -21,6 +28,9 @@ const ProductCard = ({ producto }) => {
     });
   };
 
+  // Calcular y formatear el precio ajustado
+  const precioAjustado = formatearPrecio(ajustarPrecio(producto.precio));
+
   return (
     <Card className='cardsEstilos'>
       <Card.Img variant="top" src={producto.imagen} />
@@ -29,7 +39,7 @@ const ProductCard = ({ producto }) => {
         <br></br>
         {/* <Card.Text className="small">Categoria: {producto.categoria}</Card.Text> */}
         {/* <br></br> */}
-        <Card.Text>Precio: <br></br><h4>${producto.precio}</h4></Card.Text>
+        <Card.Text>Precio: <br></br><h4>${precioAjustado}</h4></Card.Text>
         {/* <br></br> */}
         <Button onClick={manejarClick} className="boton-productos">Agregar al carrito</Button>
       </Card.Body>
