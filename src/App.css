@@ -391,7 +391,7 @@ button {
 /* Mostrar el botón flotante solo en xs */
 @media (max-width: 575px) {
   .floating-cart-button {
-    display: flex !important;
+  display: flex !important;
   }
   
   /* Ocultar el botón normal del carrito en móvil */
@@ -436,7 +436,7 @@ button {
   position: fixed !important;
   top: 0 !important;
   left: 0 !important;
-  width: 100% !important;
+    width: 100% !important;
   height: 100vh !important;
   background-color: rgb(10, 10, 11) !important;
   z-index: 2000 !important;
@@ -452,16 +452,16 @@ button {
 
 .mobile-menu-container {
   height: 100% !important;
-  display: flex !important;
+    display: flex !important;
   flex-direction: column !important;
   padding: 0 !important;
   background-color: rgb(10, 10, 11) !important;
-}
+  }
 
 .mobile-menu-header {
-  display: flex !important;
+    display: flex !important;
   justify-content: space-between !important;
-  align-items: center !important;
+    align-items: center !important;
   padding: 1rem 1.5rem !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
   background-color: rgba(0, 0, 0, 0.3) !important;
@@ -636,7 +636,7 @@ button {
 .admin-link {
   color: rgba(255, 255, 255, 0.3) !important;
   text-decoration: none !important;
-  font-size: 0.7rem !important;
+    font-size: 0.7rem !important;
   text-transform: lowercase !important;
   letter-spacing: 2px !important;
   position: absolute !important;
