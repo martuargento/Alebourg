@@ -3,11 +3,14 @@ import { Button, Card } from 'react-bootstrap';
 import { usarCarrito } from '../context/CarritoContexto';
 import Swal from 'sweetalert2';
 import { ajustarPrecio, formatearPrecio } from '../utils/preciosUtils';
+import { useNavigate } from 'react-router-dom';
 
 const ProductCard = ({ producto }) => {
   const { agregarAlCarrito } = usarCarrito();
+  const navigate = useNavigate();
 
-  const manejarClick = () => {
+  const manejarClick = (e) => {
+    e.stopPropagation();
     // Crear una copia del producto con el precio original (sin formatear)
     const productoParaCarrito = {
       ...producto,
@@ -31,8 +34,16 @@ const ProductCard = ({ producto }) => {
   // Calcular y formatear el precio ajustado para mostrar
   const precioAjustado = formatearPrecio(ajustarPrecio(producto.precio));
 
+  const irADetalle = () => {
+    navigate(`/producto/${producto.id}`);
+  };
+
   return (
-    <Card className='cardsEstilos' style={{ minHeight: '100%' }}>
+    <Card 
+      className='cardsEstilos' 
+      style={{ minHeight: '100%', cursor: 'pointer' }}
+      onClick={irADetalle}
+    >
       <Card.Img 
         variant="top" 
         src={producto.imagen} 

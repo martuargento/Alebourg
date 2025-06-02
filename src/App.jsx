@@ -6,6 +6,7 @@ import VerPedido from './components/VerPedido';
 import Footer from './components/Footer';
 import Login from './components/Login';
 import ProductosPorCategoria from './components/ProductosPorCategoria'; // Nuevo componente
+import DetalleProducto from './components/DetalleProducto';
 import { ProveedorCarrito } from './context/CarritoContexto';
 import './App.css';
 
@@ -18,6 +19,7 @@ function App() {
         <Route path="/verpedido" element={<VerPedido />} />
         <Route path="/login" element={<Login />} />
         <Route path="/categoria/:nombreCategoria" element={<ProductosPorCategoria />} />
+        <Route path="/producto/:id" element={<DetalleProducto />} />
       </Routes>
       <Footer />
     </ProveedorCarrito>
