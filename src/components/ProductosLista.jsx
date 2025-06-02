@@ -1,13 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import ProductCard from './ProductCard';
 import { usarCarrito } from '../context/CarritoContexto';
 import Swal from 'sweetalert2';
+import Buscador from './Buscador';
 
 const ProductosLista = ({ categoria = null }) => {
   const [productos, setProductos] = useState([]);
   const [loading, setLoading] = useState(true);
   const { agregarAlCarrito } = usarCarrito();
+  const [busqueda, setBusqueda] = useState('');
 
   useEffect(() => {
     fetch('https://raw.githubusercontent.com/martuargento/Alebourg/refs/heads/main/public/productosalebourgactulizados.json')
@@ -52,30 +54,45 @@ const ProductosLista = ({ categoria = null }) => {
     });
   };
 
+  const productosFiltrados = useMemo(() => {
+    if (!busqueda) return productos;
+
+    const terminoBusqueda = busqueda.toLowerCase().trim();
+    
+    return productos.filter(producto => {
+      const titulo = producto.titulo.toLowerCase();
+      const descripcion = producto.descripcion ? producto.descripcion.toLowerCase() : '';
+      
+      // Dividir el término de búsqueda en palabras
+      const palabrasBusqueda = terminoBusqueda.split(' ');
+      
+      // Verificar si todas las palabras de búsqueda están en el título o descripción
+      return palabrasBusqueda.every(palabra => 
+        titulo.includes(palabra) || descripcion.includes(palabra)
+      );
+    });
+  }, [productos, busqueda]);
+
   if (loading) return <div>Cargando productos...</div>;
 
   return (
-    <Container fluid className="px-4">
-    <Row className="justify-content-center">
-      {productos.length > 0 ? (
-        productos.map(producto => (
-          <Col 
-            key={producto.id} 
-            xs={12} 
-            md={6} 
-            lg={4} 
-            xl={3} 
-            className="mb-4 d-flex justify-content-center"
-          >
-            <ProductCard producto={producto} agregarAlCarrito={manejarAgregar} />
-          </Col>
-        ))
-        ) : (
-          <div className="text-center py-5">
-            <h4>No se encontraron productos en esta categoría</h4>
-          </div>
-        )}
-      </Row>
+    <Container>
+      <Buscador onBuscar={setBusqueda} />
+      
+      {productosFiltrados.length === 0 ? (
+        <div className="text-center text-white mt-5">
+          <h4>No se encontraron productos que coincidan con tu búsqueda</h4>
+          <p className="text-muted">Intenta con otros términos</p>
+        </div>
+      ) : (
+        <Row xs={1} md={2} lg={3} className="g-4">
+          {productosFiltrados.map((producto) => (
+            <Col key={producto.id}>
+              <ProductCard producto={producto} agregarAlCarrito={manejarAgregar} />
+            </Col>
+          ))}
+        </Row>
+      )}
     </Container>
   );
 };
