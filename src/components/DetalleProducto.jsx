@@ -114,9 +114,9 @@ const DetalleProducto = () => {
                   marginBottom: '1.5rem',
                   position: 'relative',
                   padding: '1.5rem',
-                  background: 'linear-gradient(145deg, rgba(0,255,0,0.1) 0%, rgba(0,255,0,0.02) 100%)',
+                  background: 'linear-gradient(145deg, rgba(0,255,0,0.05) 0%, rgba(0,0,0,0) 100%)',
                   borderRadius: '10px',
-                  border: '2px solid rgba(0,255,0,0.1)',
+                  border: '1px solid rgba(0,255,0,0.15)',
                   textAlign: 'center'
                 }}>
                   <div style={{
@@ -131,20 +131,20 @@ const DetalleProducto = () => {
                     fontWeight: 'bold',
                     transform: 'rotate(5deg)'
                   }}>
-                    ¡Oferta!
+                    ¡Disponible!
                   </div>
                   <div style={{
                     fontSize: '0.9rem',
                     opacity: '0.8',
                     marginBottom: '4px'
                   }}>
-                    Precio especial:
+                    Precio:
                   </div>
                   <div style={{
                     fontSize: 'clamp(2.5rem, 8vw, 3.5rem)',
                     fontWeight: '800',
                     color: '#00ff44',
-                    textShadow: '0 0 20px rgba(0,255,68,0.4)',
+                    textShadow: '0 0 15px rgba(0,255,68,0.3)',
                     lineHeight: '1'
                   }}>
                     ${precioAjustado}
