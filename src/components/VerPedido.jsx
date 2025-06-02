@@ -24,18 +24,15 @@ const VerPedido = () => {
     const numeroWhatsApp = "+5491133328382";
     
     // Crear el mensaje con el detalle del pedido
-    let mensaje = "¡Hola! Quiero hacer el siguiente pedido:\n\n";
+    let mensaje = "Hola!, Quiero realizar el siguiente pedido:\n\n";
     
     carrito.forEach(producto => {
       const precioUnitario = ajustarPrecio(producto.precio);
       const subtotal = precioUnitario * producto.cantidad;
-      mensaje += `▪ ${producto.titulo}\n`;
-      mensaje += `   Cantidad: ${producto.cantidad}\n`;
-      mensaje += `   Precio unitario: $${formatearPrecio(precioUnitario)}\n`;
-      mensaje += `   Subtotal: $${formatearPrecio(subtotal)}\n\n`;
+      mensaje += `- ${producto.titulo}: ${producto.cantidad} x $${formatearPrecio(precioUnitario)} = $${formatearPrecio(subtotal)}\n`;
     });
     
-    mensaje += `\nTotal del pedido: $${formatearPrecio(total)}`;
+    mensaje += `\nTotal: $${formatearPrecio(total)}`;
 
     // Codificar el mensaje para la URL
     const mensajeCodificado = encodeURIComponent(mensaje);
