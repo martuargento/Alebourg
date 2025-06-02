@@ -83,30 +83,30 @@ const DetalleProducto = () => {
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
-                minHeight: '40vh',
-                padding: '1rem'
+                padding: '0.5rem',
+                minHeight: '30vh'
               }}>
                 <img
                   src={producto.imagen}
                   alt={producto.titulo}
                   style={{
                     width: '100%',
-                    height: '100%',
+                    height: 'auto',
                     objectFit: 'contain',
-                    maxHeight: '50vh'
+                    maxHeight: '70vh'
                   }}
                 />
               </div>
             </Col>
             <Col xs={12} lg={4}>
               <div className="product-details" style={{
-                padding: '1.5rem',
+                padding: '1rem',
                 height: '100%'
               }}>
                 <h2 style={{
-                  fontSize: 'clamp(1.5rem, 5vw, 2rem)',
+                  fontSize: 'clamp(1.3rem, 4vw, 1.8rem)',
                   fontWeight: '600',
-                  marginBottom: '1.5rem',
+                  marginBottom: '1rem',
                   textAlign: 'center'
                 }}>{producto.titulo}</h2>
                 
