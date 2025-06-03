@@ -211,6 +211,18 @@ button {
   .row>* {
     padding: 0px !important;
   }
+
+  .titulosprincipales {
+    text-align: center !important;
+    padding: 0 !important;
+    margin: 0.5rem -8px !important;
+    width: 100% !important;
+  }
+
+  .container {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
 }
 
 /* Estilos para las categorías */
@@ -672,4 +684,142 @@ button {
 
 .admin-link:hover::after {
   width: 100% !important;
+}
+
+/* Estilos para el dropdown de ordenamiento */
+.ordenamiento-dropdown .dropdown-toggle {
+  background: rgb(10, 10, 11) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+  padding: 0.5rem 1rem !important;
+  font-size: 0.9rem !important;
+  border-radius: 8px !important;
+  min-width: 160px !important;
+}
+
+.ordenamiento-dropdown .dropdown-toggle:hover,
+.ordenamiento-dropdown .dropdown-toggle:focus {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Estilos base del dropdown menu */
+.dropdown-menu {
+  background-color: rgb(10, 10, 11) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.8) !important;
+}
+
+.dropdown-menu .dropdown-item {
+  color: rgba(255, 255, 255, 0.8) !important;
+  background-color: rgb(10, 10, 11) !important;
+}
+
+.dropdown-menu .dropdown-item:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: white !important;
+}
+
+@media (max-width: 575px) {
+  .ordenamiento-dropdown .dropdown-menu {
+    width: 80% !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    position: absolute !important;
+    text-align: center !important;
+    padding: 0.25rem 0 !important;
+    min-width: auto !important;
+    top: calc(100% + 2px) !important;
+    margin-top: 0 !important;
+    background-color: rgb(10, 10, 11) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.8) !important;
+  }
+
+  .ordenamiento-dropdown .dropdown-item {
+    text-align: center !important;
+    justify-content: center !important;
+    padding: 0.4rem 0.75rem !important;
+    font-size: 0.9rem !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+    background-color: rgb(10, 10, 11) !important;
+  }
+
+  .ordenamiento-dropdown .dropdown-toggle {
+    font-size: 0.9rem !important;
+    padding: 0.4rem 0.75rem !important;
+    background-color: rgb(10, 10, 11) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  }
+}
+
+/* Estilos para el buscador */
+.mb-4 {
+  margin-bottom: 1rem !important;
+}
+
+@media (max-width: 575px) {
+  .mb-4 {
+    margin: 0.25rem auto !important;
+    max-width: 90% !important;
+  }
+
+  .input-group {
+    width: 100% !important;
+  }
+
+  .form-control, .input-group-text {
+    font-size: 0.9rem !important;
+  }
+}
+
+/* Estilos para el contenedor del buscador */
+.buscador-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+@media (max-width: 575px) {
+  .buscador-container {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+  }
+
+  .buscador-container .flex-grow-1 {
+    margin: 0 auto;
+    width: 90%;
+  }
+
+  .ordenamiento-dropdown {
+    width: 90% !important;
+    margin: 0.25rem auto !important;
+  }
+}
+
+/* Ajustes para el título en mobile */
+@media (max-width: 575px) {
+  .titulosprincipales {
+    margin-bottom: 0.5rem !important;
+    padding-bottom: 5px !important;
+    padding-left: 1rem !important;
+  }
+
+  .buscador-container {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+  }
+
+  /* Ajustar el margen del contenedor del buscador */
+  .mb-4 {
+    margin: 0.25rem auto !important;
+    max-width: 90% !important;
+  }
+
+  /* Ajustar el espacio del dropdown */
+  .ordenamiento-dropdown {
+    width: 90% !important;
+    margin: 0.25rem auto !important;
+  }
 }

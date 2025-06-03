@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { Container, Row, Col } from 'react-bootstrap';
+import { Container, Row, Col, Dropdown } from 'react-bootstrap';
 import ProductCard from './ProductCard';
 import { usarCarrito } from '../context/CarritoContexto';
 import Swal from 'sweetalert2';
@@ -10,6 +10,7 @@ const ProductosLista = ({ categoria = null }) => {
   const [loading, setLoading] = useState(true);
   const { agregarAlCarrito } = usarCarrito();
   const [busqueda, setBusqueda] = useState('');
+  const [ordenamiento, setOrdenamiento] = useState('');
 
   useEffect(() => {
     fetch('https://raw.githubusercontent.com/martuargento/Alebourg/refs/heads/main/public/productosalebourgactulizados.json')
@@ -18,20 +19,18 @@ const ProductosLista = ({ categoria = null }) => {
         let filtrados = data;
         
         if (categoria) {
-        const categoriaNormalizada = categoria.toLowerCase()
-          .replace(/-/g, ' ')
-          .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        
-        filtrados = data.filter(producto => {
-          const productCategory = producto.categoria.toLowerCase()
+          const categoriaNormalizada = categoria.toLowerCase()
+            .replace(/-/g, '')
             .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-          
-          return (
-            productCategory === categoriaNormalizada ||
-            productCategory.includes(categoriaNormalizada) ||
-            categoriaNormalizada.includes(productCategory)
-          );
-        });
+        
+          filtrados = data.filter(producto => {
+            const productCategory = producto.categoria.toLowerCase()
+              .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+              .replace(/\s+/g, '')
+              .replace(/[\/&]/g, '');
+            
+            return productCategory === categoriaNormalizada;
+          });
         }
         
         setProductos(filtrados);
@@ -56,37 +55,56 @@ const ProductosLista = ({ categoria = null }) => {
 
   const productosFiltrados = useMemo(() => {
     if (!busqueda) return productos;
-
-    const terminoBusqueda = busqueda.toLowerCase().trim();
     
-    return productos.filter(producto => {
-      const titulo = producto.titulo.toLowerCase();
-      const descripcion = producto.descripcion ? producto.descripcion.toLowerCase() : '';
-      
-      // Dividir el término de búsqueda en palabras
-      const palabrasBusqueda = terminoBusqueda.split(' ');
-      
-      // Verificar si todas las palabras de búsqueda están en el título o descripción
-      return palabrasBusqueda.every(palabra => 
-        titulo.includes(palabra) || descripcion.includes(palabra)
-      );
-    });
+    const busquedaLower = busqueda.toLowerCase();
+    return productos.filter(producto => 
+      producto.titulo.toLowerCase().includes(busquedaLower)
+    );
   }, [productos, busqueda]);
+
+  const productosOrdenados = useMemo(() => {
+    if (!ordenamiento) return productosFiltrados;
+
+    return [...productosFiltrados].sort((a, b) => {
+      const precioA = parseFloat(a.precio.replace(/,/g, ''));
+      const precioB = parseFloat(b.precio.replace(/,/g, ''));
+      
+      return ordenamiento === 'menor' ? precioA - precioB : precioB - precioA;
+    });
+  }, [productosFiltrados, ordenamiento]);
 
   if (loading) return <div>Cargando productos...</div>;
 
   return (
     <Container>
-      <Buscador onBuscar={setBusqueda} />
+      <div className={`d-flex flex-column flex-sm-row align-items-${categoria ? 'start' : 'center'} gap-2 mb-4 buscador-container`}>
+        <div className="flex-grow-1">
+          <Buscador onBuscar={setBusqueda} />
+        </div>
+        {categoria && (
+          <Dropdown className="ordenamiento-dropdown">
+            <Dropdown.Toggle variant="outline-light" id="dropdown-ordenamiento">
+              {ordenamiento === 'menor' ? 'Menor precio' : 
+               ordenamiento === 'mayor' ? 'Mayor precio' : 
+               'Ordenar por precio'}
+            </Dropdown.Toggle>
+            <Dropdown.Menu>
+              <Dropdown.Item onClick={() => setOrdenamiento('menor')}>Menor precio</Dropdown.Item>
+              <Dropdown.Item onClick={() => setOrdenamiento('mayor')}>Mayor precio</Dropdown.Item>
+              <Dropdown.Item onClick={() => setOrdenamiento('')}>Sin ordenar</Dropdown.Item>
+            </Dropdown.Menu>
+          </Dropdown>
+        )}
+      </div>
       
-      {productosFiltrados.length === 0 ? (
+      {productosOrdenados.length === 0 ? (
         <div className="text-center text-white mt-5">
           <h4>No se encontraron productos que coincidan con tu búsqueda</h4>
           <p className="text-muted">Intenta con otros términos</p>
         </div>
       ) : (
         <Row xs={1} md={2} lg={3} className="g-4">
-          {productosFiltrados.map((producto) => (
+          {productosOrdenados.map((producto) => (
             <Col key={producto.id}>
               <ProductCard producto={producto} agregarAlCarrito={manejarAgregar} />
             </Col>

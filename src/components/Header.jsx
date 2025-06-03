@@ -36,7 +36,7 @@ const Header = () => {
   useEffect(() => {
     const fetchCategorias = async () => {
       try {
-        const response = await fetch('https://raw.githubusercontent.com/martuargento/Alebourg/main/public/productosalebourgactulizados.json');
+        const response = await fetch('https://raw.githubusercontent.com/martinalejandronuniezcursor2/alebourgprueba/refs/heads/main/public/productosalebourgactulizados.json');
         const data = await response.json();
         
         const categoriasMap = {};
@@ -44,13 +44,19 @@ const Header = () => {
           if (!producto.categoria) return;
           const categoria = producto.categoria.trim();
           if (categoria) {
+            // Separar palabras basadas en mayúsculas
+            const categoriaSeparada = categoria.replace(/([A-Z])/g, ' $1').trim();
             categoriasMap[categoria] = (categoriasMap[categoria] || 0) + 1;
           }
         });
 
         setCategorias(
           Object.entries(categoriasMap)
-            .map(([nombre, cantidad]) => ({ nombre, cantidad }))
+            .map(([nombre, cantidad]) => ({ 
+              nombre: nombre.replace(/([A-Z])/g, ' $1').trim(), 
+              nombreOriginal: nombre,
+              cantidad 
+            }))
             .sort((a, b) => a.nombre.localeCompare(b.nombre))
         );
         setLoading(false);
@@ -120,7 +126,7 @@ const Header = () => {
                     categorias.map((categoria, index) => (
                       <Link
                         key={index}
-                        to={`/categoria/${formatCategory(categoria.nombre)}`}
+                        to={`/categoria/${formatCategory(categoria.nombreOriginal)}`}
                         className="category-item"
                         onClick={() => setShowCategories(false)}
                       >
@@ -218,7 +224,7 @@ const Header = () => {
                         categorias.map((categoria, index) => (
                           <Link
                             key={index}
-                            to={`/categoria/${formatCategory(categoria.nombre)}`}
+                            to={`/categoria/${formatCategory(categoria.nombreOriginal)}`}
                             className="mobile-category-item"
                             onClick={() => {
                               const menu = document.getElementById('navbarMobile');
