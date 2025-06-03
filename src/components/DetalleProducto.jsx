@@ -61,7 +61,7 @@ const DetalleProducto = () => {
   }
 
   // Calcular el precio ajustado
-  const precioAjustado = formatearPrecio(ajustarPrecio(producto.precio));
+  const precioAjustado = formatearPrecio(ajustarPrecio(producto.precio, producto.titulo));
 
   return (
     <Container fluid className="p-0">

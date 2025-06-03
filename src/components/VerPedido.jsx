@@ -15,7 +15,7 @@ const VerPedido = () => {
 
   // Calcular el total del carrito
   const total = carrito.reduce((acc, producto) => {
-    const precioNumerico = ajustarPrecio(producto.precio);
+    const precioNumerico = ajustarPrecio(producto.precio, producto.titulo);
     return acc + (precioNumerico * producto.cantidad);
   }, 0);
 
@@ -25,7 +25,7 @@ const VerPedido = () => {
     let mensaje = "Alebourg!, Quiero realizar el siguiente pedido:\n\n";
     
     carrito.forEach(producto => {
-      const precioUnitario = ajustarPrecio(producto.precio);
+      const precioUnitario = ajustarPrecio(producto.precio, producto.titulo);
       const subtotal = precioUnitario * producto.cantidad;
       mensaje += `- ${producto.titulo}: ${producto.cantidad} x $${formatearPrecio(precioUnitario)} = $${formatearPrecio(subtotal)}\n`;
     });
@@ -48,7 +48,8 @@ const VerPedido = () => {
     <Container className="my-5">
       <div style={{ maxWidth: '900px', margin: '0 auto' }}>
         {carrito.map(producto => {
-          const precioUnitario = ajustarPrecio(producto.precio);
+          const precioNumerico = ajustarPrecio(producto.precio, producto.titulo);
+          const precioUnitario = ajustarPrecio(producto.precio, producto.titulo);
           const subtotal = precioUnitario * producto.cantidad;
           
           return (
