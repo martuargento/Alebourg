@@ -76,8 +76,8 @@ const ProductosLista = ({ categoria = null }) => {
   if (loading) return <div>Cargando productos...</div>;
 
   return (
-    <Container>
-      <div className={`d-flex flex-column flex-sm-row align-items-${categoria ? 'start' : 'center'} gap-2 mb-4 buscador-container`}>
+    <Container fluid className="p-0">
+      <div className={`d-flex flex-column flex-sm-row align-items-${categoria ? 'start' : 'center'} gap-2 mb-4 buscador-container px-2`}>
         <div className="flex-grow-1">
           <Buscador onBuscar={setBusqueda} />
         </div>
@@ -103,13 +103,15 @@ const ProductosLista = ({ categoria = null }) => {
           <p className="text-muted">Intenta con otros términos</p>
         </div>
       ) : (
-        <Row xs={1} md={2} lg={3} className="g-4">
-          {productosOrdenados.map((producto) => (
-            <Col key={producto.id}>
-              <ProductCard producto={producto} agregarAlCarrito={manejarAgregar} />
-            </Col>
-          ))}
-        </Row>
+        <div className="px-2">
+          <Row className="g-2 mx-0">
+            {productosOrdenados.map((producto) => (
+              <Col xs={12} md={6} lg={4} key={producto.id} className="mb-2">
+                <ProductCard producto={producto} agregarAlCarrito={manejarAgregar} />
+              </Col>
+            ))}
+          </Row>
+        </div>
       )}
     </Container>
   );

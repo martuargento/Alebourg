@@ -41,7 +41,13 @@ const ProductCard = ({ producto }) => {
   return (
     <Card 
       className='cardsEstilos' 
-      style={{ minHeight: '100%', cursor: 'pointer' }}
+      style={{ 
+        minHeight: '100%', 
+        cursor: 'pointer',
+        width: '100%',
+        maxWidth: '100%',
+        overflow: 'hidden'
+      }}
       onClick={irADetalle}
     >
       <Card.Img 
@@ -50,18 +56,19 @@ const ProductCard = ({ producto }) => {
         style={{ 
           height: '200px', 
           objectFit: 'contain', 
-          padding: '10px' 
+          padding: '10px',
+          maxWidth: '100%'
         }} 
       />
-      <Card.Body className="d-flex flex-column">
-        <Card.Title className="mb-3">{producto.titulo}</Card.Title>
+      <Card.Body className="d-flex flex-column p-2">
+        <Card.Title className="mb-3 text-break">{producto.titulo}</Card.Title>
         <Card.Text className="mt-auto">
           Precio: <br />
           <h4>${precioAjustado}</h4>
         </Card.Text>
         <Button 
           onClick={manejarClick} 
-          className="boton-productos mt-auto"
+          className="boton-productos mt-auto w-100"
         >
           Agregar al carrito
         </Button>
