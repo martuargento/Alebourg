@@ -10,6 +10,7 @@ const Header = () => {
   const navigate = useNavigate();
   const [showCategories, setShowCategories] = useState(false);
   const [showMobileCategories, setShowMobileCategories] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [categorias, setCategorias] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -21,7 +22,16 @@ const Header = () => {
     setTimeout(() => {
       setShowMobileCategories(false);
       setIsClosing(false);
-    }, 300);
+    }, 200);
+  };
+
+  const handleToggleMobileMenu = () => {
+    if (showMobileMenu) {
+      setShowMobileMenu(false);
+      setShowMobileCategories(false);
+    } else {
+      setShowMobileMenu(true);
+    }
   };
 
   // Cerrar categorías al hacer click fuera
@@ -45,7 +55,7 @@ const Header = () => {
   useEffect(() => {
     const fetchCategorias = async () => {
       try {
-        const response = await fetch('https://raw.githubusercontent.com/martuargento/Alebourg/refs/heads/main/public/productosalebourgactulizados.json');
+        const response = await fetch('https://raw.githubusercontent.com/martinalejandronuniezcursor2/alebourgprueba/refs/heads/main/public/productosalebourgactulizados.json');
         const data = await response.json();
         
         const categoriasMap = {};
@@ -104,10 +114,9 @@ const Header = () => {
         <button
           className="navbar-toggler d-sm-none"
           type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarMobile"
+          onClick={handleToggleMobileMenu}
           aria-controls="navbarMobile"
-          aria-expanded="false"
+          aria-expanded={showMobileMenu}
           aria-label="Toggle navigation"
         >
           <span className="navbar-toggler-icon"></span>
@@ -187,7 +196,7 @@ const Header = () => {
         </div>
 
         {/* Mobile Menu - Solo visible en xs */}
-        <div className="collapse navbar-collapse mobile-menu d-sm-none" id="navbarMobile">
+        <div className={`mobile-menu d-sm-none ${showMobileMenu ? 'show' : ''}`}>
           <div className="mobile-menu-container">
             <div className="mobile-menu-header">
               <Link className="navbar-brand" to="/">
@@ -195,8 +204,7 @@ const Header = () => {
               </Link>
               <button
                 className="mobile-menu-close"
-                data-bs-toggle="collapse"
-                data-bs-target="#navbarMobile"
+                onClick={handleToggleMobileMenu}
               >
                 <FaTimes />
               </button>
@@ -208,11 +216,7 @@ const Header = () => {
                   <Link 
                     to="/"
                     className="mobile-menu-link"
-                    onClick={() => {
-                      const menu = document.getElementById('navbarMobile');
-                      const bsCollapse = new bootstrap.Collapse(menu);
-                      bsCollapse.hide();
-                    }}
+                    onClick={handleToggleMobileMenu}
                   >
                     Productos
                   </Link>
@@ -226,7 +230,7 @@ const Header = () => {
                     <FaChevronDown 
                       style={{
                         transform: showMobileCategories ? 'rotate(180deg)' : 'rotate(0)',
-                        transition: 'transform 0.3s ease'
+                        transition: 'transform 0.12s ease'
                       }}
                       size={12}
                     />
@@ -242,7 +246,7 @@ const Header = () => {
                           bottom: 0,
                           backgroundColor: 'rgba(0,0,0,0.5)',
                           zIndex: 9998,
-                          animation: isClosing ? 'fadeOut 0.3s ease-out forwards' : 'fadeIn 0.3s ease-out forwards'
+                          animation: isClosing ? 'fadeOut 0.12s ease-out forwards' : 'fadeIn 0.12s ease-out forwards'
                         }} 
                         onClick={handleCloseMenu} 
                       />
@@ -259,7 +263,7 @@ const Header = () => {
                         borderRadius: '10px',
                         boxShadow: '0 0 20px rgba(0,0,0,0.5)',
                         border: '1px solid rgba(255,255,255,0.1)',
-                        animation: isClosing ? 'slideDown 0.3s ease-out forwards' : 'slideUp 0.3s ease-out forwards'
+                        animation: isClosing ? 'slideDown 0.12s ease-out forwards' : 'slideUp 0.12s ease-out forwards'
                       }}>
                         <style>
                           {`
@@ -356,9 +360,7 @@ const Header = () => {
                                 }}
                                 onClick={() => {
                                   setShowMobileCategories(false);
-                                  const menu = document.getElementById('navbarMobile');
-                                  const bsCollapse = new bootstrap.Collapse(menu);
-                                  bsCollapse.hide();
+                                  handleToggleMobileMenu();
                                 }}
                               >
                                 <span>{categoria.nombre}</span>
@@ -383,9 +385,7 @@ const Header = () => {
                 <button 
                   onClick={() => {
                     manejarLogout();
-                    const menu = document.getElementById('navbarMobile');
-                    const bsCollapse = new bootstrap.Collapse(menu);
-                    bsCollapse.hide();
+                    handleToggleMobileMenu();
                   }}
                   className="mobile-menu-admin"
                 >
@@ -395,8 +395,7 @@ const Header = () => {
                 <Link 
                   to="/login" 
                   className="mobile-menu-admin"
-                  data-bs-toggle="collapse"
-                  data-bs-target="#navbarMobile"
+                  onClick={handleToggleMobileMenu}
                 >
                   admin
                 </Link>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { Container, Row, Col, Dropdown } from 'react-bootstrap';
+import { Container, Row, Col, Dropdown, Button } from 'react-bootstrap';
 import ProductCard from './ProductCard';
 import { usarCarrito } from '../context/CarritoContexto';
 import Swal from 'sweetalert2';
@@ -11,9 +11,10 @@ const ProductosLista = ({ categoria = null }) => {
   const { agregarAlCarrito } = usarCarrito();
   const [busqueda, setBusqueda] = useState('');
   const [ordenamiento, setOrdenamiento] = useState('');
+  const [productosVisibles, setProductosVisibles] = useState(20);
 
   useEffect(() => {
-    fetch('https://raw.githubusercontent.com/martuargento/Alebourg/refs/heads/main/public/productosalebourgactulizados.json')
+    fetch('https://raw.githubusercontent.com/martinalejandronuniezcursor2/alebourgprueba/refs/heads/main/public/productosalebourgactulizados.json')
       .then(res => res.json())
       .then(data => {
         let filtrados = data;
@@ -73,7 +74,14 @@ const ProductosLista = ({ categoria = null }) => {
     });
   }, [productosFiltrados, ordenamiento]);
 
+  const cargarMasProductos = () => {
+    setProductosVisibles(prev => prev + 20);
+  };
+
   if (loading) return <div>Cargando productos...</div>;
+
+  const productosAMostrar = productosOrdenados.slice(0, productosVisibles);
+  const hayMasProductos = productosVisibles < productosOrdenados.length;
 
   return (
     <Container fluid className="p-0">
@@ -103,15 +111,29 @@ const ProductosLista = ({ categoria = null }) => {
           <p className="text-muted">Intenta con otros términos</p>
         </div>
       ) : (
-        <div className="px-2">
-          <Row className="g-2 mx-0">
-            {productosOrdenados.map((producto) => (
-              <Col xs={12} md={6} lg={4} key={producto.id} className="mb-2">
-                <ProductCard producto={producto} agregarAlCarrito={manejarAgregar} />
-              </Col>
-            ))}
-          </Row>
-        </div>
+        <>
+          <div className="px-2">
+            <Row className="g-2 mx-0">
+              {productosAMostrar.map((producto) => (
+                <Col xs={12} md={6} lg={4} key={producto.id} className="mb-2">
+                  <ProductCard producto={producto} agregarAlCarrito={manejarAgregar} />
+                </Col>
+              ))}
+            </Row>
+          </div>
+          
+          {hayMasProductos && (
+            <div className="text-center mt-4 mb-4">
+              <Button 
+                variant="outline-light" 
+                onClick={cargarMasProductos}
+                className="px-4 py-2"
+              >
+                Ver más productos
+              </Button>
+            </div>
+          )}
+        </>
       )}
     </Container>
   );

@@ -448,18 +448,21 @@ button {
   position: fixed !important;
   top: 0 !important;
   left: 0 !important;
-    width: 100% !important;
+  width: 100% !important;
   height: 100vh !important;
   background-color: rgb(10, 10, 11) !important;
   z-index: 2000 !important;
   transform: translateY(-100%) !important;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transition: all 0.2s ease-out !important;
   opacity: 0 !important;
+  visibility: hidden !important;
+  will-change: transform, opacity, visibility !important;
 }
 
 .mobile-menu.show {
   transform: translateY(0) !important;
   opacity: 1 !important;
+  visibility: visible !important;
 }
 
 .mobile-menu-container {
@@ -525,6 +528,7 @@ button {
   border: none !important;
   width: 100% !important;
   text-align: left !important;
+  will-change: background-color, color !important;
 }
 
 .mobile-menu-link:hover,
@@ -538,9 +542,10 @@ button {
   border-radius: 12px !important;
   margin-top: 0.5rem !important;
   overflow: hidden !important;
-  transition: all 0.3s ease !important;
-  max-height: calc(100vh - 250px) !important; /* Mucho más alto para mostrar más categorías */
+  transition: all 0.2s ease !important;
+  max-height: calc(100vh - 250px) !important;
   overflow-y: auto !important;
+  will-change: transform, opacity !important;
 }
 
 .mobile-category-item {
@@ -554,6 +559,7 @@ button {
   transition: all 0.2s ease !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.03) !important;
   background: rgb(5, 5, 6) !important;
+  will-change: background-color, color !important;
 }
 
 .mobile-category-item:last-child {
@@ -821,5 +827,45 @@ button {
   .ordenamiento-dropdown {
     width: 90% !important;
     margin: 0.25rem auto !important;
+  }
+}
+
+@keyframes slideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(10vh) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes slideDown {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(10vh) scale(0.98);
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
   }
 }
