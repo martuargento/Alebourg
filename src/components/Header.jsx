@@ -1,9 +1,10 @@
 // src/components/Header.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FaShoppingCart, FaChevronDown, FaTimes } from 'react-icons/fa';
+import { FaShoppingCart, FaChevronDown, FaTimes, FaChevronUp } from 'react-icons/fa';
 import { usarCarrito } from '../context/CarritoContexto';
 import logo from '../assets/logo.png';
+import ThemeToggle from './ThemeToggle';
 
 const Header = () => {
   const { carrito } = usarCarrito();
@@ -14,6 +15,7 @@ const Header = () => {
   const [isClosing, setIsClosing] = useState(false);
   const [categorias, setCategorias] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentTheme, setCurrentTheme] = useState(document.documentElement.getAttribute('data-theme'));
   const categoriesRef = useRef(null);
   const buttonRef = useRef(null);
 
@@ -22,15 +24,17 @@ const Header = () => {
     setTimeout(() => {
       setShowMobileCategories(false);
       setIsClosing(false);
-    }, 200);
+    }, 80);
   };
 
   const handleToggleMobileMenu = () => {
     if (showMobileMenu) {
       setShowMobileMenu(false);
       setShowMobileCategories(false);
+      document.body.style.overflow = 'auto';
     } else {
       setShowMobileMenu(true);
+      document.body.style.overflow = 'hidden';
     }
   };
 
@@ -55,7 +59,7 @@ const Header = () => {
   useEffect(() => {
     const fetchCategorias = async () => {
       try {
-        const response = await fetch('https://raw.githubusercontent.com/martuargento/Alebourg/refs/heads/main/public/productosalebourgactulizados.json');
+        const response = await fetch('https://raw.githubusercontent.com/martinalejandronuniezcursor2/alebourgprueba/refs/heads/main/public/productosalebourgactulizados.json');
         const data = await response.json();
         
         const categoriasMap = {};
@@ -88,6 +92,31 @@ const Header = () => {
     fetchCategorias();
   }, []);
 
+  // Escuchar cambios en el tema
+  useEffect(() => {
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'data-theme') {
+          setCurrentTheme(document.documentElement.getAttribute('data-theme'));
+        }
+      });
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme']
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  // Limpiar el estilo del body al desmontar el componente
+  useEffect(() => {
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, []);
+
   const manejarLogout = () => {
     localStorage.removeItem('logueado');
     navigate('/');
@@ -108,7 +137,11 @@ const Header = () => {
       {/* Desktop Navigation */}
       <nav className="navbar navbar-expand-sm px-4 navbarestilo">
         <Link className="navbar-brand" to="/">
-          <img src={logo} alt="Alebourg" style={{ height: '55px', objectFit: 'contain' }} />
+          <img 
+            src={document.documentElement.getAttribute('data-theme') === 'light' ? '/logolight.png' : logo} 
+            alt="Alebourg" 
+            style={{ height: '55px', objectFit: 'contain' }} 
+          />
         </Link>
 
         <button
@@ -179,13 +212,13 @@ const Header = () => {
                 </Link>
               </div>
             )}
-            
+            <ThemeToggle />
             {/* Desktop Cart Button */}
             <Link 
               to="/verpedido" 
               className="btn btn-outline-light position-relative botonCarritoEstilo"
             >
-              <FaShoppingCart size={20} />
+              <FaShoppingCart size={18} />
               {cantidadTotal > 0 && (
                 <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                   {cantidadTotal}
@@ -197,10 +230,17 @@ const Header = () => {
 
         {/* Mobile Menu - Solo visible en xs */}
         <div className={`mobile-menu d-sm-none ${showMobileMenu ? 'show' : ''}`}>
-          <div className="mobile-menu-container">
+          <div className="mobile-menu-container" style={{ 
+            height: '100vh',
+            backgroundColor: '#1e1e1e'
+          }}>
             <div className="mobile-menu-header">
               <Link className="navbar-brand" to="/">
-                <img src={logo} alt="Alebourg" style={{ height: '40px', objectFit: 'contain' }} />
+                <img 
+                  src={document.documentElement.getAttribute('data-theme') === 'light' ? '/logolight.png' : logo} 
+                  alt="Alebourg" 
+                  style={{ height: '40px', objectFit: 'contain' }} 
+                />
               </Link>
               <button
                 className="mobile-menu-close"
@@ -210,11 +250,15 @@ const Header = () => {
               </button>
             </div>
 
-            <div className="mobile-menu-content">
+            <div className="mobile-menu-content" style={{ 
+              display: 'flex', 
+              flexDirection: 'column',
+              height: '100%'
+            }}>
               <ul className="mobile-menu-nav">
                 <li className="mobile-menu-item">
                   <Link 
-                    to="/"
+                    to="/" 
                     className="mobile-menu-link"
                     onClick={handleToggleMobileMenu}
                   >
@@ -230,7 +274,7 @@ const Header = () => {
                     <FaChevronDown 
                       style={{
                         transform: showMobileCategories ? 'rotate(180deg)' : 'rotate(0)',
-                        transition: 'transform 0.12s ease'
+                        transition: 'transform 0.08s ease'
                       }}
                       size={12}
                     />
@@ -244,26 +288,27 @@ const Header = () => {
                           left: 0,
                           right: 0,
                           bottom: 0,
-                          backgroundColor: 'rgba(0,0,0,0.5)',
+                          backgroundColor: 'var(--mobile-overlay-bg)',
                           zIndex: 9998,
-                          animation: isClosing ? 'fadeOut 0.12s ease-out forwards' : 'fadeIn 0.12s ease-out forwards'
+                          animation: isClosing ? 'fadeOut 0.08s ease-out forwards' : 'fadeIn 0.08s ease-out forwards'
                         }} 
                         onClick={handleCloseMenu} 
                       />
                       <div style={{
                         position: 'fixed',
                         top: '20px',
-                        left: '20px',
-                        right: '20px',
+                        left: '10px',
+                        right: '10px',
                         bottom: '20px',
-                        backgroundColor: '#1e1e1e',
+                        backgroundColor: 'var(--mobile-menu-bg)',
                         zIndex: 9999,
                         padding: '20px',
                         overflowY: 'auto',
                         borderRadius: '10px',
-                        boxShadow: '0 0 20px rgba(0,0,0,0.5)',
-                        border: '1px solid rgba(255,255,255,0.1)',
-                        animation: isClosing ? 'slideDown 0.12s ease-out forwards' : 'slideUp 0.12s ease-out forwards'
+                        boxShadow: '0 0 20px rgba(0,0,0,0.3)',
+                        border: '1px solid var(--mobile-menu-border)',
+                        animation: isClosing ? 'slideDown 0.06s cubic-bezier(0.4, 0, 0.2, 1) forwards' : 'slideUp 0.06s cubic-bezier(0.4, 0, 0.2, 1) forwards',
+                        willChange: 'transform, opacity'
                       }}>
                         <style>
                           {`
@@ -310,32 +355,32 @@ const Header = () => {
                           justifyContent: 'space-between',
                           alignItems: 'center',
                           marginBottom: '20px',
-                          borderBottom: '1px solid rgba(255,255,255,0.1)',
+                          borderBottom: '1px solid var(--mobile-menu-border)',
                           paddingBottom: '10px'
                         }}>
                           <h4 style={{ 
-                            color: 'white', 
+                            color: 'var(--text-color)', 
                             margin: 0,
                             fontSize: '1.2rem',
                             fontWeight: '500'
                           }}>Categorías</h4>
                           <button 
                             onClick={handleCloseMenu}
+                            className="categories-close"
                             style={{
                               background: 'none',
-                              border: 'none',
-                              color: 'white',
-                              fontSize: '24px',
                               padding: '10px',
                               cursor: 'pointer',
-                              opacity: '0.8'
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
                             }}
                           >
                             <FaTimes />
                           </button>
                         </div>
                         {loading ? (
-                          <div className="p-3 text-white">Cargando...</div>
+                          <div className="p-3" style={{ color: 'var(--text-color)' }}>Cargando...</div>
                         ) : (
                           <div style={{
                             display: 'flex',
@@ -351,9 +396,9 @@ const Header = () => {
                                   justifyContent: 'space-between',
                                   alignItems: 'center',
                                   padding: '12px 15px',
-                                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                  backgroundColor: 'var(--mobile-menu-item-bg)',
                                   borderRadius: '8px',
-                                  color: 'white',
+                                  color: 'var(--text-color)',
                                   textDecoration: 'none',
                                   transition: 'all 0.2s ease',
                                   fontSize: '0.95rem'
@@ -365,7 +410,8 @@ const Header = () => {
                               >
                                 <span>{categoria.nombre}</span>
                                 <span style={{
-                                  color: '#999',
+                                  color: 'var(--text-color)',
+                                  opacity: '0.6',
                                   fontSize: '0.9em'
                                 }}>{categoria.cantidad}</span>
                               </Link>
@@ -376,30 +422,37 @@ const Header = () => {
                     </>
                   )}
                 </li>
+                <li className="mobile-menu-item" style={{ marginTop: '1rem' }}>
+                  <div className="d-flex justify-content-center">
+                    <ThemeToggle />
+                  </div>
+                </li>
               </ul>
-            </div>
 
-            <div className="mobile-menu-footer">
-              <hr className="mobile-menu-divider" />
-              {estaLogueado ? (
-                <button 
-                  onClick={() => {
-                    manejarLogout();
-                    handleToggleMobileMenu();
-                  }}
-                  className="mobile-menu-admin"
-                >
-                  cerrar sesión
-                </button>
-              ) : (
-                <Link 
-                  to="/login" 
-                  className="mobile-menu-admin"
-                  onClick={handleToggleMobileMenu}
-                >
-                  admin
-                </Link>
-              )}
+              <div style={{ flex: 0.2 }}></div>
+
+              <div className="mobile-menu-footer">
+                <hr className="mobile-menu-divider" />
+                {estaLogueado ? (
+                  <button 
+                    onClick={() => {
+                      manejarLogout();
+                      handleToggleMobileMenu();
+                    }}
+                    className="mobile-menu-admin"
+                  >
+                    cerrar sesión
+                  </button>
+                ) : (
+                  <Link 
+                    to="/login" 
+                    className="mobile-menu-admin"
+                    onClick={handleToggleMobileMenu}
+                  >
+                    admin
+                  </Link>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -410,7 +463,7 @@ const Header = () => {
         to="/verpedido" 
         className="floating-cart-button d-sm-none"
       >
-        <FaShoppingCart size={24} />
+        <FaShoppingCart size={22} />
         {cantidadTotal > 0 && (
           <span className="badge">
             {cantidadTotal}

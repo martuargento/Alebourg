@@ -27,6 +27,8 @@ body {
   min-width: 320px;
   min-height: 100vh;
   /* Quité display:flex y place-items */
+  background-color: var(--background-color) !important;
+  color: var(--text-color) !important;
 }
 
 h1 {
@@ -64,5 +66,733 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   }
+}
+
+:root[data-theme="dark"] {
+  --background-color: rgba(14,16,15,255);
+  --text-color: #ffffff;
+  --text-color-secondary: rgba(255, 255, 255, 0.7);
+  --card-bg: rgba(250, 251, 251, 0.034);
+  --card-border: rgba(250, 251, 251, 0.43);
+  --navbar-bg: rgb(42, 45, 46);
+  --button-bg: #b04a78;
+  --button-hover: rgba(178, 40, 118, 0.85);
+  --input-bg: rgba(250, 251, 251, 0.079);
+  --mobile-menu-bg: #1e1e1e;
+  --mobile-menu-item-bg: rgba(255, 255, 255, 0.05);
+  --mobile-menu-border: rgba(255, 255, 255, 0.1);
+  --mobile-overlay-bg: rgba(0, 0, 0, 0.5);
+  --mobile-categories-bg: #1e1e1e;
+  --brand-accent: #fca2de;
+}
+
+:root[data-theme="light"] {
+  /* Colores base */
+  --background-color: #e2e8f0;  /* Gris más oscuro para el fondo */
+  --text-color: #1e293b;
+  --text-color-secondary: #475569;
+  --card-bg: #ffffff;
+  --card-border: #cbd5e1;
+  --navbar-bg: #f8fafc;  /* Header claro */
+  --navbar-text: #1e293b;  /* Texto oscuro para el header */
+  --button-bg: #374151;
+  --button-hover: #4b5563;
+  --input-bg: #ffffff;
+  --mobile-menu-bg: #ffffff;
+  --mobile-menu-item-bg: #f8fafc;
+  --mobile-menu-border: #e2e8f0;
+  --mobile-overlay-bg: rgba(0, 0, 0, 0.1);
+  --mobile-categories-bg: #ffffff;
+  --brand-accent: #6b7280;
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.1);
+  --footer-bg: #f3f4f6;
+  --footer-text: #4b5563;
+  --footer-border: #e5e7eb;
+  --search-bg: #ffffff;
+  --search-border: #e2e8f0;
+  --header-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.card {
+  background-color: var(--card-bg) !important;
+  color: var(--text-color) !important;
+  border-color: var(--card-border) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.card:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+  border-color: #cbd5e1 !important;
+}
+
+.navbarestilo {
+  background-color: var(--navbar-bg) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+}
+
+.nav-link {
+  color: var(--text-color) !important;
+}
+
+.nav-link:hover {
+  color: var(--brand-accent) !important;
+}
+
+.inputForEstilos {
+  background-color: var(--input-bg) !important;
+  color: var(--text-color) !important;
+  border: 1px solid var(--mobile-menu-border) !important;
+}
+
+.inputForEstilos:focus {
+  border-color: var(--brand-accent) !important;
+  box-shadow: 0 0 0 2px rgba(252, 162, 222, 0.1) !important;
+}
+
+.theme-toggle-btn {
+  height: 32px !important;
+  width: 32px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  border-radius: 6px !important;
+  transition: all 0.2s ease !important;
+  padding: 0 !important;
+}
+
+.theme-text {
+  font-weight: 500 !important;
+}
+
+/* Modo claro */
+[data-theme="light"] .theme-toggle-btn {
+  background-color: rgba(55, 65, 81, 0.03) !important;
+  color: rgba(30, 41, 59, 0.8) !important;
+  border: 1px solid rgba(30, 41, 59, 0.1) !important;
+}
+
+[data-theme="light"] .theme-toggle-btn:hover {
+  background-color: rgba(55, 65, 81, 0.08) !important;
+  color: rgba(30, 41, 59, 1) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Modo oscuro */
+[data-theme="dark"] .theme-toggle-btn {
+  background-color: rgba(255, 255, 255, 0.03) !important;
+  color: rgba(255, 255, 255, 0.6) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .theme-toggle-btn:hover {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Estilos para el menú móvil */
+.mobile-menu {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 1050 !important;
+  background-color: rgba(0, 0, 0, 0.5) !important;
+}
+
+.mobile-menu-container {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+.mobile-menu-content {
+  height: auto !important;
+  min-height: calc(100% - 70px) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 1rem !important;
+}
+
+.mobile-menu-header {
+  border-bottom: 1px solid var(--mobile-menu-border) !important;
+  background-color: var(--mobile-menu-item-bg) !important;
+}
+
+.mobile-menu-footer {
+  background-color: var(--mobile-menu-bg) !important;
+  border-top: 1px solid var(--mobile-menu-border) !important;
+}
+
+.mobile-menu-admin {
+  color: var(--text-color) !important;
+  opacity: 0.5;
+}
+
+.mobile-menu-admin:hover {
+  color: var(--text-color) !important;
+  opacity: 0.8;
+}
+
+.mobile-menu-divider {
+  border-color: var(--mobile-menu-border) !important;
+}
+
+.mobile-menu-close {
+  color: var(--text-color) !important;
+}
+
+/* Estilos para el panel de categorías móvil */
+.mobile-menu-categories {
+  background: var(--mobile-menu-bg) !important;
+}
+
+.mobile-category-item {
+  background: var(--mobile-menu-bg) !important;
+  color: var(--text-color) !important;
+  border-bottom: 1px solid var(--mobile-menu-border) !important;
+}
+
+.mobile-category-item:hover {
+  background: var(--mobile-menu-item-bg) !important;
+}
+
+/* Ajustes para el overlay del menú de categorías */
+[style*="rgba(0,0,0,0.5)"] {
+  background-color: var(--mobile-overlay-bg) !important;
+}
+
+/* Ajuste para el contenedor del menú de categorías */
+[style*="backgroundColor: '#1e1e1e'"] {
+  background-color: var(--mobile-menu-bg) !important;
+}
+
+/* Ajustes para el menú de categorías móvil */
+.mobile-menu [style*="backgroundColor: '#1e1e1e'"] {
+  background-color: var(--mobile-categories-bg) !important;
+}
+
+.mobile-menu-nav button,
+.mobile-menu-nav a {
+  color: var(--text-color) !important;
+}
+
+.mobile-menu-header {
+  background-color: var(--mobile-menu-item-bg) !important;
+}
+
+/* Ajuste para el texto de carga */
+.mobile-menu .p-3 {
+  color: var(--text-color) !important;
+}
+
+[data-theme="light"] .titulosprincipales {
+  color: var(--text-color) !important;
+  font-weight: 600 !important;
+  margin-bottom: 1.5rem !important;
+  padding-bottom: 0.5rem !important;
+  border-bottom: 2px solid var(--card-border) !important;
+}
+
+[data-theme="light"] .card {
+  background-color: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05) !important;
+  border-radius: 8px !important;
+}
+
+[data-theme="light"] .card:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1) !important;
+  border-color: #94a3b8 !important;
+}
+
+[data-theme="light"] .navbarestilo {
+  background-color: #f8fafc !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+
+[data-theme="light"] .nav-link {
+  color: #1e293b !important;
+  font-weight: 500 !important;
+}
+
+[data-theme="light"] .nav-link:hover {
+  color: #374151 !important;
+}
+
+[data-theme="light"] .nav-link::after {
+  content: '' !important;
+  position: absolute !important;
+  bottom: -1px !important;
+  left: 0.75rem !important;
+  right: 0.75rem !important;
+  height: 2px !important;
+  background-color: var(--brand-accent) !important;
+  opacity: 0 !important;
+  transform: scaleX(0.8) !important;
+  transition: all 0.2s ease !important;
+}
+
+[data-theme="light"] .nav-link:hover::after {
+  opacity: 1 !important;
+  transform: scaleX(1) !important;
+}
+
+[data-theme="light"] .form-control {
+  border-color: var(--card-border) !important;
+  background-color: var(--input-bg) !important;
+  color: var(--text-color) !important;
+  border-radius: 8px !important;
+  padding: 0.625rem 1rem !important;
+  font-size: 0.95rem !important;
+  transition: all 0.2s ease !important;
+}
+
+[data-theme="light"] .form-control:focus {
+  border-color: var(--button-bg) !important;
+  box-shadow: 0 0 0 3px rgba(252, 162, 222, 0.08) !important;
+}
+
+[data-theme="light"] .input-group-text {
+  background-color: var(--card-bg) !important;
+  border-color: var(--card-border) !important;
+  color: var(--text-color-secondary) !important;
+  border-radius: 8px !important;
+}
+
+[data-theme="light"] .theme-toggle-btn {
+  background-color: rgba(55, 65, 81, 0.03) !important;
+  color: rgba(30, 41, 59, 0.8) !important;
+  border: 1px solid rgba(30, 41, 59, 0.1) !important;
+}
+
+[data-theme="light"] .theme-toggle-btn:hover {
+  background-color: rgba(55, 65, 81, 0.08) !important;
+  color: rgba(30, 41, 59, 1) !important;
+  transform: translateY(-1px) !important;
+}
+
+[data-theme="light"] .navbar-toggler {
+  color: #1e293b !important;
+}
+
+[data-theme="light"] .navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%2830, 41, 59, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+}
+
+/* Ajustes para el buscador */
+[data-theme="light"] .search-container {
+  background-color: var(--search-bg) !important;
+  transition: all 0.2s ease !important;
+}
+
+[data-theme="light"] .search-container:focus-within {
+  border-color: var(--brand-accent) !important;
+  box-shadow: 0 0 0 1px var(--brand-accent) !important;
+}
+
+[data-theme="light"] .form-control::placeholder {
+  color: var(--text-color-secondary) !important;
+  opacity: 0.7 !important;
+}
+
+[data-theme="light"] .form-control:focus {
+  background-color: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Botón de carrito */
+[data-theme="light"] .botonCarritoEstilo {
+  background-color: rgba(55, 65, 81, 0.03) !important;
+  color: rgba(30, 41, 59, 0.8) !important;
+  border: 1px solid rgba(30, 41, 59, 0.1) !important;
+}
+
+[data-theme="light"] .botonCarritoEstilo:hover {
+  background-color: rgba(55, 65, 81, 0.08) !important;
+  color: rgba(30, 41, 59, 1) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Footer */
+[data-theme="light"] footer {
+  background-color: #f3f4f6 !important;
+  color: #4b5563 !important;
+  border-top: 1px solid #e5e7eb !important;
+  padding: 2rem 0 !important;
+  margin-top: 2rem !important;
+}
+
+[data-theme="light"] footer a {
+  color: #374151 !important;
+  text-decoration: none !important;
+  transition: color 0.2s ease !important;
+}
+
+[data-theme="light"] footer a:hover {
+  color: #1f2937 !important;
+}
+
+/* Categorías */
+[data-theme="light"] .categories-panel {
+  background-color: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+}
+
+[data-theme="light"] .category-item {
+  color: #1e293b !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  padding: 12px 16px !important;
+  transition: all 0.2s ease !important;
+}
+
+[data-theme="light"] .category-item:hover {
+  background-color: #f8fafc !important;
+  color: #374151 !important;
+}
+
+[data-theme="light"] .category-item span:last-child {
+  color: #64748b !important;
+  font-size: 0.875rem !important;
+}
+
+/* Inputs generales */
+[data-theme="light"] .inputForEstilos {
+  background-color: var(--input-bg) !important;
+  border: 1px solid var(--card-border) !important;
+  color: var(--text-color) !important;
+  border-radius: 8px !important;
+}
+
+[data-theme="light"] .inputForEstilos:focus {
+  border-color: var(--button-bg) !important;
+  box-shadow: 0 0 0 3px rgba(176, 74, 120, 0.1) !important;
+}
+
+/* Botones principales */
+[data-theme="light"] .btn-primary {
+  background-color: var(--button-bg) !important;
+  border-color: var(--button-bg) !important;
+  color: white !important;
+}
+
+[data-theme="light"] .btn-primary:hover {
+  background-color: var(--button-hover) !important;
+  border-color: var(--button-hover) !important;
+}
+
+[data-theme="light"] .admin-link {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+[data-theme="light"] .admin-link:hover {
+  color: #ffffff !important;
+}
+
+/* Botón flotante del carrito para móvil */
+.floating-cart-button {
+  position: fixed !important;
+  bottom: 20px !important;
+  right: 20px !important;
+  width: 56px !important;
+  height: 56px !important;
+  border-radius: 50% !important;
+  color: white !important;
+  display: none !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: transform 0.2s ease !important;
+  z-index: 1060 !important;
+  border: none !important;
+}
+
+/* Estilos para modo oscuro */
+[data-theme="dark"] .floating-cart-button {
+  background-color: #b04a78 !important;
+  box-shadow: 0 4px 12px rgba(176, 74, 120, 0.3) !important;
+}
+
+[data-theme="dark"] .floating-cart-button .badge {
+  border: 2px solid #b04a78 !important;
+}
+
+/* Estilos para modo claro */
+[data-theme="light"] .floating-cart-button {
+  background-color: rgba(55, 65, 81, 0.9) !important;
+  box-shadow: 0 4px 8px rgba(55, 65, 81, 0.15) !important;
+}
+
+[data-theme="light"] .floating-cart-button .badge {
+  border: 2px solid #374151 !important;
+}
+
+.floating-cart-button:hover {
+  background-color: rgba(55, 65, 81, 1) !important;
+}
+
+.floating-cart-button .badge {
+  position: absolute !important;
+  top: -8px !important;
+  right: -8px !important;
+  background-color: #dc2626 !important;
+  border-radius: 50% !important;
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.75rem !important;
+}
+
+/* Mostrar el botón flotante solo en xs */
+@media (max-width: 575px) {
+  .floating-cart-button {
+    display: flex !important;
+  }
+  
+  /* Ocultar el botón normal del carrito en móvil */
+  .botonCarritoEstilo {
+    display: none !important;
+  }
+
+  .theme-toggle-btn {
+    width: auto !important;
+    margin: 10rem auto 0.5rem auto !important;
+    min-width: 160px !important;
+    padding: 0 12px !important;
+  }
+
+  .theme-toggle-btn svg {
+    margin-right: 4px !important;
+  }
+
+  /* Modo claro en mobile */
+  [data-theme="light"] .mobile-menu .theme-toggle-btn {
+    background-color: rgba(0, 0, 0, 0.03) !important;
+    color: rgba(0, 0, 0, 0.6) !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  }
+
+  /* Modo oscuro en mobile */
+  [data-theme="dark"] .mobile-menu .theme-toggle-btn {
+    background-color: rgba(255, 255, 255, 0.03) !important;
+    color: rgba(255, 255, 255, 0.6) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  }
+}
+
+/* Ajustes para el menú hamburguesa en modo claro */
+html[data-theme="light"] .navbar-toggler {
+  background-color: #374151 !important;
+  border: none !important;
+  padding: 8px !important;
+  border-radius: 6px !important;
+}
+
+html[data-theme="light"] .navbar-toggler:hover {
+  background-color: #4b5563 !important;
+}
+
+html[data-theme="light"] .navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+}
+
+/* Estilos para el botón de cierre de categorías */
+html[data-theme="light"] button[style*="background: none"] {
+  background-color: #f1f5f9 !important;
+  color: #1e293b !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 6px !important;
+  width: 32px !important;
+  height: 32px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.2s ease !important;
+  padding: 0 !important;
+  cursor: pointer !important;
+}
+
+html[data-theme="light"] button[style*="background: none"]:hover {
+  background-color: #e2e8f0 !important;
+  color: #374151 !important;
+}
+
+/* Estilos consistentes para botones del header en desktop */
+@media (min-width: 576px) {
+  .theme-toggle-btn,
+  .botonCarritoEstilo {
+    width: 40px !important;
+    height: 40px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 6px !important;
+    transition: all 0.2s ease !important;
+    padding: 0 !important;
+  }
+
+  .theme-toggle-btn {
+    background-color: transparent !important;
+    border: 1px solid var(--card-border) !important;
+    color: var(--text-color) !important;
+  }
+
+  .theme-toggle-btn:hover {
+    background-color: var(--card-bg) !important;
+    border-color: var(--brand-accent) !important;
+  }
+
+  .botonCarritoEstilo {
+    background-color: transparent !important;
+    border: 1px solid var(--card-border) !important;
+    color: var(--text-color) !important;
+  }
+
+  .botonCarritoEstilo:hover {
+    background-color: var(--card-bg) !important;
+    border-color: var(--brand-accent) !important;
+  }
+}
+
+/* Mantener el resto de los estilos existentes sin cambios */
+
+[data-theme="light"] .btn-outline-light {
+  background-color: #f1f5f9 !important;
+  color: #1e293b !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+[data-theme="light"] .btn-outline-light:hover {
+  background-color: #e2e8f0 !important;
+  color: #1e293b !important;
+  border-color: #cbd5e1 !important;
+}
+
+[data-theme="light"] .boton-productos {
+  background-color: #374151 !important;
+  border: none !important;
+  color: white !important;
+  padding: 8px 16px !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+}
+
+[data-theme="light"] .boton-productos:hover {
+  background-color: #4b5563 !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Estilos para SweetAlert en modo claro */
+[data-theme="light"] .swal2-popup {
+  background-color: #ffffff !important;
+  color: #1e293b !important;
+}
+
+[data-theme="light"] .swal2-title {
+  color: #1e293b !important;
+}
+
+[data-theme="light"] .swal2-html-container {
+  color: #475569 !important;
+}
+
+[data-theme="light"] .swal2-icon.swal2-success {
+  border-color: #374151 !important;
+  color: #374151 !important;
+}
+
+[data-theme="light"] .swal2-icon.swal2-success [class^='swal2-success-line'] {
+  background-color: #374151 !important;
+}
+
+[data-theme="light"] .swal2-icon.swal2-success .swal2-success-ring {
+  border-color: #374151 !important;
+}
+
+/* Estilos para los botones del carrito en modo claro */
+[data-theme="light"] .cart-item {
+  background-color: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+[data-theme="light"] .cart-total {
+  background-color: #f1f5f9 !important;
+  border-top: 2px solid #374151 !important;
+}
+
+[data-theme="light"] .cart-button {
+  background-color: #374151 !important;
+  color: white !important;
+  border: none !important;
+  transition: all 0.2s ease !important;
+}
+
+[data-theme="light"] .cart-button:hover {
+  background-color: #4b5563 !important;
+  transform: translateY(-1px) !important;
+}
+
+[data-theme="light"] .cart-quantity-button {
+  background-color: #374151 !important;
+  color: white !important;
+  border: none !important;
+  width: 35px !important;
+  height: 35px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.2s ease !important;
+}
+
+[data-theme="light"] .cart-quantity-button:hover {
+  background-color: #4b5563 !important;
+}
+
+/* Ajustes para el buscador en modo claro */
+[data-theme="light"] .form-control::placeholder {
+  color: var(--text-color-secondary) !important;
+  opacity: 0.7 !important;
+}
+
+/* Ajustes para el buscador en modo oscuro */
+[data-theme="dark"] .form-control::placeholder {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+[data-theme="dark"] .search-container {
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+[data-theme="dark"] .search-container:focus-within {
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2) !important;
+}
+
+[data-theme="dark"] .botonCarritoEstilo {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  width: 40px !important;
+  height: 40px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 8px !important;
+  transition: all 0.2s ease !important;
+}
+
+[data-theme="dark"] .botonCarritoEstilo:hover {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
 }
 

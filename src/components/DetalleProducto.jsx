@@ -13,9 +13,12 @@ const DetalleProducto = () => {
   const { agregarAlCarrito } = usarCarrito();
 
   useEffect(() => {
+    // Hacer scroll al inicio cuando el componente se monta
+    window.scrollTo(0, 0);
+    
     const fetchProducto = async () => {
       try {
-        const response = await fetch('https://raw.githubusercontent.com/martuargento/Alebourg/refs/heads/main/public/productosalebourgactulizados.json');
+        const response = await fetch('https://raw.githubusercontent.com/martinalejandronuniezcursor2/alebourgprueba/refs/heads/main/public/productosalebourgactulizados.json');
         const data = await response.json();
         const productoEncontrado = data.find(p => p.id === parseInt(id));
         
@@ -65,16 +68,16 @@ const DetalleProducto = () => {
 
   return (
     <Container fluid className="p-0">
-      <div className="product-container" style={{
-        backgroundColor: 'rgba(0, 0, 0, 0.2)',
+      <div style={{
         margin: '0 auto',
         minHeight: '100vh',
         padding: '1rem'
       }}>
         <div style={{
-          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+          backgroundColor: 'transparent',
           borderRadius: '10px',
-          overflow: 'hidden'
+          overflow: 'hidden',
+          boxShadow: '0 0 10px rgba(0, 0, 0, 0.05)'
         }}>
           <Row className="g-0">
             <Col xs={12} lg={8}>
@@ -83,7 +86,8 @@ const DetalleProducto = () => {
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
-                padding: '0.5rem',
+                padding: '1rem',
+                background: 'white',
                 minHeight: '30vh'
               }}>
                 <img
@@ -100,13 +104,14 @@ const DetalleProducto = () => {
             </Col>
             <Col xs={12} lg={4}>
               <div className="product-details" style={{
-                padding: '1rem',
-                height: '100%'
+                padding: '1.5rem',
+                height: '100%',
+                background: 'white'
               }}>
                 <h2 style={{
                   fontSize: 'clamp(1.3rem, 4vw, 1.8rem)',
                   fontWeight: '600',
-                  marginBottom: '1rem',
+                  marginBottom: '1.5rem',
                   textAlign: 'center'
                 }}>{producto.titulo}</h2>
                 
@@ -114,25 +119,9 @@ const DetalleProducto = () => {
                   marginBottom: '1.5rem',
                   position: 'relative',
                   padding: '1.5rem',
-                  background: 'linear-gradient(145deg, rgba(0,255,0,0.05) 0%, rgba(0,0,0,0) 100%)',
-                  borderRadius: '10px',
-                  border: '1px solid rgba(0,255,0,0.15)',
                   textAlign: 'center'
                 }}>
-                  <div style={{
-                    position: 'absolute',
-                    top: '10px',
-                    right: '10px',
-                    background: '#00cc44',
-                    color: 'black',
-                    padding: '4px 12px',
-                    borderRadius: '20px',
-                    fontSize: '0.9rem',
-                    fontWeight: 'bold',
-                    transform: 'rotate(5deg)'
-                  }}>
-                    ¡Disponible!
-                  </div>
+
                   <div style={{
                     fontSize: '0.9rem',
                     opacity: '0.8',
@@ -143,9 +132,7 @@ const DetalleProducto = () => {
                   <div style={{
                     fontSize: 'clamp(2.5rem, 8vw, 3.5rem)',
                     fontWeight: '800',
-                    color: '#00ff44',
-                    textShadow: '0 0 15px rgba(0,255,68,0.3)',
-                    lineHeight: '1'
+                    color: '#00ff44'
                   }}>
                     ${precioAjustado}
                   </div>
@@ -163,7 +150,7 @@ const DetalleProducto = () => {
                   <p style={{
                     margin: '0',
                     padding: '8px 16px',
-                    background: 'rgba(255, 255, 255, 0.05)',
+                    backgroundColor: 'rgba(0, 0, 0, 0.2)',
                     borderRadius: '20px',
                     display: 'inline-block',
                     fontSize: '0.9rem'
@@ -174,19 +161,17 @@ const DetalleProducto = () => {
                   <Button 
                     onClick={manejarAgregar}
                     size="lg"
+                    className="boton-productos"
                     style={{
                       padding: '1rem',
                       fontSize: 'clamp(1rem, 4vw, 1.2rem)',
-                      fontWeight: '600',
-                      backgroundColor: '#333',
-                      border: 'none',
-                      transition: 'all 0.2s ease'
+                      fontWeight: '600'
                     }}
                   >
                     Agregar al carrito
                   </Button>
                   <Button 
-                    variant="outline-secondary"
+                    className="boton-productos"
                     onClick={() => navigate(-1)}
                     style={{
                       padding: '0.75rem',
@@ -201,6 +186,72 @@ const DetalleProducto = () => {
           </Row>
         </div>
       </div>
+      <style>
+        {`
+          @media (max-width: 768px) {
+            /* Eliminar todos los espacios y efectos visuales */
+            .product-details {
+              border: none !important;
+              box-shadow: none !important;
+              padding: 0 !important;
+              background: transparent !important;
+            }
+            .product-image-container {
+              padding: 0 !important;
+              margin: 0 !important;
+              min-height: auto !important;
+            }
+            .precio-container {
+              border: none !important;
+              margin: 0 !important;
+              padding: 1rem !important;
+              background: none !important;
+              background-color: transparent !important;
+              box-shadow: none !important;
+              outline: none !important;
+            }
+            .precio-container * {
+              border: none !important;
+              box-shadow: none !important;
+              outline: none !important;
+              background: none !important;
+            }
+            .categoria-container {
+              margin: 0 !important;
+              padding: 1rem !important;
+            }
+            h2 {
+              margin: 0 !important;
+              padding: 1rem !important;
+            }
+            .d-grid {
+              padding: 1rem !important;
+            }
+            
+            /* Estilos específicos para modo claro */
+            [data-theme="light"] .product-details,
+            [data-theme="light"] .precio-container,
+            [data-theme="light"] .precio-container * {
+              background: none !important;
+              background-color: transparent !important;
+              border: none !important;
+              box-shadow: none !important;
+              outline: none !important;
+            }
+            
+            /* Estilos específicos para modo oscuro */
+            [data-theme="dark"] .product-details {
+              background-color: rgba(0, 0, 0, 0.2) !important;
+            }
+            [data-theme="dark"] .product-image-container {
+              background-color: rgba(0, 0, 0, 0.2) !important;
+            }
+            [data-theme="dark"] .categoria-container p {
+              background-color: rgba(255, 255, 255, 0.05) !important;
+            }
+          }
+        `}
+      </style>
     </Container>
   );
 };

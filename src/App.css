@@ -147,13 +147,16 @@ button {
 }
 
 .botonCarritoEstilo{
-  background-color: rgba(250, 251, 251, 0.079) !important;
-  color: rgb(255, 255, 255) !important;
+  background-color: rgba(250, 251, 251, 0.03) !important;
+  color: rgb(255, 255, 255, 0.8) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  transition: all 0.3s ease !important;
 }
 
 .botonCarritoEstilo:hover{
-  background-color: #b04a78 !important;
+  background-color: rgba(176, 74, 120, 0.2) !important;
   color: rgb(255, 255, 255) !important;
+  transform: translateY(-1px) !important;
 }
 
 .inputForEstilos{
@@ -374,19 +377,21 @@ button {
   width: 56px !important;
   height: 56px !important;
   border-radius: 50% !important;
-  background-color: #fe99d3 !important;
+  background-color: rgba(176, 74, 120, 0.8) !important;
   color: white !important;
   display: none !important; /* Por defecto oculto */
   align-items: center !important;
   justify-content: center !important;
-  box-shadow: 0 4px 12px rgba(254, 153, 211, 0.3) !important;
+  box-shadow: 0 4px 8px rgba(176, 74, 120, 0.2) !important;
   transition: transform 0.2s ease !important;
   z-index: 1060 !important;
   border: none !important;
+  opacity: 0.9 !important;
 }
 
 .floating-cart-button:hover {
-  transform: scale(1.1) !important;
+  opacity: 1 !important;
+  transform: scale(1.05) !important;
 }
 
 .floating-cart-button .badge {
@@ -441,6 +446,43 @@ button {
     background-color: rgba(255, 255, 255, 0.05) !important;
     color: white !important;
   }
+
+  .theme-toggle-btn,
+  .botonCarritoEstilo {
+    width: 36px !important;
+    height: 36px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 6px !important;
+    transition: all 0.2s ease !important;
+    padding: 0 !important;
+    opacity: 0.8 !important;
+  }
+
+  .theme-toggle-btn {
+    background-color: transparent !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+  }
+
+  .theme-toggle-btn:hover {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    opacity: 1 !important;
+  }
+
+  .botonCarritoEstilo {
+    background-color: transparent !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+  }
+
+  .botonCarritoEstilo:hover {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    opacity: 1 !important;
+  }
 }
 
 /* Menú móvil moderno */
@@ -453,10 +495,10 @@ button {
   background-color: rgb(10, 10, 11) !important;
   z-index: 2000 !important;
   transform: translateY(-100%) !important;
-  transition: all 0.2s ease-out !important;
+  transition: all 0.15s cubic-bezier(0.33, 1, 0.68, 1) !important;
   opacity: 0 !important;
   visibility: hidden !important;
-  will-change: transform, opacity, visibility !important;
+  will-change: transform, opacity !important;
 }
 
 .mobile-menu.show {
@@ -469,17 +511,23 @@ button {
   height: 100% !important;
     display: flex !important;
   flex-direction: column !important;
-  padding: 0 !important;
   background-color: rgb(10, 10, 11) !important;
+  opacity: 0 !important;
+  transform: translateY(-20px) !important;
+  transition: all 0.2s cubic-bezier(0.33, 1, 0.68, 1) !important;
+}
+
+.mobile-menu.show .mobile-menu-container {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
   }
 
 .mobile-menu-header {
+  padding: 1rem 1.5rem !important;
     display: flex !important;
   justify-content: space-between !important;
     align-items: center !important;
-  padding: 1rem 1.5rem !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
-  background-color: rgba(0, 0, 0, 0.3) !important;
 }
 
 .mobile-menu-close {
@@ -490,7 +538,6 @@ button {
   padding: 0.5rem !important;
   cursor: pointer !important;
   transition: color 0.2s ease !important;
-  margin-right: -0.5rem !important;
 }
 
 .mobile-menu-close:hover {
@@ -501,7 +548,26 @@ button {
   flex: 1 !important;
   overflow-y: auto !important;
   padding: 1.5rem !important;
-  background-color: rgb(10, 10, 11) !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+/* Ajuste del scroll */
+.mobile-menu-content {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.mobile-menu-content::-webkit-scrollbar {
+  display: none !important;
+}
+
+/* Animación del botón hamburguesa */
+.navbar-toggler {
+  transition: transform 0.2s ease !important;
+}
+
+.navbar-toggler:active {
+  transform: scale(0.95) !important;
 }
 
 .mobile-menu-nav {
@@ -833,7 +899,7 @@ button {
 @keyframes slideUp {
   0% {
     opacity: 0;
-    transform: translateY(10vh) scale(0.98);
+    transform: translateY(2vh) scale(0.99);
   }
   100% {
     opacity: 1;
@@ -848,24 +914,135 @@ button {
   }
   100% {
     opacity: 0;
-    transform: translateY(10vh) scale(0.98);
+    transform: translateY(2vh) scale(0.99);
   }
 }
 
 @keyframes fadeIn {
-  0% {
+  from {
     opacity: 0;
   }
-  100% {
-    opacity: 1;
+  to {
+    opacity: 0.6;
   }
 }
 
 @keyframes fadeOut {
-  0% {
-    opacity: 1;
+  from {
+    opacity: 0.6;
   }
-  100% {
+  to {
     opacity: 0;
   }
+}
+
+/* Estilos específicos para el tema claro */
+[data-theme="light"] .mobile-menu {
+  background-color: rgba(255, 255, 255, 0.98) !important;
+}
+
+[data-theme="light"] .mobile-menu-container {
+  background-color: #ffffff !important;
+}
+
+[data-theme="light"] .mobile-menu-link {
+  background-color: #f8fafc !important;
+  color: #1e293b !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+[data-theme="light"] .mobile-menu-link:hover {
+  background-color: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+}
+
+[data-theme="light"] .mobile-menu-header {
+  background-color: #ffffff !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+
+[data-theme="light"] .mobile-menu-close {
+  color: #64748b !important;
+}
+
+[data-theme="light"] .mobile-menu-close:hover {
+  color: #1e293b !important;
+}
+
+[data-theme="light"] .mobile-menu-divider {
+  border-color: #e2e8f0 !important;
+}
+
+[data-theme="light"] .mobile-menu-admin {
+  color: #64748b !important;
+}
+
+[data-theme="light"] .mobile-menu-admin:hover {
+  color: #1e293b !important;
+}
+
+[data-theme="light"] .theme-toggle-btn {
+  background-color: #f8fafc !important;
+  color: #1e293b !important;
+  border: 1px solid #e2e8f0 !important;
+  padding: 0.5rem !important;
+  border-radius: 8px !important;
+  transition: all 0.2s ease !important;
+}
+
+[data-theme="light"] .theme-toggle-btn:hover {
+  background-color: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+}
+
+/* Estilos para el mensaje de carrito vacío */
+[data-theme="light"] p, 
+[data-theme="light"] h4 {
+  color: #1e293b !important;
+}
+
+[data-theme="light"] .text-white {
+  color: #1e293b !important;
+}
+
+[data-theme="light"] .text-muted {
+  color: #64748b !important;
+}
+
+/* Estilos para el detalle de producto en modo claro */
+[data-theme="light"] .product-details {
+  background-color: #ffffff !important;
+  border-radius: 16px !important;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+[data-theme="light"] .precio-container {
+  background: linear-gradient(145deg, rgba(34, 197, 94, 0.08) 0%, rgba(255, 255, 255, 0) 100%) !important;
+  border: 1px solid rgba(34, 197, 94, 0.2) !important;
+}
+
+[data-theme="light"] .precio-container div[style*="background: #00cc44"] {
+  background: #22c55e !important;
+  color: white !important;
+  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.2) !important;
+}
+
+[data-theme="light"] .precio-container div[style*="color: #00ff44"] {
+  color: #16a34a !important;
+  text-shadow: none !important;
+}
+
+[data-theme="light"] .categoria-container p {
+  background: #f1f5f9 !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #64748b !important;
+}
+
+[data-theme="light"] .container.my-5 {
+  background: transparent !important;
+}
+
+[data-theme="light"] body {
+  background-color: #f8fafc !important;
 }
