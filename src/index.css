@@ -796,3 +796,60 @@ html[data-theme="light"] button[style*="background: none"]:hover {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
 }
 
+[data-theme="dark"] .cart-quantity-button {
+  background-color: #b04a78 !important;
+  color: white !important;
+  border: none !important;
+  width: 35px !important;
+  height: 35px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.2s ease !important;
+  font-size: 1.2rem !important;
+}
+
+[data-theme="dark"] .cart-quantity-button:hover {
+  background-color: #c25587 !important;
+  transform: translateY(-1px) !important;
+}
+
+[data-theme="dark"] .cart-quantity-button svg {
+  width: 16px !important;
+  height: 16px !important;
+}
+
+[data-theme="dark"] .cart-button {
+  background-color: #b04a78 !important;
+  color: white !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  transition: all 0.2s ease !important;
+}
+
+[data-theme="dark"] .cart-button:hover {
+  background-color: #c25587 !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  transform: translateY(-1px) !important;
+}
+
+[data-theme="dark"] .cart-button:focus {
+  box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.2) !important;
+}
+
+[data-theme="dark"] .cart-item {
+  background-color: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme="dark"] .cart-item:hover {
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+[data-theme="dark"] .cart-total {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-top: 2px solid rgba(255, 255, 255, 0.4) !important;
+  backdrop-filter: brightness(95%) !important;
+}
+
