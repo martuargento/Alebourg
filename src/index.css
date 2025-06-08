@@ -853,3 +853,83 @@ html[data-theme="light"] button[style*="background: none"]:hover {
   backdrop-filter: brightness(95%) !important;
 }
 
+/* Estilos para el grid de productos */
+.productos-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+  gap: 1rem !important;
+  max-width: 1400px !important;
+  margin: 0 auto !important;
+  padding: 1rem !important;
+}
+
+.producto-item {
+  width: 100% !important;
+  min-width: 280px !important;
+  margin: 0 auto !important;
+}
+
+.cardsEstilos {
+  height: 100% !important;
+  width: 100% !important;
+  margin: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  transition: transform 0.2s ease-in-out !important;
+}
+
+.cardsEstilos:hover {
+  transform: translateY(-5px) !important;
+}
+
+/* Media queries para ajustar el grid según el tamaño de pantalla */
+@media (max-width: 576px) {
+  .productos-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (min-width: 577px) and (max-width: 991px) {
+  .productos-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+@media (min-width: 992px) and (max-width: 1399px) {
+  .productos-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
+
+@media (min-width: 1400px) {
+  .productos-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+}
+
+/* Ajustes para mantener consistencia en las tarjetas */
+.card-img-top {
+  height: 200px !important;
+  object-fit: contain !important;
+  padding: 1rem !important;
+}
+
+.card-body {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  padding: 1rem !important;
+  height: 100% !important;
+}
+
+.card-title {
+  font-size: 1rem !important;
+  line-height: 1.4 !important;
+  margin-bottom: 0.5rem !important;
+  flex-grow: 1 !important;
+}
+
+.card-text {
+  margin-top: auto !important;
+}
+

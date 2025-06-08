@@ -14,7 +14,7 @@ const ProductosLista = ({ categoria = null }) => {
   const [productosVisibles, setProductosVisibles] = useState(20);
 
   useEffect(() => {
-    fetch('https://raw.githubusercontent.com/martuargento/Alebourg/refs/heads/main/public/productosalebourgactulizados.json')
+    fetch('https://raw.githubusercontent.com/martinalejandronuniezcursor2/alebourgprueba/refs/heads/main/public/productosalebourgactulizados.json')
       .then(res => res.json())
       .then(data => {
         let filtrados = data;
@@ -112,14 +112,12 @@ const ProductosLista = ({ categoria = null }) => {
         </div>
       ) : (
         <>
-          <div className="px-2">
-            <Row className="g-2 mx-0">
-              {productosAMostrar.map((producto) => (
-                <Col xs={12} md={6} lg={4} key={producto.id} className="mb-2">
-                  <ProductCard producto={producto} agregarAlCarrito={manejarAgregar} />
-                </Col>
-              ))}
-            </Row>
+          <div className="productos-grid px-2">
+            {productosAMostrar.map((producto) => (
+              <div key={producto.id} className="producto-item">
+                <ProductCard producto={producto} agregarAlCarrito={manejarAgregar} />
+              </div>
+            ))}
           </div>
           
           {hayMasProductos && (
