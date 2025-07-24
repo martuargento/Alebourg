@@ -21,46 +21,25 @@ app.post('/api/precios-utils', (req, res) => {
     return res.status(400).json({ error: 'Rangos inválidos' });
   }
 
-  // Filtrar duplicados antes de generar el código
-  let rangosFiltrados = [];
-  const limitesVistos = new Set();
-  let mayorIgual = null;
-  for (const r of rangos) {
-    if (r.mayorIgual) {
-      mayorIgual = r;
-    } else if (!limitesVistos.has(r.limite)) {
-      rangosFiltrados.push(r);
-      limitesVistos.add(r.limite);
-    }
-  }
-  // Eliminar cualquier < X cuyo límite sea igual al del mayorIgual
-  if (mayorIgual) {
-    rangosFiltrados = rangosFiltrados.filter(r => r.limite !== mayorIgual.limite);
-    rangosFiltrados.push(mayorIgual);
-  }
-
   // Generar la función ajustarPrecio con los nuevos rangos
   let ajustarPrecioStr = `// Función para parsear el precio desde el string del JSON\n`;
   ajustarPrecioStr += `export const parsearPrecio = (precioStr) => {\n  const precioLimpio = precioStr.trim().replace(/,/g, '');\n  return parseFloat(precioLimpio);\n};\n\n`;
   ajustarPrecioStr += `export const redondearA500 = (precio) => {\n  return Math.floor(precio / 500) * 500;\n};\n\n`;
-  ajustarPrecioStr += `export const ajustarPrecio = (precioOriginal, titulo = '') => {\n  const precio = parsearPrecio(precioOriginal);\n  let precioAjustado = precio;\n`;
+  ajustarPrecioStr += `export const ajustarPrecio = (precioOriginal, titulo = '', categoria = '') => {\n  const precio = parsearPrecio(precioOriginal);\n  let precioAjustado = precio;\n`;
   if (ajusteEspecial) {
     ajustarPrecioStr += `  // Ajuste especial\n  ${ajusteEspecial}\n`;
   }
   ajustarPrecioStr += `  // Aplicar ajustes según rangos\n`;
-  for (let i = 0; i < rangosFiltrados.length; i++) {
-    const r = rangosFiltrados[i];
-    if (r.mayorIgual) {
-      ajustarPrecioStr += `  else if (precio >= ${r.limite}) precioAjustado += ${r.monto};\n`;
-    } else if (i === 0) {
-      ajustarPrecioStr += `  if (precio < ${r.limite}) precioAjustado += ${r.monto};\n`;
-    } else {
-      ajustarPrecioStr += `  else if (precio < ${r.limite}) precioAjustado += ${r.monto};\n`;
-    }
+  for (const r of rangos) {
+    ajustarPrecioStr += `  if (precio < ${r.limite}) precioAjustado += ${r.monto};\n  else `;
   }
-  ajustarPrecioStr += `  return redondearA500(precioAjustado);\n};\n\n`;
+  ajustarPrecioStr += `if (precio >= ${rangos[rangos.length-1].limite}) precioAjustado += ${rangos[rangos.length-1].monto};\n`;
+  // Lógica especial para auriculares
+  ajustarPrecioStr += `\n  // Lógica especial para auriculares\n  if (categoria.trim().toLowerCase() === 'auriculares' && redondearA500(precioAjustado) < 4000) {\n    return 4000;\n  }\n`;
+  ajustarPrecioStr += `\n  return redondearA500(precioAjustado);\n};\n\n`;
   ajustarPrecioStr += `export const formatearPrecio = ${formatearPrecio || '(precio) => precio.toLocaleString(\'es-AR\')'};\n`;
 
+  const preciosUtilsPath = path.join(__dirname, 'src', 'utils', 'preciosUtils.js');
   fs.writeFile(preciosUtilsPath, ajustarPrecioStr, (err) => {
     if (err) {
       return res.status(500).json({ error: 'No se pudo escribir el archivo.' });

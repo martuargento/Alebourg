@@ -32,7 +32,7 @@ const ProductCard = ({ producto }) => {
   };
 
   // Calcular y formatear el precio ajustado para mostrar
-  const precioAjustado = formatearPrecio(ajustarPrecio(producto.precio, producto.titulo));
+  const precioAjustado = formatearPrecio(ajustarPrecio(producto.precio, producto.titulo, producto.categoria));
 
   const irADetalle = () => {
     navigate(`/producto/${producto.id}`);
