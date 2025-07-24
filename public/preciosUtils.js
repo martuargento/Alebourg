@@ -8,7 +8,7 @@ export const redondearA500 = (precio) => {
   return Math.floor(precio / 500) * 500;
 };
 
-export const ajustarPrecio = (precioOriginal, titulo = '') => {
+export const ajustarPrecio = (precioOriginal, titulo = '', categoria = '') => {
   const precio = parsearPrecio(precioOriginal);
   let precioAjustado = precio;
   // Ajuste especial
@@ -38,9 +38,16 @@ export const ajustarPrecio = (precioOriginal, titulo = '') => {
   else   if (precio < 50000) precioAjustado += 18000;
   else   if (precio < 60000) precioAjustado += 20000;
   else   if (precio < 70000) precioAjustado += 22000;
-  else   if (precio < 80000) precioAjustado += 25000;
-  else   if (precio < 100000) precioAjustado += 30000;
+  else   if (precio < 80000) precioAjustado += 30000;
+  else   if (precio < 100000) precioAjustado += 35000;
+  else   if (precio < 100000) precioAjustado += 35000;
   else if (precio >= 100000) precioAjustado += 35000;
+
+  // Lógica especial para auriculares
+  if (categoria.trim().toLowerCase() === 'auriculares' && redondearA500(precioAjustado) < 4000) {
+    return 4000;
+  }
+
   return redondearA500(precioAjustado);
 };
 

@@ -30,10 +30,17 @@ app.post('/api/precios-utils', (req, res) => {
     ajustarPrecioStr += `  // Ajuste especial\n  ${ajusteEspecial}\n`;
   }
   ajustarPrecioStr += `  // Aplicar ajustes según rangos\n`;
-  for (const r of rangos) {
-    ajustarPrecioStr += `  if (precio < ${r.limite}) precioAjustado += ${r.monto};\n  else `;
+  for (let i = 0; i < rangos.length; i++) {
+    const r = rangos[i];
+    if (i === 0) {
+      ajustarPrecioStr += `  if (precio < ${r.limite}) precioAjustado += ${r.monto};\n`;
+    } else if (i < rangos.length - 1) {
+      ajustarPrecioStr += `  else if (precio < ${r.limite}) precioAjustado += ${r.monto};\n`;
+    }
   }
-  ajustarPrecioStr += `if (precio >= ${rangos[rangos.length-1].limite}) precioAjustado += ${rangos[rangos.length-1].monto};\n`;
+  // Último rango (mayor o igual)
+  const last = rangos[rangos.length-1];
+  ajustarPrecioStr += `  else if (precio >= ${last.limite}) precioAjustado += ${last.monto};\n`;
   // Lógica especial para auriculares
   ajustarPrecioStr += `\n  // Lógica especial para auriculares\n  if (categoria.trim().toLowerCase() === 'auriculares' && redondearA500(precioAjustado) < 4000) {\n    return 4000;\n  }\n`;
   ajustarPrecioStr += `\n  return redondearA500(precioAjustado);\n};\n\n`;
@@ -46,6 +53,21 @@ app.post('/api/precios-utils', (req, res) => {
     }
     res.json({ ok: true });
   });
+});
+
+// Endpoint para obtener preciosUtils.js como texto plano
+app.get('/api/precios-utils', (req, res) => {
+  if (req.query.raw === '1') {
+    const preciosUtilsPath = path.join(__dirname, 'src', 'utils', 'preciosUtils.js');
+    fs.readFile(preciosUtilsPath, 'utf8', (err, data) => {
+      if (err) {
+        return res.status(500).send('No se pudo leer el archivo.');
+      }
+      res.type('text/plain').send(data);
+    });
+  } else {
+    res.status(400).json({ error: 'Parámetro raw=1 requerido' });
+  }
 });
 
 app.listen(PORT, () => {

@@ -63,13 +63,16 @@ const AdminPrecios = () => {
       navigate('/');
       return;
     }
-    fetch('/preciosUtils.js')
-      .then(res => res.text())
-      .then(codigo => {
-        setCodigo(codigo);
-        setRangos(obtenerRangosDesdeCodigo(codigo));
-        setAjusteEspecial(obtenerAjusteEspecial(codigo));
-      });
+    const fetchCodigo = () => {
+      fetch('http://localhost:3001/api/precios-utils?raw=1')
+        .then(res => res.text())
+        .then(codigo => {
+          setCodigo(codigo);
+          setRangos(obtenerRangosDesdeCodigo(codigo));
+          setAjusteEspecial(obtenerAjusteEspecial(codigo));
+        });
+    };
+    fetchCodigo();
   }, [navigate]);
 
   const actualizarRango = (idx, campo, valor) => {
@@ -103,6 +106,14 @@ const AdminPrecios = () => {
       });
       if (res.ok) {
         setToast({ mensaje: '¡Guardado con éxito!', tipo: 'success' });
+        // Recargar rangos después de guardar
+        fetch('http://localhost:3001/api/precios-utils?raw=1')
+          .then(res => res.text())
+          .then(codigo => {
+            setCodigo(codigo);
+            setRangos(obtenerRangosDesdeCodigo(codigo));
+            setAjusteEspecial(obtenerAjusteEspecial(codigo));
+          });
       } else {
         setToast({ mensaje: 'Error al guardar.', tipo: 'danger' });
       }
@@ -120,7 +131,7 @@ const AdminPrecios = () => {
         <p className={`text-center mb-4 ${darkMode ? 'text-secondary' : 'text-muted'}`} style={{ fontSize: '1.05rem' }}>Editá los rangos y montos de ajuste de precios. Los cambios impactan en toda la web.</p>
         <div className="d-flex flex-column gap-3">
           {rangos.map((r, idx) => (
-            <div key={idx} className={`rounded-4 px-3 py-2 d-flex flex-column flex-md-row align-items-center justify-content-between gap-2 border ${r.mayorIgual ? 'border-info' : ''}`} style={{ background: r.mayorIgual ? (darkMode ? '#1e293b' : '#e0f2fe') : (darkMode ? '#262b32' : '#fff'), borderColor: r.mayorIgual ? '#0ea5e9' : (darkMode ? '#555' : '#e5e7eb'), borderWidth: 2, borderRadius: 18, minHeight: 70, boxShadow: darkMode ? '0 2px 12px rgba(0,0,0,0.35)' : '0 2px 8px rgba(0,0,0,0.07)' }}>
+            <div key={idx} className={`rounded-4 px-3 py-2 d-flex flex-column flex-md-row align-items-center justify-content-between gap-2 border${r.mayorIgual ? ' border-info' : ''}`} style={{ background: r.mayorIgual ? (darkMode ? '#1e293b' : '#e0f2fe') : (darkMode ? '#262b32' : '#fff'), borderColor: r.mayorIgual ? '#0ea5e9' : (darkMode ? '#555' : '#e5e7eb'), borderWidth: 2, borderRadius: 18, minHeight: 70, boxShadow: darkMode ? '0 2px 12px rgba(0,0,0,0.35)' : '0 2px 8px rgba(0,0,0,0.07)', marginTop: r.mayorIgual ? 32 : 0 }}>
               <div className="d-flex flex-wrap align-items-center gap-2 flex-grow-1 justify-content-center justify-content-md-start">
                 <span className={`fw-bold ${darkMode ? 'text-white' : 'text-dark'}`}>{r.mayorIgual ? 'Si precio >=' : 'Si precio <'} </span>
                 <div className="input-group input-group-sm" style={{ width: 170, maxWidth: '100%' }}>
@@ -129,7 +140,7 @@ const AdminPrecios = () => {
                     onChange={e => !r.mayorIgual && actualizarRango(idx, 'limite', parseInt(e.target.value)||0)} disabled={!!r.mayorIgual} />
                   <button type="button" className={`btn ${darkMode ? 'btn-outline-light' : 'btn-outline-secondary'}`} title="Sumar 500" onClick={() => !r.mayorIgual && sumarRestar(idx, 'limite', 500)} disabled={!!r.mayorIgual}><FaPlus /></button>
                 </div>
-                {r.mayorIgual && <span className="badge bg-info text-dark ms-2">Rango abierto</span>}
+                {r.mayorIgual && null}
                 <span className={`mx-2 ${darkMode ? 'text-white' : 'text-dark'}`}>sumar</span>
                 <div className="input-group input-group-sm" style={{ width: 170, maxWidth: '100%' }}>
                   <button type="button" className={`btn ${darkMode ? 'btn-outline-info' : 'btn-outline-primary'}`} title="Restar 500" onClick={() => sumarRestar(idx, 'monto', -500)}><FaMinus /></button>
