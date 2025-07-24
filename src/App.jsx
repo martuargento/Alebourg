@@ -7,6 +7,7 @@ import Footer from './components/Footer';
 import Login from './components/Login';
 import ProductosPorCategoria from './components/ProductosPorCategoria'; // Nuevo componente
 import DetalleProducto from './components/DetalleProducto';
+import AdminPrecios from './components/AdminPrecios';
 import { ProveedorCarrito } from './context/CarritoContexto';
 import './App.css';
 
@@ -20,6 +21,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/categoria/:nombreCategoria" element={<ProductosPorCategoria />} />
         <Route path="/producto/:id" element={<DetalleProducto />} />
+        <Route path="/admin/precios" element={<AdminPrecios />} />
       </Routes>
       <Footer />
     </ProveedorCarrito>

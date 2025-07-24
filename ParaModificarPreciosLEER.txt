@@ -1,0 +1,25 @@
+para que funcione, hay que hacerlo de manera local. (no se puede en alebourg.netlify.app)
+
+entonces abrimos el proyecto en visual o cursor ai
+
+y ponemos en la terminal
+
+npm run dev 
+
+(de esta forma ya podemos ingresar a la pagina)
+
+ahora para poder modificar los precios hay que abrir otra terminal en visual o cursor ai
+
+y poner también este comando:
+
+node server-precios.js
+
+
+entonces ahí si ya estaríamos haciendo correr tanto el servidor local de front end
+como el servidor local de backend
+
+solo asi dejara modificar los precios
+
+
+después es solo cuestión de subirlo a GitHub con un push
+y ahí si ya impactara en alebourg.netlify.app de manera publica para mis clientes

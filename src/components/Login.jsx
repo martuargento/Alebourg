@@ -13,6 +13,7 @@ const Login = () => {
     if (usuario === 'admin' && password === '1234') {
       // Guardamos estado de login en localStorage
       localStorage.setItem('logueado', 'true');
+      localStorage.setItem('esAdmin', 'true');
       Swal.fire({
       title: '¡Éxito!',
       text: 'Has iniciado sesión correctamente',
@@ -21,8 +22,9 @@ const Login = () => {
       color: '#fff',
       confirmButtonColor: '#3085d6'
     });
-      navigate('/'); // redirigimos al home
+      navigate('/admin/precios'); // redirigimos a la página de admin precios
     } else {
+      localStorage.setItem('esAdmin', 'false');
       Swal.fire({
       title: 'Error',
       text: 'Usuario o contraseña incorrectos',

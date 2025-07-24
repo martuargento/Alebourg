@@ -192,6 +192,11 @@ const Header = () => {
                 </div>
               )}
             </li>
+            {localStorage.getItem('esAdmin') === 'true' && (
+              <li className="nav-item">
+                <Link className="nav-link" to="/admin/precios">Admin Precios</Link>
+              </li>
+            )}
           </ul>
 
           <div className="d-flex align-items-center gap-3">

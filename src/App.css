@@ -135,10 +135,11 @@ body {
   border: 1px solid #333 !important;
 }
 
-button {
+/* Eliminar la siguiente regla global para que los botones usen Bootstrap y no se vean rosas */
+/* button {
   background-color: #b04a78 !important;
   color: #ffffff !important;
-}
+} */
 
 
 
