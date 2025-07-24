@@ -47,6 +47,11 @@ const AdminPrecios = () => {
   const [darkMode, setDarkMode] = useState(false);
   const navigate = useNavigate();
 
+  // Protección extra: no mostrar nada si no es admin
+  if (typeof window !== 'undefined' && localStorage.getItem('esAdmin') !== 'true') {
+    return null;
+  }
+
   useEffect(() => {
     const theme = document.documentElement.getAttribute('data-theme');
     setDarkMode(theme === 'dark');

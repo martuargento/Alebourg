@@ -119,6 +119,7 @@ const Header = () => {
 
   const manejarLogout = () => {
     localStorage.removeItem('logueado');
+    localStorage.removeItem('esAdmin');
     navigate('/');
   };
 
@@ -427,6 +428,17 @@ const Header = () => {
                     </>
                   )}
                 </li>
+                {localStorage.getItem('esAdmin') === 'true' && (
+                  <li className="mobile-menu-item">
+                    <Link 
+                      to="/admin/precios" 
+                      className="mobile-menu-link"
+                      onClick={handleToggleMobileMenu}
+                    >
+                      Admin Precios
+                    </Link>
+                  </li>
+                )}
                 <li className="mobile-menu-item" style={{ marginTop: '1rem' }}>
                   <div className="d-flex justify-content-center">
                     <ThemeToggle />
