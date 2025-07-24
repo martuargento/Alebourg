@@ -20,11 +20,11 @@ export const ajustarPrecio = (precioOriginal, titulo = '', categoria = '') => {
   if (precio < 1500) precioAjustado += 1500;
   else if (precio < 2000) precioAjustado += 2500;
   else if (precio < 3000) precioAjustado += 3000;
-  else if (precio < 4000) precioAjustado += 3500;
-  else if (precio < 5000) precioAjustado += 4000;
-  else if (precio < 6000) precioAjustado += 4500;
+  else if (precio < 4000) precioAjustado += 4500;
+  else if (precio < 5000) precioAjustado += 4500;
+  else if (precio < 6000) precioAjustado += 5000;
   else if (precio < 7000) precioAjustado += 5000;
-  else if (precio < 8000) precioAjustado += 5000;
+  else if (precio < 8000) precioAjustado += 5500;
   else if (precio < 9000) precioAjustado += 5500;
   else if (precio < 10000) precioAjustado += 6000;
   else if (precio < 11000) precioAjustado += 6500;
