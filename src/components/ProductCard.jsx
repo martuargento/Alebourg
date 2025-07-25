@@ -28,26 +28,82 @@ const ProductCard = ({ producto }) => {
     fetch('http://localhost:3001/api/descuentos')
       .then(res => res.json())
       .then(reglasDescuento => {
-        const reglasCantidad = reglasDescuento.filter(r => r.tipo === 'cantidad').sort((a, b) => a.minCantidad - b.minCantidad);
-        if (reglasCantidad.length > 0) {
-          const cantidadTotal = carrito.reduce((acc, p) => acc + p.cantidad, 0) + 1; // +1 porque ya se agregó
-          let proximoDescuento = null;
-          for (let i = 0; i < reglasCantidad.length; i++) {
-            if (cantidadTotal < reglasCantidad[i].minCantidad) {
-              proximoDescuento = reglasCantidad[i];
-              break;
-            }
+        const reglasRango = reglasDescuento.filter(r => r.tipo === 'rango_precio');
+        const cantidadTotal = carrito.reduce((acc, p) => acc + p.cantidad, 0) + 1;
+        // Buscar el próximo escalón
+        const proximaRegla = reglasRango
+          .filter(r => r.minCantidad > cantidadTotal)
+          .sort((a, b) => a.minCantidad - b.minCantidad)[0];
+        const mejorRegla = reglasRango
+          .filter(r => cantidadTotal >= r.minCantidad)
+          .sort((a, b) => b.minCantidad - a.minCantidad)[0];
+        if (proximaRegla) {
+          const faltan = proximaRegla.minCantidad - cantidadTotal;
+          const porcentajes = proximaRegla.rangos.filter(r => r.esPorcentaje && r.descuento > 0 && r.descuento < 100).map(r => r.descuento);
+          const fijos = proximaRegla.rangos.filter(r => !r.esPorcentaje && r.descuento > 0).map(r => r.descuento);
+          let partes = [];
+          if (porcentajes.length > 0) {
+            const maxP = Math.max(...porcentajes);
+            partes.push(`hasta ${maxP}%`);
           }
-          if (proximoDescuento) {
-            const faltan = proximoDescuento.minCantidad - cantidadTotal;
-            setMensajeDescuento(`¡Agregá ${faltan} producto${faltan > 1 ? 's' : ''} más y obtené ${proximoDescuento.descuento}${proximoDescuento.esPorcentaje ? '% de descuento' : '$ de descuento'}!`);
-            setFadeOut(false);
-            setMostrarBarra(true);
-            setTimeout(() => setFadeOut(true), 7500); // Empieza a desvanecer a los 7.5s
-            setTimeout(() => setMostrarBarra(false), 8000); // Oculta a los 8s
+          if (fijos.length > 0) {
+            const maxF = Math.max(...fijos);
+            partes.push(`hasta $${maxF}`);
+          }
+          let textoDescuento = '';
+          if (partes.length === 2) {
+            textoDescuento = `${partes[0]} o ${partes[1]}`;
+          } else if (partes.length === 1) {
+            textoDescuento = partes[0];
+          }
+          if (textoDescuento) {
+            setMensajeDescuento(`¡Agregá ${faltan} producto${faltan > 1 ? 's' : ''} más y obtené descuentos de ${textoDescuento} según el valor de cada producto!`);
           } else {
-            setMostrarBarra(false);
+            setMensajeDescuento(`¡Agregá ${faltan} producto${faltan > 1 ? 's' : ''} más y obtené descuentos especiales según el valor de cada producto!`);
           }
+          setFadeOut(false);
+          setMostrarBarra(true);
+          setTimeout(() => setFadeOut(true), 7500);
+          setTimeout(() => setMostrarBarra(false), 8000);
+        } else if (mejorRegla) {
+          setMensajeDescuento('¡Ya tenés descuento por rango de precio aplicado en cada producto!');
+          setFadeOut(false);
+          setMostrarBarra(true);
+          setTimeout(() => setFadeOut(true), 3500);
+          setTimeout(() => {
+            setMostrarBarra(false);
+            // Mostrar el próximo escalón si existe
+            const proximaRegla = reglasRango
+              .filter(r => r.minCantidad > cantidadTotal)
+              .sort((a, b) => a.minCantidad - b.minCantidad)[0];
+            if (proximaRegla) {
+              const faltan = proximaRegla.minCantidad - cantidadTotal;
+              const porcentajes = proximaRegla.rangos.filter(r => r.esPorcentaje && r.descuento > 0 && r.descuento < 100).map(r => r.descuento);
+              const fijos = proximaRegla.rangos.filter(r => !r.esPorcentaje && r.descuento > 0).map(r => r.descuento);
+              let partes = [];
+              if (porcentajes.length > 0) {
+                const maxP = Math.max(...porcentajes);
+                partes.push(`hasta ${maxP}%`);
+              }
+              if (fijos.length > 0) {
+                const maxF = Math.max(...fijos);
+                partes.push(`hasta $${maxF}`);
+              }
+              let textoDescuento = '';
+              if (partes.length === 2) {
+                textoDescuento = `${partes[0]} o ${partes[1]}`;
+              } else if (partes.length === 1) {
+                textoDescuento = partes[0];
+              }
+              if (textoDescuento) {
+                setMensajeDescuento(`¡Agregá ${faltan} producto${faltan > 1 ? 's' : ''} más y obtené descuentos de ${textoDescuento} según el valor de cada producto!`);
+                setFadeOut(false);
+                setMostrarBarra(true);
+                setTimeout(() => setFadeOut(true), 7500);
+                setTimeout(() => setMostrarBarra(false), 8000);
+              }
+            }
+          }, 4000);
         } else {
           setMostrarBarra(false);
         }

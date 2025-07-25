@@ -1,16 +1,64 @@
 [
   {
-    "tipo": "cantidad",
+    "tipo": "rango_precio",
     "minCantidad": 2,
-    "descuento": 10,
-    "esPorcentaje": true,
-    "productoId": ""
+    "rangos": [
+      {
+        "min": 0,
+        "max": 10000,
+        "descuento": 10,
+        "esPorcentaje": true
+      },
+      {
+        "min": 10001,
+        "max": 30000,
+        "descuento": 10,
+        "esPorcentaje": true
+      },
+      {
+        "min": 30001,
+        "max": 50000,
+        "descuento": 5,
+        "esPorcentaje": true
+      },
+      {
+        "min": 50001,
+        "max": null,
+        "descuento": 20,
+        "esPorcentaje": false,
+        "sobreGanancia": true
+      }
+    ]
   },
   {
-    "tipo": "cantidad",
+    "tipo": "rango_precio",
     "minCantidad": 5,
-    "descuento": 20,
-    "esPorcentaje": true,
-    "productoId": ""
+    "rangos": [
+      {
+        "min": 0,
+        "max": 10000,
+        "descuento": 15,
+        "esPorcentaje": true
+      },
+      {
+        "min": 10001,
+        "max": 30000,
+        "descuento": 15,
+        "esPorcentaje": true
+      },
+      {
+        "min": 30001,
+        "max": 50000,
+        "descuento": 10,
+        "esPorcentaje": true
+      },
+      {
+        "min": 50001,
+        "max": null,
+        "descuento": 20,
+        "esPorcentaje": false,
+        "sobreGanancia": true
+      }
+    ]
   }
 ]

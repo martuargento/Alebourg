@@ -186,6 +186,85 @@ const AdminPrecios = () => {
     setNuevoDescuento({ tipo: 'cantidad', minCantidad: 2, descuento: 0, esPorcentaje: true, productoId: '' });
   };
 
+  // --- DESCUENTOS POR RANGO DE PRECIO ---
+  const [rangoMinCantidad, setRangoMinCantidad] = useState(3);
+  const [rangosPrecio, setRangosPrecio] = useState([
+    { min: 0, max: 10000, descuento: 20, esPorcentaje: true },
+    { min: 10001, max: 30000, descuento: 10, esPorcentaje: true },
+    { min: 30001, max: null, descuento: 5, esPorcentaje: true }
+  ]);
+
+  // Sincronizar con descuentos.json si existe una regla de tipo rango_precio
+  useEffect(() => {
+    const reglaRango = descuentos.find(r => r.tipo === 'rango_precio');
+    if (reglaRango) {
+      setRangoMinCantidad(reglaRango.minCantidad);
+      setRangosPrecio(reglaRango.rangos);
+    }
+  }, [descuentos]);
+
+  const handleAgregarRango = () => {
+    setRangosPrecio([...rangosPrecio, { min: 0, max: null, descuento: 0, esPorcentaje: true }]);
+  };
+  const handleEliminarRango = (idx) => {
+    setRangosPrecio(rangosPrecio.filter((_, i) => i !== idx));
+  };
+  const handleGuardarRangos = () => {
+    const nuevaRegla = {
+      tipo: 'rango_precio',
+      minCantidad: rangoMinCantidad,
+      rangos: rangosPrecio.map(r => ({ ...r, min: Number(r.min), max: r.max === '' ? null : (r.max !== null ? Number(r.max) : null), descuento: Number(r.descuento), esPorcentaje: !!r.esPorcentaje }))
+    };
+    guardarDescuentos([nuevaRegla]);
+  };
+
+  // --- DESCUENTOS POR RANGO DE PRECIO MULTIPLES ---
+  const [reglasRango, setReglasRango] = useState([]);
+  useEffect(() => {
+    setReglasRango(descuentos.filter(r => r.tipo === 'rango_precio'));
+  }, [descuentos]);
+
+  const handleAgregarReglaRango = () => {
+    setReglasRango([...reglasRango, {
+      tipo: 'rango_precio',
+      minCantidad: 2,
+      rangos: [
+        { min: 0, max: 10000, descuento: 10, esPorcentaje: true },
+        { min: 10001, max: null, descuento: 5, esPorcentaje: true }
+      ]
+    }]);
+  };
+  const handleEliminarReglaRango = (idx) => {
+    setReglasRango(reglasRango.filter((_, i) => i !== idx));
+  };
+  const handleGuardarTodasReglasRango = () => {
+    guardarDescuentos([...descuentos.filter(r => r.tipo !== 'rango_precio'), ...reglasRango]);
+  };
+
+  // --- DESCUENTOS POR GANANCIA ACUMULADA ---
+  const [reglasGanancia, setReglasGanancia] = useState([]);
+  useEffect(() => {
+    setReglasGanancia(descuentos.filter(r => r.tipo === 'ganancia'));
+  }, [descuentos]);
+
+  const handleAgregarReglaGanancia = () => {
+    setReglasGanancia([...reglasGanancia, {
+      tipo: 'ganancia',
+      minCantidad: 2,
+      porcentaje: 10
+    }]);
+  };
+  const handleEliminarReglaGanancia = (idx) => {
+    setReglasGanancia(reglasGanancia.filter((_, i) => i !== idx));
+  };
+  const handleGuardarTodasReglasGanancia = () => {
+    guardarDescuentos([
+      ...descuentos.filter(r => r.tipo !== 'ganancia'),
+      ...reglasGanancia,
+      ...descuentos.filter(r => r.tipo === 'rango_precio') // mantener reglas de rango
+    ]);
+  };
+
   return (
     <div className={`container py-5 d-flex flex-column align-items-center ${darkMode ? 'bg-dark' : ''}`} style={{ minHeight: '100vh', background: darkMode ? 'var(--background-color, #181a1b)' : '#f5f7fa' }}>
       {toast && <Toast mensaje={toast.mensaje} tipo={toast.tipo} onClose={() => setToast(null)} dark={darkMode} />}
@@ -283,6 +362,61 @@ const AdminPrecios = () => {
           </ul>
         </div>
         {/* FIN SECCIÓN DESCUENTOS */}
+        {/* SECCIÓN DESCUENTOS POR RANGO DE PRECIO MULTIPLES */}
+        <div className="mt-5 mb-4 p-4 rounded-4" style={{ background: darkMode ? '#23272f' : '#f8fafc', border: '2px solid #0ea5e9' }}>
+          <h4 className={`mb-3 fw-bold ${darkMode ? 'text-info' : 'text-primary'}`}>Descuentos por rango de precio (escalonados por cantidad)</h4>
+          {reglasRango.map((regla, idx) => (
+            <div key={idx} className="mb-4 p-3 border rounded-3" style={{ borderColor: '#0ea5e9' }}>
+              <div className="d-flex align-items-center mb-2 gap-2">
+                <label className="form-label mb-0">Cantidad mínima de productos:</label>
+                <input type="number" className="form-control" style={{ width: 90 }} value={regla.minCantidad} min={1} onChange={e => setReglasRango(reglasRango.map((rr, i) => i === idx ? { ...rr, minCantidad: Number(e.target.value) } : rr))} />
+                <button className="btn btn-sm btn-outline-danger ms-auto" onClick={() => handleEliminarReglaRango(idx)}>Eliminar tabla</button>
+              </div>
+              <h6 className="mb-2">Rangos de precio y descuento:</h6>
+              <ul className="list-group mb-2">
+                {regla.rangos.map((r, ridx) => (
+                  <li key={ridx} className="list-group-item d-flex align-items-center gap-2">
+                    <span>Desde $</span>
+                    <input type="number" className="form-control" style={{ width: 90 }} value={r.min} min={0} onChange={e => setReglasRango(reglasRango.map((rr, i) => i === idx ? { ...rr, rangos: rr.rangos.map((rrr, j) => j === ridx ? { ...rrr, min: Number(e.target.value) } : rrr) } : rr))} />
+                    <span>hasta</span>
+                    <input type="number" className="form-control" style={{ width: 90 }} value={r.max === null ? '' : r.max} min={0} onChange={e => setReglasRango(reglasRango.map((rr, i) => i === idx ? { ...rr, rangos: rr.rangos.map((rrr, j) => j === ridx ? { ...rrr, max: e.target.value === '' ? null : Number(e.target.value) } : rrr) } : rr))} placeholder="Sin límite" />
+                    <span>descuento:</span>
+                    <input type="number" className="form-control" style={{ width: 70 }} value={r.descuento} min={0} onChange={e => setReglasRango(reglasRango.map((rr, i) => i === idx ? { ...rr, rangos: rr.rangos.map((rrr, j) => j === ridx ? { ...rrr, descuento: Number(e.target.value) } : rrr) } : rr))} />
+                    <select className="form-select" style={{ width: 130 }} value={r.esPorcentaje ? 'porcentaje' : (r.sobreGanancia ? 'ganancia' : 'fijo')} onChange={e => setReglasRango(reglasRango.map((rr, i) => i === idx ? { ...rr, rangos: rr.rangos.map((rrr, j) => j === ridx ? { ...rrr, esPorcentaje: e.target.value === 'porcentaje', sobreGanancia: e.target.value === 'ganancia' } : rrr) } : rr))}>
+                      <option value="porcentaje">% (Porcentaje)</option>
+                      <option value="fijo">$ fijo</option>
+                      <option value="ganancia">% sobre ganancia</option>
+                    </select>
+                    <button className="btn btn-sm btn-outline-danger ms-auto" onClick={() => setReglasRango(reglasRango.map((rr, i) => i === idx ? { ...rr, rangos: rr.rangos.filter((_, j) => j !== ridx) } : rr))}>Eliminar rango</button>
+                  </li>
+                ))}
+              </ul>
+              <button className="btn btn-success mb-2" onClick={() => setReglasRango(reglasRango.map((rr, i) => i === idx ? { ...rr, rangos: [...rr.rangos, { min: 0, max: null, descuento: 0, esPorcentaje: true }] } : rr))}>Agregar rango</button>
+            </div>
+          ))}
+          <button className="btn btn-primary mb-3" onClick={handleAgregarReglaRango}>Agregar tabla de descuentos por cantidad</button>
+          <button className="btn btn-info ms-2" onClick={handleGuardarTodasReglasRango}>Guardar todos los descuentos por rango</button>
+        </div>
+        {/* FIN SECCIÓN DESCUENTOS POR RANGO DE PRECIO MULTIPLES */}
+        {/* SECCIÓN DESCUENTOS POR GANANCIA ACUMULADA */}
+        <div className="mt-5 mb-4 p-4 rounded-4" style={{ background: darkMode ? '#23272f' : '#f8fafc', border: '2px solid #0ea5e9' }}>
+          <h4 className={`mb-3 fw-bold ${darkMode ? 'text-info' : 'text-primary'}`}>Descuentos por porcentaje sobre la ganancia acumulada</h4>
+          {reglasGanancia.map((regla, idx) => (
+            <div key={idx} className="mb-3 p-3 border rounded-3" style={{ borderColor: '#0ea5e9' }}>
+              <div className="d-flex align-items-center gap-2">
+                <label className="form-label mb-0">Cantidad mínima de productos:</label>
+                <input type="number" className="form-control" style={{ width: 90 }} value={regla.minCantidad} min={1} onChange={e => setReglasGanancia(reglasGanancia.map((rr, i) => i === idx ? { ...rr, minCantidad: Number(e.target.value) } : rr))} />
+                <label className="form-label mb-0 ms-3">% de descuento sobre la ganancia:</label>
+                <input type="number" className="form-control" style={{ width: 90 }} value={regla.porcentaje} min={1} max={100} onChange={e => setReglasGanancia(reglasGanancia.map((rr, i) => i === idx ? { ...rr, porcentaje: Number(e.target.value) } : rr))} />
+                <span>%</span>
+                <button className="btn btn-sm btn-outline-danger ms-auto" onClick={() => handleEliminarReglaGanancia(idx)}>Eliminar</button>
+              </div>
+            </div>
+          ))}
+          <button className="btn btn-primary mb-3" onClick={handleAgregarReglaGanancia}>Agregar descuento por ganancia</button>
+          <button className="btn btn-info ms-2" onClick={handleGuardarTodasReglasGanancia}>Guardar descuentos por ganancia</button>
+        </div>
+        {/* FIN SECCIÓN DESCUENTOS POR GANANCIA ACUMULADA */}
         <div className="d-flex flex-column align-items-center mt-4 gap-2">
           <button className="btn btn-primary rounded-pill px-5 py-2 fs-5" style={{ minWidth: 220 }} onClick={guardarCambios} disabled={guardando}>{guardando ? 'Guardando...' : 'Guardar cambios'}</button>
         </div>
