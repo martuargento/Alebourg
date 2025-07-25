@@ -128,6 +128,64 @@ const AdminPrecios = () => {
     setGuardando(false);
   };
 
+  // --- DESCUENTOS ---
+  const [descuentos, setDescuentos] = useState([]);
+  const [editandoDescuento, setEditandoDescuento] = useState(null);
+  const [nuevoDescuento, setNuevoDescuento] = useState({ tipo: 'cantidad', minCantidad: 2, descuento: 0, esPorcentaje: true, productoId: '' });
+  const [guardandoDescuentos, setGuardandoDescuentos] = useState(false);
+
+  // Cargar reglas de descuento al montar
+  useEffect(() => {
+    fetch('http://localhost:3001/api/descuentos')
+      .then(res => res.json())
+      .then(setDescuentos)
+      .catch(() => setDescuentos([]));
+  }, []);
+
+  const guardarDescuentos = async (reglas) => {
+    setGuardandoDescuentos(true);
+    try {
+      const res = await fetch('http://localhost:3001/api/descuentos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(reglas)
+      });
+      if (res.ok) {
+        setDescuentos(reglas);
+        setToast({ mensaje: 'Descuentos guardados', tipo: 'success' });
+      } else {
+        setToast({ mensaje: 'Error al guardar descuentos', tipo: 'danger' });
+      }
+    } catch (e) {
+      setToast({ mensaje: 'Error de conexión al guardar descuentos', tipo: 'danger' });
+    }
+    setGuardandoDescuentos(false);
+  };
+
+  const handleAgregarDescuento = () => {
+    let regla = { ...nuevoDescuento };
+    if (regla.tipo === 'producto') regla.productoId = parseInt(regla.productoId);
+    setDescuentos([...descuentos, regla]);
+    setNuevoDescuento({ tipo: 'cantidad', minCantidad: 2, descuento: 0, esPorcentaje: true, productoId: '' });
+  };
+
+  const handleEliminarDescuento = (idx) => {
+    setDescuentos(descuentos.filter((_, i) => i !== idx));
+  };
+
+  const handleEditarDescuento = (idx) => {
+    setEditandoDescuento(idx);
+    setNuevoDescuento({ ...descuentos[idx] });
+  };
+
+  const handleGuardarEdicion = () => {
+    let regla = { ...nuevoDescuento };
+    if (regla.tipo === 'producto') regla.productoId = parseInt(regla.productoId);
+    setDescuentos(descuentos.map((r, i) => i === editandoDescuento ? regla : r));
+    setEditandoDescuento(null);
+    setNuevoDescuento({ tipo: 'cantidad', minCantidad: 2, descuento: 0, esPorcentaje: true, productoId: '' });
+  };
+
   return (
     <div className={`container py-5 d-flex flex-column align-items-center ${darkMode ? 'bg-dark' : ''}`} style={{ minHeight: '100vh', background: darkMode ? 'var(--background-color, #181a1b)' : '#f5f7fa' }}>
       {toast && <Toast mensaje={toast.mensaje} tipo={toast.tipo} onClose={() => setToast(null)} dark={darkMode} />}
@@ -164,6 +222,67 @@ const AdminPrecios = () => {
           <textarea className={`form-control ${darkMode ? 'bg-dark text-light border-secondary' : ''}`} rows={3} value={ajusteEspecial}
             onChange={e => setAjusteEspecial(e.target.value)} style={{ borderRadius: 12 }} />
         </div>
+        {/* SECCIÓN DESCUENTOS */}
+        <div className="mt-5 mb-4 p-4 rounded-4" style={{ background: darkMode ? '#23272f' : '#f8fafc', border: '2px solid #0ea5e9' }}>
+          <h4 className={`mb-3 fw-bold ${darkMode ? 'text-info' : 'text-primary'}`}>Descuentos configurables</h4>
+          <div className="mb-3">
+            <label className="form-label">Tipo de descuento:</label>
+            <select className="form-select" value={nuevoDescuento.tipo} onChange={e => setNuevoDescuento(nd => ({ ...nd, tipo: e.target.value }))}>
+              <option value="cantidad">Por cantidad total</option>
+              <option value="producto">Por producto específico</option>
+            </select>
+          </div>
+          {nuevoDescuento.tipo === 'producto' && (
+            <div className="mb-3">
+              <label className="form-label">ID del producto:</label>
+              <input type="number" className="form-control" value={nuevoDescuento.productoId} onChange={e => setNuevoDescuento(nd => ({ ...nd, productoId: e.target.value }))} />
+            </div>
+          )}
+          <div className="mb-3">
+            <label className="form-label">Cantidad mínima:</label>
+            <input type="number" className="form-control" value={nuevoDescuento.minCantidad} min={1} onChange={e => setNuevoDescuento(nd => ({ ...nd, minCantidad: parseInt(e.target.value) }))} />
+          </div>
+          <div className="mb-3">
+            <label className="form-label">Descuento:</label>
+            <input type="number" className="form-control" value={nuevoDescuento.descuento} min={0} onChange={e => setNuevoDescuento(nd => ({ ...nd, descuento: parseFloat(e.target.value) }))} />
+          </div>
+          <div className="mb-3">
+            <label className="form-label">Tipo de descuento:</label>
+            <select className="form-select" value={nuevoDescuento.esPorcentaje ? 'porcentaje' : 'fijo'} onChange={e => setNuevoDescuento(nd => ({ ...nd, esPorcentaje: e.target.value === 'porcentaje' }))}>
+              <option value="porcentaje">Porcentaje (%)</option>
+              <option value="fijo">Monto fijo ($)</option>
+            </select>
+          </div>
+          <div className="mb-3 d-flex gap-2">
+            {editandoDescuento === null ? (
+              <button className="btn btn-success" onClick={handleAgregarDescuento}>Agregar descuento</button>
+            ) : (
+              <>
+                <button className="btn btn-primary" onClick={handleGuardarEdicion}>Guardar edición</button>
+                <button className="btn btn-secondary" onClick={() => { setEditandoDescuento(null); setNuevoDescuento({ tipo: 'cantidad', minCantidad: 2, descuento: 0, esPorcentaje: true, productoId: '' }); }}>Cancelar</button>
+              </>
+            )}
+            <button className="btn btn-info ms-auto" disabled={guardandoDescuentos} onClick={() => guardarDescuentos(descuentos)}>
+              {guardandoDescuentos ? 'Guardando...' : 'Guardar todos los descuentos'}
+            </button>
+          </div>
+          <hr />
+          <h5 className="mb-3">Reglas configuradas:</h5>
+          <ul className="list-group">
+            {descuentos.length === 0 && <li className="list-group-item">No hay reglas de descuento configuradas.</li>}
+            {descuentos.map((r, idx) => (
+              <li key={idx} className="list-group-item d-flex align-items-center gap-2">
+                <span className="badge bg-primary">{r.tipo === 'cantidad' ? 'Por cantidad' : 'Por producto'}</span>
+                {r.tipo === 'producto' && <span>ID: {r.productoId}</span>}
+                <span>Cant. mínima: {r.minCantidad}</span>
+                <span>Descuento: {r.descuento} {r.esPorcentaje ? '%' : '$'}</span>
+                <button className="btn btn-sm btn-outline-primary ms-auto" onClick={() => handleEditarDescuento(idx)}>Editar</button>
+                <button className="btn btn-sm btn-outline-danger" onClick={() => handleEliminarDescuento(idx)}>Eliminar</button>
+              </li>
+            ))}
+          </ul>
+        </div>
+        {/* FIN SECCIÓN DESCUENTOS */}
         <div className="d-flex flex-column align-items-center mt-4 gap-2">
           <button className="btn btn-primary rounded-pill px-5 py-2 fs-5" style={{ minWidth: 220 }} onClick={guardarCambios} disabled={guardando}>{guardando ? 'Guardando...' : 'Guardar cambios'}</button>
         </div>

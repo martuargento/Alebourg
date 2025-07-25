@@ -1,0 +1,9 @@
+[
+  {
+    "tipo": "cantidad",
+    "minCantidad": 2,
+    "descuento": 10,
+    "esPorcentaje": true,
+    "productoId": ""
+  }
+]

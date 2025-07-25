@@ -70,6 +70,34 @@ app.get('/api/precios-utils', (req, res) => {
   }
 });
 
+// --- DESCUENTOS ---
+const descuentosPath = path.join(__dirname, 'src', 'utils', 'descuentos.json');
+
+// Obtener reglas de descuento
+app.get('/api/descuentos', (req, res) => {
+  fs.readFile(descuentosPath, 'utf8', (err, data) => {
+    if (err) {
+      if (err.code === 'ENOENT') return res.json([]); // Si no existe, devolver vacío
+      return res.status(500).json({ error: 'No se pudo leer descuentos.' });
+    }
+    try {
+      res.json(JSON.parse(data));
+    } catch (e) {
+      res.status(500).json({ error: 'Descuentos corruptos.' });
+    }
+  });
+});
+
+// Guardar reglas de descuento
+app.post('/api/descuentos', (req, res) => {
+  const reglas = req.body;
+  if (!Array.isArray(reglas)) return res.status(400).json({ error: 'Formato inválido' });
+  fs.writeFile(descuentosPath, JSON.stringify(reglas, null, 2), (err) => {
+    if (err) return res.status(500).json({ error: 'No se pudo guardar descuentos.' });
+    res.json({ ok: true });
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`Servidor de precios corriendo en http://localhost:${PORT}`);
 }); 

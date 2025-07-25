@@ -40,7 +40,6 @@ export const ajustarPrecio = (precioOriginal, titulo = '', categoria = '') => {
   else if (precio < 70000) precioAjustado += 22000;
   else if (precio < 80000) precioAjustado += 25000;
   else if (precio < 100000) precioAjustado += 30000;
-  
   else if (precio >= 100001) precioAjustado += 35000;
 
   // Lógica especial para auriculares
