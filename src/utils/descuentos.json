@@ -5,5 +5,12 @@
     "descuento": 10,
     "esPorcentaje": true,
     "productoId": ""
+  },
+  {
+    "tipo": "cantidad",
+    "minCantidad": 5,
+    "descuento": 20,
+    "esPorcentaje": true,
+    "productoId": ""
   }
 ]
