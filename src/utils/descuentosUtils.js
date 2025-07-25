@@ -2,17 +2,38 @@ import { ajustarPrecio, parsearPrecio } from './preciosUtils';
 
 export const calcularDescuento = (carrito, reglas) => {
   let descuentoTotal = 0;
-  // Buscar la mejor regla de rango_precio según la cantidad de productos
-  const cantidadTotal = carrito.reduce((acc, p) => acc + p.cantidad, 0);
-  const reglasRango = reglas.filter(r => r.tipo === 'rango_precio');
-  // Ordenar de mayor a menor minCantidad y tomar la mejor que cumpla
-  const mejorRegla = reglasRango
-    .filter(r => cantidadTotal >= r.minCantidad)
-    .sort((a, b) => b.minCantidad - a.minCantidad)[0];
-  if (mejorRegla) {
-    carrito.forEach(producto => {
-      const precioAjustado = ajustarPrecio(producto.precio, producto.titulo, producto.categoria);
-      const precioBase = parsearPrecio(producto.precio);
+  
+  // Calcular descuento individual por producto
+  carrito.forEach(producto => {
+    const precioAjustado = ajustarPrecio(producto.precio, producto.titulo, producto.categoria);
+    const precioBase = parsearPrecio(producto.precio);
+    
+    // Buscar reglas de descuento por rango de precio
+    const reglasRango = reglas.filter(r => r.tipo === 'rango_precio');
+    
+    // Calcular cuántos productos en el carrito están en el mismo rango de precio
+    const productosEnMismoRango = carrito.filter(p => {
+      const precioP = ajustarPrecio(p.precio, p.titulo, p.categoria);
+      
+      // Buscar si ambos productos están en el mismo rango
+      for (const regla of reglasRango) {
+        const rangoP = regla.rangos.find(r => precioP >= r.min && (r.max === null || precioP <= r.max));
+        const rangoActual = regla.rangos.find(r => precioAjustado >= r.min && (r.max === null || precioAjustado <= r.max));
+        
+        if (rangoP && rangoActual && rangoP === rangoActual) {
+          return true;
+        }
+      }
+      return false;
+    });
+    
+    const cantidadEnMismoRango = productosEnMismoRango.reduce((acc, p) => acc + p.cantidad, 0);
+    
+    const mejorRegla = reglasRango
+      .filter(r => cantidadEnMismoRango >= r.minCantidad)
+      .sort((a, b) => b.minCantidad - a.minCantidad)[0];
+      
+    if (mejorRegla) {
       const rango = mejorRegla.rangos.find(r => precioAjustado >= r.min && (r.max === null || precioAjustado <= r.max));
       if (rango) {
         if (rango.esPorcentaje) {
@@ -24,21 +45,19 @@ export const calcularDescuento = (carrito, reglas) => {
           descuentoTotal += rango.descuento * producto.cantidad;
         }
       }
-    });
-  }
-  // Descuento sobre ganancia acumulada (regla global, si existe)
-  const reglasGanancia = reglas.filter(r => r.tipo === 'ganancia');
-  const mejorGanancia = reglasGanancia
-    .filter(r => cantidadTotal >= r.minCantidad)
-    .sort((a, b) => b.minCantidad - a.minCantidad)[0];
-  if (mejorGanancia) {
-    let gananciaTotal = 0;
-    carrito.forEach(producto => {
-      const precioAjustado = ajustarPrecio(producto.precio, producto.titulo, producto.categoria);
-      const precioBase = parsearPrecio(producto.precio);
-      gananciaTotal += (precioAjustado - precioBase) * producto.cantidad;
-    });
-    descuentoTotal += gananciaTotal * (mejorGanancia.porcentaje / 100);
-  }
+    }
+    
+    // Buscar reglas de descuento por ganancia
+    const reglasGanancia = reglas.filter(r => r.tipo === 'ganancia');
+    const mejorGanancia = reglasGanancia
+      .filter(r => cantidadEnMismoRango >= r.minCantidad)
+      .sort((a, b) => b.minCantidad - a.minCantidad)[0];
+      
+    if (mejorGanancia) {
+      const ganancia = (precioAjustado - precioBase) * producto.cantidad;
+      descuentoTotal += ganancia * (mejorGanancia.porcentaje / 100);
+    }
+  });
+  
   return Math.floor(descuentoTotal);
 }; 

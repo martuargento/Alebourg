@@ -4,6 +4,8 @@ import { Container, Row, Col, Button } from 'react-bootstrap';
 import { ajustarPrecio, formatearPrecio, parsearPrecio } from '../utils/preciosUtils';
 import { calcularDescuento } from '../utils/descuentosUtils';
 import { FaTrash } from 'react-icons/fa';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 const VerPedido = () => {
   const { 
@@ -50,35 +52,68 @@ const VerPedido = () => {
   let mensajeDescuento = '';
   const reglasRango = reglasDescuento.filter(r => r.tipo === 'rango_precio');
   const cantidadTotal = carrito.reduce((acc, p) => acc + p.cantidad, 0);
-  // Buscar el próximo escalón
+  
+  // Buscar el próximo escalón (ahora basado en cantidad total para el incentivo)
   const proximaRegla = reglasRango
     .filter(r => r.minCantidad > cantidadTotal)
     .sort((a, b) => a.minCantidad - b.minCantidad)[0];
   const mejorRegla = reglasRango
     .filter(r => cantidadTotal >= r.minCantidad)
     .sort((a, b) => b.minCantidad - a.minCantidad)[0];
+    
   if (proximaRegla) {
     const faltan = proximaRegla.minCantidad - cantidadTotal;
-    const porcentajes = proximaRegla.rangos.filter(r => r.esPorcentaje && r.descuento > 0).map(r => r.descuento);
-    const fijos = proximaRegla.rangos.filter(r => !r.esPorcentaje && r.descuento > 0).map(r => r.descuento);
-    let partes = [];
-    if (porcentajes.length > 0) {
+    
+    // Analizar los rangos para crear un mensaje más específico
+    const rangosConDescuento = proximaRegla.rangos.filter(r => r.descuento > 0);
+    const rangosPorcentaje = rangosConDescuento.filter(r => r.esPorcentaje);
+    const rangosGanancia = rangosConDescuento.filter(r => r.sobreGanancia);
+    const rangosFijos = rangosConDescuento.filter(r => !r.esPorcentaje && !r.sobreGanancia);
+    
+    let mensajePartes = [];
+    
+    if (rangosPorcentaje.length > 0) {
+      const porcentajes = rangosPorcentaje.map(r => r.descuento);
       const minP = Math.min(...porcentajes);
       const maxP = Math.max(...porcentajes);
-      partes.push(minP === maxP ? `${maxP}%` : `entre ${minP}% y ${maxP}%`);
+      
+      if (minP === maxP) {
+        mensajePartes.push(`hasta ${maxP}% de descuento`);
+      } else {
+        mensajePartes.push(`descuentos del ${minP}% al ${maxP}%`);
+      }
     }
-    if (fijos.length > 0) {
-      const minF = Math.min(...fijos);
-      const maxF = Math.max(...fijos);
-      partes.push(minF === maxF ? `$${minF}` : `entre $${minF} y $${maxF}`);
+    
+    // NO mostrar descuentos sobre ganancia al cliente
+    // if (rangosGanancia.length > 0) {
+    //   const porcentajesGanancia = rangosGanancia.map(r => r.descuento);
+    //   const maxG = Math.max(...porcentajesGanancia);
+    //   mensajePartes.push(`hasta ${maxG}% de descuento sobre ganancia`);
+    // }
+    
+    if (rangosFijos.length > 0) {
+      const montos = rangosFijos.map(r => r.descuento);
+      const maxM = Math.max(...montos);
+      mensajePartes.push(`hasta $${maxM} de descuento fijo`);
     }
-    if (partes.length > 0) {
-      mensajeDescuento = `¡Agregá ${faltan} producto${faltan > 1 ? 's' : ''} más y obtené descuentos ${partes.join(' y ')} según el valor de cada producto!`;
+    
+    if (mensajePartes.length > 0) {
+      const mensajeFinal = mensajePartes.join(' y ');
+      mensajeDescuento = `🎉 ¡Solo te faltan ${faltan} producto${faltan > 1 ? 's' : ''} para desbloquear ${mensajeFinal}!`;
     } else {
-      mensajeDescuento = `¡Agregá ${faltan} producto${faltan > 1 ? 's' : ''} más y obtené descuentos especiales según el valor de cada producto!`;
+      mensajeDescuento = `🎉 ¡Agregá ${faltan} producto${faltan > 1 ? 's' : ''} más y obtené descuentos especiales!`;
     }
   } else if (mejorRegla) {
-    mensajeDescuento = `¡Ya tenés descuento por rango de precio aplicado en cada producto!`;
+    // Mensaje cuando ya tiene descuento aplicado
+    const rangosActivos = mejorRegla.rangos.filter(r => r.descuento > 0);
+    const porcentajes = rangosActivos.filter(r => r.esPorcentaje).map(r => r.descuento);
+    const maxPorcentaje = porcentajes.length > 0 ? Math.max(...porcentajes) : 0;
+    
+    if (maxPorcentaje > 0) {
+      mensajeDescuento = `✅ ¡Excelente! Ya tenés descuentos de hasta ${maxPorcentaje}% aplicados en tu carrito`;
+    } else {
+      mensajeDescuento = `✅ ¡Perfecto! Ya tenés descuentos especiales aplicados en tu carrito`;
+    }
   }
 
   // Función para enviar pedido por WhatsApp
@@ -89,10 +124,84 @@ const VerPedido = () => {
     carrito.forEach(producto => {
       const precioUnitario = ajustarPrecio(producto.precio, producto.titulo, producto.categoria);
       const subtotal = precioUnitario * producto.cantidad;
-      mensaje += `- ${producto.titulo}: ${producto.cantidad} x $${formatearPrecio(precioUnitario)} = $${formatearPrecio(subtotal)}\n`;
+      
+      // Calcular el descuento de este producto específico
+      let descuentoProducto = 0;
+      let porcentajeProducto = null;
+      
+      // Buscar reglas de descuento por rango de precio
+      const reglasRango = reglasDescuento.filter(r => r.tipo === 'rango_precio');
+      
+      // Calcular cuántos productos en el carrito están en el mismo rango de precio
+      const productosEnMismoRango = carrito.filter(p => {
+        const precioP = ajustarPrecio(p.precio, p.titulo, p.categoria);
+        const precioActual = ajustarPrecio(producto.precio, producto.titulo, producto.categoria);
+        
+        // Buscar si ambos productos están en el mismo rango
+        for (const regla of reglasRango) {
+          const rangoP = regla.rangos.find(r => precioP >= r.min && (r.max === null || precioP <= r.max));
+          const rangoActual = regla.rangos.find(r => precioActual >= r.min && (r.max === null || precioActual <= r.max));
+          
+          if (rangoP && rangoActual && rangoP === rangoActual) {
+            return true;
+          }
+        }
+        return false;
+      });
+      
+      const cantidadEnMismoRango = productosEnMismoRango.reduce((acc, p) => acc + p.cantidad, 0);
+      
+      const mejorReglaRango = reglasRango
+        .filter(r => cantidadEnMismoRango >= r.minCantidad)
+        .sort((a, b) => b.minCantidad - a.minCantidad)[0];
+        
+      if (mejorReglaRango) {
+        const rango = mejorReglaRango.rangos.find(r => precioUnitario >= r.min && (r.max === null || precioUnitario <= r.max));
+        
+        if (rango) {
+          if (rango.esPorcentaje) {
+            descuentoProducto = Math.floor((precioUnitario * producto.cantidad) * (rango.descuento / 100));
+            porcentajeProducto = rango.descuento;
+          } else if (rango.sobreGanancia) {
+            const gananciaProducto = (precioUnitario - parsearPrecio(producto.precio)) * producto.cantidad;
+            descuentoProducto = Math.floor(gananciaProducto * (rango.descuento / 100));
+          } else {
+            descuentoProducto = rango.descuento * producto.cantidad;
+          }
+        }
+      }
+      
+      // Buscar reglas de descuento por ganancia global
+      const reglasGanancia = reglasDescuento.filter(r => r.tipo === 'ganancia');
+      const mejorReglaGanancia = reglasGanancia
+        .filter(r => cantidadEnMismoRango >= r.minCantidad)
+        .sort((a, b) => b.minCantidad - a.minCantidad)[0];
+        
+      if (mejorReglaGanancia) {
+        const gananciaProducto = (precioUnitario - parsearPrecio(producto.precio)) * producto.cantidad;
+        descuentoProducto += Math.floor(gananciaProducto * (mejorReglaGanancia.porcentaje / 100));
+      }
+      
+      // Construir la línea del producto con descuento si aplica
+      if (descuentoProducto > 0) {
+        if (porcentajeProducto) {
+          mensaje += `- ${producto.titulo}: ${producto.cantidad} x $${formatearPrecio(precioUnitario)} = $${formatearPrecio(subtotal)} (Descuento: -$${formatearPrecio(descuentoProducto)} - ${porcentajeProducto}%)\n`;
+        } else {
+          mensaje += `- ${producto.titulo}: ${producto.cantidad} x $${formatearPrecio(precioUnitario)} = $${formatearPrecio(subtotal)} (Descuento: -$${formatearPrecio(descuentoProducto)})\n`;
+        }
+      } else {
+        mensaje += `- ${producto.titulo}: ${producto.cantidad} x $${formatearPrecio(precioUnitario)} = $${formatearPrecio(subtotal)}\n`;
+      }
     });
     
-    mensaje += `\nTotal: $${formatearPrecio(total)}`;
+    if (descuento > 0) {
+      mensaje += `\nSubtotal: $${formatearPrecio(total)}`;
+      mensaje += `\nDescuento aplicado: -$${formatearPrecio(descuento)}`;
+      mensaje += `\nTotal a pagar: $${formatearPrecio(totalConDescuento)}`;
+    } else {
+      mensaje += `\nTotal: $${formatearPrecio(total)}`;
+    }
+    
     const mensajeCodificado = encodeURIComponent(mensaje);
     const urlWhatsApp = `https://wa.me/${numeroWhatsApp}?text=${mensajeCodificado}`;
     window.open(urlWhatsApp, '_blank');
@@ -129,8 +238,28 @@ const VerPedido = () => {
           
           // Buscar reglas de descuento por rango de precio
           const reglasRango = reglasDescuento.filter(r => r.tipo === 'rango_precio');
+          
+          // Calcular cuántos productos en el carrito están en el mismo rango de precio
+          const productosEnMismoRango = carrito.filter(p => {
+            const precioP = ajustarPrecio(p.precio, p.titulo, p.categoria);
+            const precioActual = ajustarPrecio(producto.precio, producto.titulo, producto.categoria);
+            
+            // Buscar si ambos productos están en el mismo rango
+            for (const regla of reglasRango) {
+              const rangoP = regla.rangos.find(r => precioP >= r.min && (r.max === null || precioP <= r.max));
+              const rangoActual = regla.rangos.find(r => precioActual >= r.min && (r.max === null || precioActual <= r.max));
+              
+              if (rangoP && rangoActual && rangoP === rangoActual) {
+                return true;
+              }
+            }
+            return false;
+          });
+          
+          const cantidadEnMismoRango = productosEnMismoRango.reduce((acc, p) => acc + p.cantidad, 0);
+          
           const mejorReglaRango = reglasRango
-            .filter(r => carrito.reduce((acc, p) => acc + p.cantidad, 0) >= r.minCantidad)
+            .filter(r => cantidadEnMismoRango >= r.minCantidad)
             .sort((a, b) => b.minCantidad - a.minCantidad)[0];
             
           if (mejorReglaRango) {
@@ -153,13 +282,12 @@ const VerPedido = () => {
           // Buscar reglas de descuento por ganancia global
           const reglasGanancia = reglasDescuento.filter(r => r.tipo === 'ganancia');
           const mejorReglaGanancia = reglasGanancia
-            .filter(r => carrito.reduce((acc, p) => acc + p.cantidad, 0) >= r.minCantidad)
+            .filter(r => cantidadEnMismoRango >= r.minCantidad)
             .sort((a, b) => b.minCantidad - a.minCantidad)[0];
             
-          if (mejorReglaGanancia && gananciaTotal > 0) {
+          if (mejorReglaGanancia) {
             const gananciaProducto = (precioUnitario - parsearPrecio(producto.precio)) * producto.cantidad;
-            const proporcionGanancia = gananciaProducto / gananciaTotal;
-            descuentoTotalProducto += Math.floor(gananciaTotal * (mejorReglaGanancia.porcentaje / 100) * proporcionGanancia);
+            descuentoTotalProducto += Math.floor(gananciaProducto * (mejorReglaGanancia.porcentaje / 100));
             esDescuentoPorGanancia = true;
           }
           

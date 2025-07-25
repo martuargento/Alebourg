@@ -39,34 +39,61 @@ const ProductCard = ({ producto }) => {
           .sort((a, b) => b.minCantidad - a.minCantidad)[0];
         if (proximaRegla) {
           const faltan = proximaRegla.minCantidad - cantidadTotal;
-          const porcentajes = proximaRegla.rangos.filter(r => r.esPorcentaje && r.descuento > 0 && r.descuento < 100).map(r => r.descuento);
-          const fijos = proximaRegla.rangos.filter(r => !r.esPorcentaje && r.descuento > 0).map(r => r.descuento);
-          let partes = [];
-          if (porcentajes.length > 0) {
+          
+          // Analizar los rangos para crear un mensaje más específico
+          const rangosConDescuento = proximaRegla.rangos.filter(r => r.descuento > 0);
+          const rangosPorcentaje = rangosConDescuento.filter(r => r.esPorcentaje);
+          const rangosGanancia = rangosConDescuento.filter(r => r.sobreGanancia);
+          const rangosFijos = rangosConDescuento.filter(r => !r.esPorcentaje && !r.sobreGanancia);
+          
+          let mensajePartes = [];
+          
+          if (rangosPorcentaje.length > 0) {
+            const porcentajes = rangosPorcentaje.map(r => r.descuento);
+            const minP = Math.min(...porcentajes);
             const maxP = Math.max(...porcentajes);
-            partes.push(`hasta ${maxP}%`);
+            
+            if (minP === maxP) {
+              mensajePartes.push(`hasta ${maxP}% de descuento`);
+            } else {
+              mensajePartes.push(`descuentos del ${minP}% al ${maxP}%`);
+            }
           }
-          if (fijos.length > 0) {
-            const maxF = Math.max(...fijos);
-            partes.push(`hasta $${maxF}`);
+          
+          // NO mostrar descuentos sobre ganancia al cliente
+          // if (rangosGanancia.length > 0) {
+          //   const porcentajesGanancia = rangosGanancia.map(r => r.descuento);
+          //   const maxG = Math.max(...porcentajesGanancia);
+          //   mensajePartes.push(`hasta ${maxG}% de descuento sobre ganancia`);
+          // }
+          
+          if (rangosFijos.length > 0) {
+            const montos = rangosFijos.map(r => r.descuento);
+            const maxM = Math.max(...montos);
+            mensajePartes.push(`hasta $${maxM} de descuento fijo`);
           }
-          let textoDescuento = '';
-          if (partes.length === 2) {
-            textoDescuento = `${partes[0]} o ${partes[1]}`;
-          } else if (partes.length === 1) {
-            textoDescuento = partes[0];
-          }
-          if (textoDescuento) {
-            setMensajeDescuento(`¡Agregá ${faltan} producto${faltan > 1 ? 's' : ''} más y obtené descuentos de ${textoDescuento} según el valor de cada producto!`);
+          
+          if (mensajePartes.length > 0) {
+            const mensajeFinal = mensajePartes.join(' y ');
+            setMensajeDescuento(`🎉 ¡Solo te faltan ${faltan} producto${faltan > 1 ? 's' : ''} para desbloquear ${mensajeFinal}!`);
           } else {
-            setMensajeDescuento(`¡Agregá ${faltan} producto${faltan > 1 ? 's' : ''} más y obtené descuentos especiales según el valor de cada producto!`);
+            setMensajeDescuento(`🎉 ¡Agregá ${faltan} producto${faltan > 1 ? 's' : ''} más y obtené descuentos especiales!`);
           }
           setFadeOut(false);
           setMostrarBarra(true);
           setTimeout(() => setFadeOut(true), 7500);
           setTimeout(() => setMostrarBarra(false), 8000);
         } else if (mejorRegla) {
-          setMensajeDescuento('¡Ya tenés descuento por rango de precio aplicado en cada producto!');
+          // Mensaje cuando ya tiene descuento aplicado
+          const rangosActivos = mejorRegla.rangos.filter(r => r.descuento > 0);
+          const porcentajes = rangosActivos.filter(r => r.esPorcentaje).map(r => r.descuento);
+          const maxPorcentaje = porcentajes.length > 0 ? Math.max(...porcentajes) : 0;
+          
+          if (maxPorcentaje > 0) {
+            setMensajeDescuento(`✅ ¡Excelente! Ya tenés descuentos de hasta ${maxPorcentaje}% aplicados`);
+          } else {
+            setMensajeDescuento(`✅ ¡Perfecto! Ya tenés descuentos especiales aplicados`);
+          }
           setFadeOut(false);
           setMostrarBarra(true);
           setTimeout(() => setFadeOut(true), 3500);
@@ -78,25 +105,43 @@ const ProductCard = ({ producto }) => {
               .sort((a, b) => a.minCantidad - b.minCantidad)[0];
             if (proximaRegla) {
               const faltan = proximaRegla.minCantidad - cantidadTotal;
-              const porcentajes = proximaRegla.rangos.filter(r => r.esPorcentaje && r.descuento > 0 && r.descuento < 100).map(r => r.descuento);
-              const fijos = proximaRegla.rangos.filter(r => !r.esPorcentaje && r.descuento > 0).map(r => r.descuento);
-              let partes = [];
-              if (porcentajes.length > 0) {
+              
+              // Analizar los rangos para crear un mensaje más específico
+              const rangosConDescuento = proximaRegla.rangos.filter(r => r.descuento > 0);
+              const rangosPorcentaje = rangosConDescuento.filter(r => r.esPorcentaje);
+              const rangosGanancia = rangosConDescuento.filter(r => r.sobreGanancia);
+              const rangosFijos = rangosConDescuento.filter(r => !r.esPorcentaje && !r.sobreGanancia);
+              
+              let mensajePartes = [];
+              
+              if (rangosPorcentaje.length > 0) {
+                const porcentajes = rangosPorcentaje.map(r => r.descuento);
+                const minP = Math.min(...porcentajes);
                 const maxP = Math.max(...porcentajes);
-                partes.push(`hasta ${maxP}%`);
+                
+                if (minP === maxP) {
+                  mensajePartes.push(`hasta ${maxP}% de descuento`);
+                } else {
+                  mensajePartes.push(`descuentos del ${minP}% al ${maxP}%`);
+                }
               }
-              if (fijos.length > 0) {
-                const maxF = Math.max(...fijos);
-                partes.push(`hasta $${maxF}`);
+              
+              // NO mostrar descuentos sobre ganancia al cliente
+              // if (rangosGanancia.length > 0) {
+              //   const porcentajesGanancia = rangosGanancia.map(r => r.descuento);
+              //   const maxG = Math.max(...porcentajesGanancia);
+              //   mensajePartes.push(`hasta ${maxG}% de descuento sobre ganancia`);
+              // }
+              
+              if (rangosFijos.length > 0) {
+                const montos = rangosFijos.map(r => r.descuento);
+                const maxM = Math.max(...montos);
+                mensajePartes.push(`hasta $${maxM} de descuento fijo`);
               }
-              let textoDescuento = '';
-              if (partes.length === 2) {
-                textoDescuento = `${partes[0]} o ${partes[1]}`;
-              } else if (partes.length === 1) {
-                textoDescuento = partes[0];
-              }
-              if (textoDescuento) {
-                setMensajeDescuento(`¡Agregá ${faltan} producto${faltan > 1 ? 's' : ''} más y obtené descuentos de ${textoDescuento} según el valor de cada producto!`);
+              
+              if (mensajePartes.length > 0) {
+                const mensajeFinal = mensajePartes.join(' y ');
+                setMensajeDescuento(`🎉 ¡Solo te faltan ${faltan} producto${faltan > 1 ? 's' : ''} para desbloquear ${mensajeFinal}!`);
                 setFadeOut(false);
                 setMostrarBarra(true);
                 setTimeout(() => setFadeOut(true), 7500);
@@ -185,10 +230,10 @@ const ProductCard = ({ producto }) => {
         />
         <Card.Body className="d-flex flex-column p-2">
           <Card.Title className="mb-3 text-break">{producto.titulo}</Card.Title>
-          <Card.Text className="mt-auto">
-            Precio: <br />
+          <div className="mt-auto">
+            <div>Precio:</div>
             <h4>${precioAjustado}</h4>
-          </Card.Text>
+          </div>
           <Button 
             onClick={manejarClick} 
             className="boton-productos mt-auto w-100"
