@@ -47,7 +47,7 @@ const Login = () => {
             className="form-control inputForEstilos"
             value={usuario}
             onChange={e => setUsuario(e.target.value)}
-            placeholder="martinalejandronuniez@gmail.com"
+            placeholder="Ingresa tu email"
             required
           />
         </div>
