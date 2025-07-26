@@ -1,0 +1,17 @@
+{
+  "name": "alebourg-server",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "server-precios.js",
+  "scripts": {
+    "start": "node server-precios.js",
+    "dev": "node server-precios.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "cors": "^2.8.5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+} 
