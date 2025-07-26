@@ -20,6 +20,97 @@
     "precio": "0,304 ",
     "categoria": "Accesorios Celulares"
   },
+ {
+    "id": 11828,
+    "titulo": "Adaptador Hdmi/Rca",
+    "imagen": "https://distrikarma.com.ar/fotos/11828.jpg",
+    "precio": "6,085 ",
+    "categoria": "Adaptadores"
+  },
+ {
+    "id": 10997,
+    "titulo": "Conversor Hdmi A Rca Netmak Nm-Hd4",
+    "imagen": "https://distrikarma.com.ar/fotos/10997.jpg",
+    "precio": "5,855 ",
+    "categoria": "Adaptadores"
+  },
+ {
+    "id": 11677,
+    "titulo": "Adaptador Rca-Hdmi Suono",
+    "imagen": "https://distrikarma.com.ar/fotos/11677.jpg",
+    "precio": "7,234 ",
+    "categoria": "Adaptadores"
+  },
+  {
+    "id": 10519,
+    "titulo": "Pendrive 16 Gb Sandisk",
+    "imagen": "https://distrikarma.com.ar/fotos/10519.jpg",
+    "precio": "8,026 ",
+    "categoria": "Almacenamiento"
+  },
+{
+    "id": 10757,
+    "titulo": "Conversor Vga + Audio Hdmi Nm-Hd2",
+    "imagen": "https://distrikarma.com.ar/fotos/10757.jpg",
+    "precio": "5,736 ",
+    "categoria": "Adaptadores"
+  },
+{
+    "id": 12099,
+    "titulo": "Pendrive 32 Gb Sandisk",
+    "imagen": "https://distrikarma.com.ar/fotos/12099.jpg",
+    "precio": "8,976 ",
+    "categoria": "Almacenamiento"
+  },
+  {
+    "id": 10548,
+    "titulo": "Pendrive 64 Gb Kingston",
+    "imagen": "https://distrikarma.com.ar/fotos/10548.jpg",
+    "precio": "9,491 ",
+    "categoria": "Almacenamiento"
+  },
+ {
+    "id": 10112,
+    "titulo": "Auricular Vincha Bluetooth P47",
+    "imagen": "https://distrikarma.com.ar/fotos/10112.jpg",
+    "precio": "4,290 ",
+    "categoria": "Auricular Vincha"
+  },
+  {
+    "id": 12935,
+    "titulo": "Auricular F9 Aitech Power Bank",
+    "imagen": "https://distrikarma.com.ar/fotos/12935.jpg",
+    "precio": "6,032 ",
+    "categoria": "Auriculares"
+  },
+{
+    "id": 10040,
+    "titulo": "Auricular Inear Ng-Gl1783 Full Led Manos Libres",
+    "imagen": "https://distrikarma.com.ar/fotos/10040.jpg",
+    "precio": "6,352 ",
+    "categoria": "Auriculares"
+  },
+ {
+    "id": 12807,
+    "titulo": "Auricular Samsung Akg S30+ Caja Azul",
+    "imagen": "https://distrikarma.com.ar/fotos/12807.jpg",
+    "precio": "1,822 ",
+    "categoria": "Auriculares"
+  },
+  {
+    "id": 12244,
+    "titulo": "Cepillo Pelo Secador/ Antifrizz Oryx 3En1 Or1202",
+    "imagen": "https://distrikarma.com.ar/fotos/12244.jpg",
+    "precio": "13,728 ",
+    "categoria": "Belleza Y Cuidado Personal"
+  },
+  {
+    "id": 11703,
+    "titulo": "Auricular Sport Suono Fm/Sd Ayv0016 Verde Bt",
+    "imagen": "https://distrikarma.com.ar/fotos/11703.jpg",
+    "precio": "5,280 ",
+    "categoria": "Auriculares"
+  },
   {
     "id": 11037,
     "titulo": "Correa Para Celular Strap  4Cm X 107Cm Strap Ringo",
@@ -27,6 +118,7 @@
     "precio": "4,158 ",
     "categoria": "Accesorios Celulares"
   },
+
   {
     "id": 11019,
     "titulo": "Correa Silicona Para Airpods Colores",
@@ -245,13 +337,6 @@
     "categoria": "Adaptadores"
   },
   {
-    "id": 11828,
-    "titulo": "Adaptador Hdmi/Rca",
-    "imagen": "https://distrikarma.com.ar/fotos/11828.jpg",
-    "precio": "6,085 ",
-    "categoria": "Adaptadores"
-  },
-  {
     "id": 12054,
     "titulo": "Adaptador Ligthing H A Miniplug 3,5 Nm-Tc56 Netmak",
     "imagen": "https://distrikarma.com.ar/fotos/12054.jpg",
@@ -326,13 +411,6 @@
     "titulo": "Adaptador Para Auricular Ps4-Ps5",
     "imagen": "https://distrikarma.com.ar/fotos/12296.jpg",
     "precio": "7,920 ",
-    "categoria": "Adaptadores"
-  },
-  {
-    "id": 11677,
-    "titulo": "Adaptador Rca-Hdmi Suono",
-    "imagen": "https://distrikarma.com.ar/fotos/11677.jpg",
-    "precio": "7,234 ",
     "categoria": "Adaptadores"
   },
   {
@@ -497,13 +575,6 @@
     "categoria": "Adaptadores"
   },
   {
-    "id": 10997,
-    "titulo": "Conversor Hdmi A Rca Netmak Nm-Hd4",
-    "imagen": "https://distrikarma.com.ar/fotos/10997.jpg",
-    "precio": "5,855 ",
-    "categoria": "Adaptadores"
-  },
-  {
     "id": 12300,
     "titulo": "Conversor Hdmi-Av Gen",
     "imagen": "https://distrikarma.com.ar/fotos/12300.jpg",
@@ -543,13 +614,6 @@
     "titulo": "Conversor Vga + Audio A Hdmi Netmak Nm-G63",
     "imagen": "https://distrikarma.com.ar/fotos/11018.jpg",
     "precio": "10,704 ",
-    "categoria": "Adaptadores"
-  },
-  {
-    "id": 10757,
-    "titulo": "Conversor Vga + Audio Hdmi Nm-Hd2",
-    "imagen": "https://distrikarma.com.ar/fotos/10757.jpg",
-    "precio": "5,736 ",
     "categoria": "Adaptadores"
   },
   {
@@ -662,27 +726,6 @@
     "titulo": "Pendrive 128 Gb Kingston",
     "imagen": "https://distrikarma.com.ar/fotos/10836.jpg",
     "precio": "15,787 ",
-    "categoria": "Almacenamiento"
-  },
-  {
-    "id": 10519,
-    "titulo": "Pendrive 16 Gb Sandisk",
-    "imagen": "https://distrikarma.com.ar/fotos/10519.jpg",
-    "precio": "8,026 ",
-    "categoria": "Almacenamiento"
-  },
-  {
-    "id": 12099,
-    "titulo": "Pendrive 32 Gb Sandisk",
-    "imagen": "https://distrikarma.com.ar/fotos/12099.jpg",
-    "precio": "8,976 ",
-    "categoria": "Almacenamiento"
-  },
-  {
-    "id": 10548,
-    "titulo": "Pendrive 64 Gb Kingston",
-    "imagen": "https://distrikarma.com.ar/fotos/10548.jpg",
-    "precio": "9,491 ",
     "categoria": "Almacenamiento"
   },
   {
@@ -1026,13 +1069,6 @@
     "titulo": "Auricular Vincha Bluetooth Nm-Live-W",
     "imagen": "https://distrikarma.com.ar/fotos/12117.jpg",
     "precio": "14,616 ",
-    "categoria": "Auricular Vincha"
-  },
-  {
-    "id": 10112,
-    "titulo": "Auricular Vincha Bluetooth P47",
-    "imagen": "https://distrikarma.com.ar/fotos/10112.jpg",
-    "precio": "4,290 ",
     "categoria": "Auricular Vincha"
   },
   {
@@ -1574,13 +1610,7 @@
     "precio": "26,770 ",
     "categoria": "Auriculares"
   },
-  {
-    "id": 12935,
-    "titulo": "Auricular F9 Aitech Power Bank",
-    "imagen": "https://distrikarma.com.ar/fotos/12935.jpg",
-    "precio": "6,032 ",
-    "categoria": "Auriculares"
-  },
+
   {
     "id": 12017,
     "titulo": "Auricular Inear Akg Type-C Samsung Or",
@@ -1705,13 +1735,6 @@
     "titulo": "Auricular Inear Manos Libres Sony Blanco",
     "imagen": "https://distrikarma.com.ar/fotos/11984.jpg",
     "precio": "1,294 ",
-    "categoria": "Auriculares"
-  },
-  {
-    "id": 10040,
-    "titulo": "Auricular Inear Ng-Gl1783 Full Led Manos Libres",
-    "imagen": "https://distrikarma.com.ar/fotos/10040.jpg",
-    "precio": "6,352 ",
     "categoria": "Auriculares"
   },
   {
@@ -1841,13 +1864,6 @@
     "categoria": "Auriculares"
   },
   {
-    "id": 12807,
-    "titulo": "Auricular Samsung Akg S30+ Caja Azul",
-    "imagen": "https://distrikarma.com.ar/fotos/12807.jpg",
-    "precio": "1,822 ",
-    "categoria": "Auriculares"
-  },
-  {
     "id": 11256,
     "titulo": "Auricular Samsung Hs330 Mlibres ***Oferta***",
     "imagen": "https://distrikarma.com.ar/fotos/11256.jpg",
@@ -1900,13 +1916,6 @@
     "id": 11704,
     "titulo": "Auricular Sport Suono Fm/Sd Ayv0016 Negro Bt",
     "imagen": "https://distrikarma.com.ar/fotos/11704.jpg",
-    "precio": "5,280 ",
-    "categoria": "Auriculares"
-  },
-  {
-    "id": 11703,
-    "titulo": "Auricular Sport Suono Fm/Sd Ayv0016 Verde Bt",
-    "imagen": "https://distrikarma.com.ar/fotos/11703.jpg",
     "precio": "5,280 ",
     "categoria": "Auriculares"
   },
@@ -2062,13 +2071,6 @@
     "titulo": "Cepillo Alisador Plhcr2213 Dinax 30W",
     "imagen": "https://distrikarma.com.ar/fotos/12322.jpg",
     "precio": "7,511 ",
-    "categoria": "Belleza Y Cuidado Personal"
-  },
-  {
-    "id": 12244,
-    "titulo": "Cepillo Pelo Secador/ Antifrizz Oryx 3En1 Or1202",
-    "imagen": "https://distrikarma.com.ar/fotos/12244.jpg",
-    "precio": "13,728 ",
     "categoria": "Belleza Y Cuidado Personal"
   },
   {
