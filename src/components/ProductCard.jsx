@@ -4,6 +4,7 @@ import { usarCarrito } from '../context/CarritoContexto';
 import Swal from 'sweetalert2';
 import { ajustarPrecio, formatearPrecio } from '../utils/preciosUtils';
 import { useNavigate } from 'react-router-dom';
+import { BACKEND_URL } from '../config';
 
 const ProductCard = ({ producto }) => {
   const { agregarAlCarrito, carrito } = usarCarrito();
@@ -25,7 +26,7 @@ const ProductCard = ({ producto }) => {
     agregarAlCarrito(productoParaCarrito);
 
     // Calcular incentivo de descuento
-    fetch('http://localhost:3001/api/descuentos')
+    fetch(`${BACKEND_URL}/api/descuentos`)
       .then(res => res.json())
       .then(reglasDescuento => {
         const reglasRango = reglasDescuento.filter(r => r.tipo === 'rango_precio');

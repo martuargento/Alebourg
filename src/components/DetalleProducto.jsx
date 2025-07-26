@@ -4,6 +4,7 @@ import { Container, Row, Col, Button } from 'react-bootstrap';
 import { usarCarrito } from '../context/CarritoContexto';
 import { ajustarPrecio, formatearPrecio } from '../utils/preciosUtils';
 import Swal from 'sweetalert2';
+import { BACKEND_URL } from '../config';
 
 const DetalleProducto = () => {
   const { id } = useParams();
@@ -42,7 +43,7 @@ const DetalleProducto = () => {
     agregarAlCarrito(producto);
     
     // Calcular incentivo de descuento con la lógica moderna
-    fetch('http://localhost:3001/api/descuentos')
+    fetch(`${BACKEND_URL}/api/descuentos`)
       .then(res => res.json())
       .then(reglasDescuento => {
         const cantidadTotal = carrito.reduce((acc, p) => acc + p.cantidad, 0) + 1;

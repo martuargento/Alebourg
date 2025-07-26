@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { FaPlus, FaMinus, FaTrash } from 'react-icons/fa';
+import { BACKEND_URL } from '../config';
 
 const obtenerRangosDesdeCodigo = (codigo) => {
   // Detecta cualquier tipo de if/else if con precio < ...
@@ -69,7 +70,7 @@ const AdminPrecios = () => {
       return;
     }
     const fetchCodigo = () => {
-      fetch('http://localhost:3001/api/precios-utils?raw=1')
+      fetch(`${BACKEND_URL}/api/precios-utils?raw=1`)
         .then(res => res.text())
         .then(codigo => {
           setCodigo(codigo);
@@ -104,7 +105,7 @@ const AdminPrecios = () => {
     setGuardando(true);
     setToast(null);
     try {
-      const res = await fetch('http://localhost:3001/api/precios-utils', {
+      const res = await fetch(`${BACKEND_URL}/api/precios-utils`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ rangos, ajusteEspecial })
@@ -112,7 +113,7 @@ const AdminPrecios = () => {
       if (res.ok) {
         setToast({ mensaje: '¡Guardado con éxito!', tipo: 'success' });
         // Recargar rangos después de guardar
-        fetch('http://localhost:3001/api/precios-utils?raw=1')
+        fetch(`${BACKEND_URL}/api/precios-utils?raw=1`)
           .then(res => res.text())
           .then(codigo => {
             setCodigo(codigo);
@@ -136,7 +137,7 @@ const AdminPrecios = () => {
 
   // Cargar reglas de descuento al montar
   useEffect(() => {
-    fetch('http://localhost:3001/api/descuentos')
+    fetch(`${BACKEND_URL}/api/descuentos`)
       .then(res => res.json())
       .then(setDescuentos)
       .catch(() => setDescuentos([]));
@@ -145,7 +146,7 @@ const AdminPrecios = () => {
   const guardarDescuentos = async (reglas) => {
     setGuardandoDescuentos(true);
     try {
-      const res = await fetch('http://localhost:3001/api/descuentos', {
+      const res = await fetch(`${BACKEND_URL}/api/descuentos`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(reglas)

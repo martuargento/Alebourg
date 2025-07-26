@@ -6,6 +6,7 @@ import { calcularDescuento } from '../utils/descuentosUtils';
 import { FaTrash } from 'react-icons/fa';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { BACKEND_URL } from '../config';
 
 const VerPedido = () => {
   const { 
@@ -20,7 +21,7 @@ const VerPedido = () => {
   const [descuento, setDescuento] = useState(0);
 
   useEffect(() => {
-    fetch('http://localhost:3001/api/descuentos')
+    fetch(`${BACKEND_URL}/api/descuentos`)
       .then(res => res.json())
       .then(setReglasDescuento)
       .catch(() => setReglasDescuento([]));
