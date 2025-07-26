@@ -40,23 +40,79 @@ const DetalleProducto = () => {
 
   const manejarAgregar = () => {
     agregarAlCarrito(producto);
-    // Calcular incentivo de descuento
+    
+    // Calcular incentivo de descuento con la lógica moderna
     fetch('http://localhost:3001/api/descuentos')
       .then(res => res.json())
       .then(reglasDescuento => {
-        const reglasCantidad = reglasDescuento.filter(r => r.tipo === 'cantidad').sort((a, b) => a.minCantidad - b.minCantidad);
-        if (reglasCantidad.length > 0) {
-          const cantidadTotal = carrito.reduce((acc, p) => acc + p.cantidad, 0) + 1;
-          let proximoDescuento = null;
-          for (let i = 0; i < reglasCantidad.length; i++) {
-            if (cantidadTotal < reglasCantidad[i].minCantidad) {
-              proximoDescuento = reglasCantidad[i];
-              break;
+        const cantidadTotal = carrito.reduce((acc, p) => acc + p.cantidad, 0) + 1;
+        
+        // Buscar reglas de descuento por rango de precio
+        const reglasRango = reglasDescuento.filter(r => r.tipo === 'rango_precio');
+        
+        // Calcular cuántos productos en el carrito están en el mismo rango de precio que este producto
+        const precioProducto = ajustarPrecio(producto.precio, producto.titulo, producto.categoria);
+        const productosEnMismoRango = carrito.filter(p => {
+          const precioP = ajustarPrecio(p.precio, p.titulo, p.categoria);
+          for (const regla of reglasRango) {
+            const rangoP = regla.rangos.find(r => precioP >= r.min && (r.max === null || precioP <= r.max));
+            const rangoActual = regla.rangos.find(r => precioProducto >= r.min && (r.max === null || precioProducto <= r.max));
+            if (rangoP && rangoActual && rangoP === rangoActual) {
+              return true;
             }
           }
-          if (proximoDescuento) {
-            const faltan = proximoDescuento.minCantidad - cantidadTotal;
-            setMensajeDescuento(`¡Agregá ${faltan} producto${faltan > 1 ? 's' : ''} más y obtené ${proximoDescuento.descuento}${proximoDescuento.esPorcentaje ? '% de descuento' : '$ de descuento'}!`);
+          return false;
+        });
+        const cantidadEnMismoRango = productosEnMismoRango.reduce((acc, p) => acc + p.cantidad, 0) + 1;
+        
+        // Buscar el próximo descuento disponible
+        let proximoDescuento = null;
+        let faltan = 0;
+        
+        for (const regla of reglasRango) {
+          if (cantidadEnMismoRango < regla.minCantidad) {
+            proximoDescuento = regla;
+            faltan = regla.minCantidad - cantidadEnMismoRango;
+            break;
+          }
+        }
+        
+        if (proximoDescuento) {
+          // Construir mensaje con los rangos disponibles
+          const rangosDisponibles = proximoDescuento.rangos.filter(r => 
+            precioProducto >= r.min && (r.max === null || precioProducto <= r.max)
+          );
+          
+          if (rangosDisponibles.length > 0) {
+            const rangosPorcentaje = rangosDisponibles.filter(r => r.esPorcentaje && r.descuento < 100);
+            const rangosFijos = rangosDisponibles.filter(r => !r.esPorcentaje && r.descuento > 0);
+            
+            const mensajePartes = [];
+            
+            if (rangosPorcentaje.length > 0) {
+              const porcentajes = rangosPorcentaje.map(r => r.descuento);
+              const minP = Math.min(...porcentajes);
+              const maxP = Math.max(...porcentajes);
+              if (minP === maxP) {
+                mensajePartes.push(`hasta ${maxP}% de descuento`);
+              } else {
+                mensajePartes.push(`descuentos del ${minP}% al ${maxP}%`);
+              }
+            }
+            
+            if (rangosFijos.length > 0) {
+              const montos = rangosFijos.map(r => r.descuento);
+              const maxM = Math.max(...montos);
+              mensajePartes.push(`hasta $${maxM} de descuento fijo`);
+            }
+            
+            if (mensajePartes.length > 0) {
+              const mensajeFinal = mensajePartes.join(' y ');
+              setMensajeDescuento(`🎉 ¡Solo te faltan ${faltan} producto${faltan > 1 ? 's' : ''} para desbloquear ${mensajeFinal}!`);
+            } else {
+              setMensajeDescuento(`🎉 ¡Agregá ${faltan} producto${faltan > 1 ? 's' : ''} más y obtené descuentos especiales!`);
+            }
+            
             setFadeOut(false);
             setMostrarBarra(true);
             setTimeout(() => setFadeOut(true), 7500);
@@ -67,7 +123,12 @@ const DetalleProducto = () => {
         } else {
           setMostrarBarra(false);
         }
+      })
+      .catch(error => {
+        console.error('Error al obtener reglas de descuento:', error);
+        setMostrarBarra(false);
       });
+    
     Swal.fire({
       icon: 'success',
       title: 'Producto agregado',
@@ -153,7 +214,7 @@ const DetalleProducto = () => {
                   justifyContent: 'center',
                   alignItems: 'center',
                   padding: '1rem',
-                  background: 'white',
+                  background: document.documentElement.getAttribute('data-theme') === 'dark' ? '#1a1a1a' : 'white',
                   minHeight: '30vh'
                 }}>
                   <img
@@ -172,13 +233,14 @@ const DetalleProducto = () => {
                 <div className="product-details" style={{
                   padding: '1.5rem',
                   height: '100%',
-                  background: 'white'
+                  background: document.documentElement.getAttribute('data-theme') === 'dark' ? '#1a1a1a' : 'white'
                 }}>
                   <h2 style={{
                     fontSize: 'clamp(1.3rem, 4vw, 1.8rem)',
                     fontWeight: '600',
                     marginBottom: '1.5rem',
-                    textAlign: 'center'
+                    textAlign: 'center',
+                    color: document.documentElement.getAttribute('data-theme') === 'dark' ? '#ffffff' : '#000000'
                   }}>{producto.titulo}</h2>
                   
                   <div className="precio-container" style={{
@@ -191,7 +253,8 @@ const DetalleProducto = () => {
                     <div style={{
                       fontSize: '0.9rem',
                       opacity: '0.8',
-                      marginBottom: '4px'
+                      marginBottom: '4px',
+                      color: document.documentElement.getAttribute('data-theme') === 'dark' ? '#ffffff' : '#000000'
                     }}>
                       Precio:
                     </div>
@@ -211,12 +274,14 @@ const DetalleProducto = () => {
                     <h4 style={{ 
                       fontSize: '0.9rem',
                       opacity: '0.8',
-                      marginBottom: '8px'
+                      marginBottom: '8px',
+                      color: document.documentElement.getAttribute('data-theme') === 'dark' ? '#ffffff' : '#000000'
                     }}>Categoría:</h4>
                     <p style={{
                       margin: '0',
                       padding: '8px 16px',
-                      backgroundColor: 'rgba(0, 0, 0, 0.2)',
+                      backgroundColor: document.documentElement.getAttribute('data-theme') === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.2)',
+                      color: document.documentElement.getAttribute('data-theme') === 'dark' ? '#ffffff' : '#000000',
                       borderRadius: '20px',
                       display: 'inline-block',
                       fontSize: '0.9rem'
@@ -252,8 +317,56 @@ const DetalleProducto = () => {
             </Row>
           </div>
         </div>
+        
+        {/* Barra de mensaje de descuento */}
+        {mostrarBarra && (
+          <div
+            style={{
+              position: 'fixed',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              background: 'linear-gradient(90deg, #007bff, #28a745)',
+              color: '#fff',
+              padding: '15px 20px',
+              textAlign: 'center',
+              fontSize: '1rem',
+              fontWeight: '600',
+              zIndex: 9999,
+              transform: fadeOut ? 'translateY(100%)' : 'translateY(0)',
+              transition: 'transform 0.5s ease-in-out',
+              boxShadow: '0 -2px 10px rgba(0,0,0,0.3)'
+            }}
+          >
+            {mensajeDescuento}
+          </div>
+        )}
+        
         <style>
           {`
+            /* Estilos para modo oscuro en desktop */
+            [data-theme="dark"] .product-image-container {
+              background-color: #1a1a1a !important;
+            }
+            
+            [data-theme="dark"] .product-details {
+              background-color: #1a1a1a !important;
+              color: #ffffff !important;
+            }
+            
+            [data-theme="dark"] .product-details h2 {
+              color: #ffffff !important;
+            }
+            
+            [data-theme="dark"] .product-details h4 {
+              color: #ffffff !important;
+            }
+            
+            [data-theme="dark"] .categoria-container p {
+              background-color: rgba(255, 255, 255, 0.1) !important;
+              color: #ffffff !important;
+            }
+            
             @media (max-width: 768px) {
               /* Eliminar todos los espacios y efectos visuales */
               .product-details {

@@ -116,8 +116,14 @@ const VerPedido = () => {
     }
   }
 
-  // Función para enviar pedido por WhatsApp
-  const enviarPedidoWhatsApp = () => {
+
+
+  // Función para enviar pedido por WhatsApp con PDF
+  const enviarPedidoWhatsApp = async () => {
+    // Primero generar el PDF
+    await generarPDF();
+    
+    // Luego enviar mensaje por WhatsApp
     const numeroWhatsApp = "+5491133328382";
     let mensaje = "Alebourg!, Quiero realizar el siguiente pedido:\n\n";
     
@@ -202,9 +208,153 @@ const VerPedido = () => {
       mensaje += `\nTotal: $${formatearPrecio(total)}`;
     }
     
+    mensaje += `\n\n📄 Se ha generado un PDF con el pedido completo que puedes adjuntar.`;
+    
     const mensajeCodificado = encodeURIComponent(mensaje);
     const urlWhatsApp = `https://wa.me/${numeroWhatsApp}?text=${mensajeCodificado}`;
     window.open(urlWhatsApp, '_blank');
+  };
+
+  // Función para generar PDF del pedido
+  const generarPDF = async () => {
+    const doc = new jsPDF();
+    
+    // Configurar el documento
+    doc.setFontSize(20);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Alebourg - Pedido', 105, 20, { align: 'center' });
+    
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Fecha: ${new Date().toLocaleDateString('es-AR')}`, 20, 35);
+    doc.text(`Hora: ${new Date().toLocaleTimeString('es-AR')}`, 20, 42);
+    
+    let yPosition = 60;
+    
+    // Agregar productos
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Productos:', 20, yPosition);
+    yPosition += 10;
+    
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    
+    for (let i = 0; i < carrito.length; i++) {
+      const producto = carrito[i];
+      const precioUnitario = ajustarPrecio(producto.precio, producto.titulo, producto.categoria);
+      const subtotal = precioUnitario * producto.cantidad;
+      
+      // Calcular descuento del producto
+      let descuentoProducto = 0;
+      let porcentajeProducto = null;
+      
+      const reglasRango = reglasDescuento.filter(r => r.tipo === 'rango_precio');
+      const productosEnMismoRango = carrito.filter(p => {
+        const precioP = ajustarPrecio(p.precio, p.titulo, p.categoria);
+        const precioActual = ajustarPrecio(producto.precio, producto.titulo, producto.categoria);
+        
+        for (const regla of reglasRango) {
+          const rangoP = regla.rangos.find(r => precioP >= r.min && (r.max === null || precioP <= r.max));
+          const rangoActual = regla.rangos.find(r => precioActual >= r.min && (r.max === null || precioActual <= r.max));
+          
+          if (rangoP && rangoActual && rangoP === rangoActual) {
+            return true;
+          }
+        }
+        return false;
+      });
+      
+      const cantidadEnMismoRango = productosEnMismoRango.reduce((acc, p) => acc + p.cantidad, 0);
+      const mejorReglaRango = reglasRango
+        .filter(r => cantidadEnMismoRango >= r.minCantidad)
+        .sort((a, b) => b.minCantidad - a.minCantidad)[0];
+        
+      if (mejorReglaRango) {
+        const rango = mejorReglaRango.rangos.find(r => precioUnitario >= r.min && (r.max === null || precioUnitario <= r.max));
+        
+        if (rango) {
+          if (rango.esPorcentaje) {
+            descuentoProducto = Math.floor((precioUnitario * producto.cantidad) * (rango.descuento / 100));
+            porcentajeProducto = rango.descuento;
+          } else if (rango.sobreGanancia) {
+            const gananciaProducto = (precioUnitario - parsearPrecio(producto.precio)) * producto.cantidad;
+            descuentoProducto = Math.floor(gananciaProducto * (rango.descuento / 100));
+          } else {
+            descuentoProducto = rango.descuento * producto.cantidad;
+          }
+        }
+      }
+      
+      const reglasGanancia = reglasDescuento.filter(r => r.tipo === 'ganancia');
+      const mejorReglaGanancia = reglasGanancia
+        .filter(r => cantidadEnMismoRango >= r.minCantidad)
+        .sort((a, b) => b.minCantidad - a.minCantidad)[0];
+        
+      if (mejorReglaGanancia) {
+        const gananciaProducto = (precioUnitario - parsearPrecio(producto.precio)) * producto.cantidad;
+        descuentoProducto += Math.floor(gananciaProducto * (mejorReglaGanancia.porcentaje / 100));
+      }
+      
+      // Agregar imagen del producto si es posible
+      // No incluir imágenes para evitar problemas de CORS
+      yPosition += 15;
+      
+      // Agregar información del producto
+      const nombreProducto = producto.titulo.length > 40 ? producto.titulo.substring(0, 37) + '...' : producto.titulo;
+      doc.text(`${i + 1}. ${nombreProducto}`, 45, yPosition);
+      yPosition += 5;
+      
+      doc.text(`   Cantidad: ${producto.cantidad} x $${formatearPrecio(precioUnitario)} = $${formatearPrecio(subtotal)}`, 45, yPosition);
+      yPosition += 5;
+      
+      if (descuentoProducto > 0) {
+        if (porcentajeProducto) {
+          doc.setTextColor(0, 128, 0); // Verde para descuentos
+          doc.text(`   Descuento: -$${formatearPrecio(descuentoProducto)} (${porcentajeProducto}%)`, 45, yPosition);
+        } else {
+          doc.setTextColor(0, 128, 0);
+          doc.text(`   Descuento: -$${formatearPrecio(descuentoProducto)}`, 45, yPosition);
+        }
+        doc.setTextColor(0, 0, 0); // Volver a negro
+        yPosition += 5;
+      }
+      
+      yPosition += 5;
+      
+      // Verificar si necesitamos nueva página
+      if (yPosition > 250) {
+        doc.addPage();
+        yPosition = 20;
+      }
+    }
+    
+    // Agregar totales
+    yPosition += 10;
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Resumen:', 20, yPosition);
+    yPosition += 10;
+    
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Subtotal: $${formatearPrecio(total)}`, 20, yPosition);
+    yPosition += 7;
+    
+    if (descuento > 0) {
+      doc.setTextColor(0, 128, 0);
+      doc.text(`Descuento aplicado: -$${formatearPrecio(descuento)}`, 20, yPosition);
+      yPosition += 7;
+      doc.setTextColor(0, 0, 0);
+    }
+    
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`Total a pagar: $${formatearPrecio(totalConDescuento)}`, 20, yPosition);
+    
+    // Guardar el PDF
+    const nombreArchivo = `pedido_alebourg_${new Date().toISOString().slice(0, 10)}_${Date.now()}.pdf`;
+    doc.save(nombreArchivo);
   };
 
   // Verificar si es admin
@@ -447,15 +597,19 @@ const VerPedido = () => {
           >
             Vaciar carrito
           </Button>
-          <Button 
+                          <div className="d-flex gap-2">
+          <Button
             className="cart-button px-4 py-2"
-            style={{ 
-              minWidth: '140px'
+            style={{
+              minWidth: '140px',
+              backgroundColor: '#28a745',
+              borderColor: '#28a745'
             }}
             onClick={enviarPedidoWhatsApp}
           >
-            Enviar pedido
+            Realizar Pedido
           </Button>
+        </div>
         </div>
       </div>
     </Container>

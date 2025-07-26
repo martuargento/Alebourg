@@ -10,7 +10,7 @@ const Login = () => {
   const manejarLogin = (e) => {
     e.preventDefault();
 
-    if (usuario === 'admin' && password === '1234') {
+    if (usuario === 'martinalejandronuniez@gmail.com' && password === 'alebourg912') {
       // Guardamos estado de login en localStorage
       localStorage.setItem('logueado', 'true');
       localStorage.setItem('esAdmin', 'true');
@@ -41,12 +41,13 @@ const Login = () => {
       <h3>Iniciar sesión</h3>
       <form onSubmit={manejarLogin}>
         <div className="mb-3">
-          <label>Usuario</label>
+          <label>Email</label>
           <input
-            type="text"
+            type="email"
             className="form-control inputForEstilos"
             value={usuario}
             onChange={e => setUsuario(e.target.value)}
+            placeholder="martinalejandronuniez@gmail.com"
             required
           />
         </div>
