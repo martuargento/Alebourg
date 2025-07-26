@@ -109,9 +109,9 @@ const DetalleProducto = () => {
             
             if (mensajePartes.length > 0) {
               const mensajeFinal = mensajePartes.join(' y ');
-              setMensajeDescuento(`🎉 ¡Solo te faltan ${faltan} producto${faltan > 1 ? 's' : ''} para desbloquear ${mensajeFinal}!`);
-            } else {
-              setMensajeDescuento(`🎉 ¡Agregá ${faltan} producto${faltan > 1 ? 's' : ''} más y obtené descuentos especiales!`);
+                          setMensajeDescuento(`¡Solo te faltan ${faltan} producto${faltan > 1 ? 's' : ''} para desbloquear ${mensajeFinal}!`);
+          } else {
+            setMensajeDescuento(`¡Agregá ${faltan} producto${faltan > 1 ? 's' : ''} más y obtené descuentos especiales!`);
             }
             
             setFadeOut(false);
@@ -161,38 +161,63 @@ const DetalleProducto = () => {
 
   return (
     <>
-      {/* Barra de incentivo de descuento */}
+      {/* Toast de incentivo de descuento */}
       {mostrarBarra && mensajeDescuento && (
         <div style={{
           position: 'fixed',
-          left: 0,
-          right: 0,
-          bottom: 0,
+          top: '80px',
+          left: '50%',
+          transform: 'translateX(-50%)',
           zIndex: 9999,
-          background: 'linear-gradient(90deg, #0ea5e9 0%, #00ff44 100%)',
+          background: 'linear-gradient(135deg, #0ea5e9 0%, #00ff44 100%)',
           color: '#222',
           fontWeight: 600,
-          fontSize: '1.15rem',
+          fontSize: '0.85rem',
+          padding: '10px 16px',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.25)',
+          letterSpacing: '0.3px',
+          borderRadius: 20,
+          maxWidth: '90vw',
+          width: 'auto',
+          animation: fadeOut ? 'fadeOutToast 0.4s forwards' : 'slideInToast 0.3s',
+          transition: 'all 0.3s ease',
+          backdropFilter: 'blur(8px)',
+          border: '1px solid rgba(255,255,255,0.2)',
           textAlign: 'center',
-          padding: '18px 0 14px 0',
-          boxShadow: '0 -2px 16px rgba(0,0,0,0.12)',
-          letterSpacing: '0.5px',
-          borderTopLeftRadius: 16,
-          borderTopRightRadius: 16,
-          animation: fadeOut ? 'fadeOutBar 0.5s forwards' : 'slideUpBar 0.3s',
-          transition: 'opacity 0.5s',
         }}>
-          {mensajeDescuento}
+          <div style={{ 
+            textAlign: 'center',
+            width: '100%',
+            lineHeight: '1.3'
+          }}>
+            <div style={{ fontSize: '1.2rem', marginBottom: '4px' }}>🎉</div>
+            <div style={{ 
+              wordBreak: 'break-word',
+              hyphens: 'auto'
+            }}>{mensajeDescuento}</div>
+          </div>
         </div>
       )}
       <style>{`
-        @keyframes slideUpBar {
-          from { transform: translateY(100%); opacity: 0; }
-          to { transform: translateY(0); opacity: 1; }
+        @keyframes slideInToast {
+          from { 
+            transform: translate(-50%, -20px); 
+            opacity: 0; 
+          }
+          to { 
+            transform: translate(-50%, 0); 
+            opacity: 1; 
+          }
         }
-        @keyframes fadeOutBar {
-          from { opacity: 1; }
-          to { opacity: 0; }
+        @keyframes fadeOutToast {
+          from { 
+            transform: translate(-50%, 0); 
+            opacity: 1; 
+          }
+          to { 
+            transform: translate(-50%, -20px); 
+            opacity: 0; 
+          }
         }
       `}</style>
       <Container fluid className="p-0">
