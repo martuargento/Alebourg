@@ -18,27 +18,15 @@ export const getProductos = async () => {
   }
 
   try {
-    const response = await fetch(`${BACKEND_URL}/api/productos`);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    const productos = await response.json();
+    // Usar el archivo JSON local como fuente principal
+    const module = await import('../assets/productosalebourgactulizados.json');
+    const productos = module.default;
     productosCache = productos;
     lastFetch = Date.now();
     return productos;
   } catch (error) {
     console.error('Error al obtener productos:', error);
-    // Si falla, intentar con el archivo local como fallback
-    try {
-      const response = await fetch('/productosalebourgactulizados.json');
-      const productos = await response.json();
-      productosCache = productos;
-      lastFetch = Date.now();
-      return productos;
-    } catch (fallbackError) {
-      console.error('Error en fallback:', fallbackError);
-      return [];
-    }
+    return [];
   }
 };
 
