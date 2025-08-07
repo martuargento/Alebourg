@@ -98,6 +98,79 @@ app.post('/api/descuentos', (req, res) => {
   });
 });
 
+// --- PRODUCTOS ---
+const productosPath = path.join(__dirname, 'public', 'productosalebourgactulizados.json');
+
+// Obtener todos los productos
+app.get('/api/productos', (req, res) => {
+  fs.readFile(productosPath, 'utf8', (err, data) => {
+    if (err) {
+      if (err.code === 'ENOENT') return res.json([]); // Si no existe, devolver vacío
+      return res.status(500).json({ error: 'No se pudo leer productos.' });
+    }
+    try {
+      res.json(JSON.parse(data));
+    } catch (e) {
+      res.status(500).json({ error: 'Productos corruptos.' });
+    }
+  });
+});
+
+// Obtener producto por ID
+app.get('/api/productos/:id', (req, res) => {
+  const { id } = req.params;
+  fs.readFile(productosPath, 'utf8', (err, data) => {
+    if (err) {
+      if (err.code === 'ENOENT') return res.status(404).json({ error: 'Producto no encontrado' });
+      return res.status(500).json({ error: 'No se pudo leer productos.' });
+    }
+    try {
+      const productos = JSON.parse(data);
+      const producto = productos.find(p => p.id === parseInt(id));
+      if (!producto) {
+        return res.status(404).json({ error: 'Producto no encontrado' });
+      }
+      res.json(producto);
+    } catch (e) {
+      res.status(500).json({ error: 'Productos corruptos.' });
+    }
+  });
+});
+
+// Obtener categorías
+app.get('/api/categorias', (req, res) => {
+  fs.readFile(productosPath, 'utf8', (err, data) => {
+    if (err) {
+      if (err.code === 'ENOENT') return res.json([]);
+      return res.status(500).json({ error: 'No se pudo leer productos.' });
+    }
+    try {
+      const productos = JSON.parse(data);
+      const categoriasMap = {};
+      productos.forEach(producto => {
+        if (!producto.categoria) return;
+        const categoria = producto.categoria.trim();
+        if (categoria) {
+          const categoriaSeparada = categoria.replace(/([A-Z])/g, ' $1').trim();
+          categoriasMap[categoria] = (categoriasMap[categoria] || 0) + 1;
+        }
+      });
+
+      const categorias = Object.entries(categoriasMap)
+        .map(([nombre, cantidad]) => ({ 
+          nombre: nombre.replace(/([A-Z])/g, ' $1').trim(), 
+          nombreOriginal: nombre,
+          cantidad 
+        }))
+        .sort((a, b) => a.nombre.localeCompare(b.nombre));
+
+      res.json(categorias);
+    } catch (e) {
+      res.status(500).json({ error: 'Productos corruptos.' });
+    }
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`Servidor de precios corriendo en http://localhost:${PORT}`);
 }); 

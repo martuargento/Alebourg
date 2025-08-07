@@ -4,6 +4,7 @@ import ProductCard from './ProductCard';
 import { usarCarrito } from '../context/CarritoContexto';
 import Swal from 'sweetalert2';
 import Buscador from './Buscador';
+import { getProductos } from '../services/apiService';
 
 const ProductosLista = ({ categoria = null }) => {
   const [productos, setProductos] = useState([]);
@@ -14,9 +15,9 @@ const ProductosLista = ({ categoria = null }) => {
   const [productosVisibles, setProductosVisibles] = useState(20);
 
   useEffect(() => {
-    fetch('https://raw.githubusercontent.com/martuargento/Alebourg/refs/heads/main/public/productosalebourgactulizados.json')
-      .then(res => res.json())
-      .then(data => {
+    const cargarProductos = async () => {
+      try {
+        const data = await getProductos();
         let filtrados = data;
         
         if (categoria) {
@@ -36,11 +37,13 @@ const ProductosLista = ({ categoria = null }) => {
         
         setProductos(filtrados);
         setLoading(false);
-      })
-      .catch(err => {
-        console.error("Error de carga de API", err);
+      } catch (err) {
+        console.error("Error de carga de productos", err);
         setLoading(false);
-      });
+      }
+    };
+
+    cargarProductos();
   }, [categoria]);
 
   const manejarAgregar = (producto) => {

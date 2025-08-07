@@ -5,6 +5,7 @@ import { usarCarrito } from '../context/CarritoContexto';
 import { ajustarPrecio, formatearPrecio } from '../utils/preciosUtils';
 import Swal from 'sweetalert2';
 import { BACKEND_URL } from '../config';
+import { getProductoById } from '../services/apiService';
 
 const DetalleProducto = () => {
   const { id } = useParams();
@@ -22,9 +23,7 @@ const DetalleProducto = () => {
     
     const fetchProducto = async () => {
       try {
-        const response = await fetch('https://raw.githubusercontent.com/martuargento/Alebourg/refs/heads/main/public/productosalebourgactulizados.json');
-        const data = await response.json();
-        const productoEncontrado = data.find(p => p.id === parseInt(id));
+        const productoEncontrado = await getProductoById(parseInt(id));
         
         if (productoEncontrado) {
           setProducto(productoEncontrado);

@@ -5,6 +5,7 @@ import { FaShoppingCart, FaChevronDown, FaTimes, FaChevronUp } from 'react-icons
 import { usarCarrito } from '../context/CarritoContexto';
 import logo from '../assets/logo.png';
 import ThemeToggle from './ThemeToggle';
+import { getCategorias } from '../services/apiService';
 
 const Header = () => {
   const { carrito } = usarCarrito();
@@ -59,29 +60,8 @@ const Header = () => {
   useEffect(() => {
     const fetchCategorias = async () => {
       try {
-        const response = await fetch('https://raw.githubusercontent.com/martuargento/Alebourg/refs/heads/main/public/productosalebourgactulizados.json');
-        const data = await response.json();
-        
-        const categoriasMap = {};
-        data.forEach(producto => {
-          if (!producto.categoria) return;
-          const categoria = producto.categoria.trim();
-          if (categoria) {
-            // Separar palabras basadas en mayúsculas
-            const categoriaSeparada = categoria.replace(/([A-Z])/g, ' $1').trim();
-            categoriasMap[categoria] = (categoriasMap[categoria] || 0) + 1;
-          }
-        });
-
-        setCategorias(
-          Object.entries(categoriasMap)
-            .map(([nombre, cantidad]) => ({ 
-              nombre: nombre.replace(/([A-Z])/g, ' $1').trim(), 
-              nombreOriginal: nombre,
-              cantidad 
-            }))
-            .sort((a, b) => a.nombre.localeCompare(b.nombre))
-        );
+        const categorias = await getCategorias();
+        setCategorias(categorias);
         setLoading(false);
       } catch (error) {
         console.error('Error fetching categories:', error);

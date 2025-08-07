@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import ProductosLista from './ProductosLista';
 import { Row, Col } from 'react-bootstrap';
+import { getProductos } from '../services/apiService';
 
 const ProductosPorCategoria = () => {
   const { nombreCategoria } = useParams();
@@ -11,8 +12,7 @@ const ProductosPorCategoria = () => {
   useEffect(() => {
     const obtenerCategoria = async () => {
       try {
-        const response = await fetch('https://raw.githubusercontent.com/martuargento/Alebourg/refs/heads/main/public/productosalebourgactulizados.json');
-        const data = await response.json();
+        const data = await getProductos();
         
         const producto = data.find(p => {
           const categoriaURL = p.categoria.toLowerCase()
