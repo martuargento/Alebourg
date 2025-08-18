@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { getSupabaseServerClient } from '../_supabaseClient.js';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -15,6 +16,21 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Método no permitido' });
   }
 
+  // Intentar leer desde Supabase si está configurado
+  try {
+    const supabase = getSupabaseServerClient();
+    if (supabase) {
+      const { data, error } = await supabase.from('productos').select('*');
+      if (error) throw error;
+      if (Array.isArray(data) && data.length > 0) {
+        return res.json(data);
+      }
+    }
+  } catch (err) {
+    console.warn('Supabase no disponible o error al leer, usando JSON local. Detalle:', err.message);
+  }
+
+  // Fallback al JSON local
   const productosPath = path.join(process.cwd(), 'public', 'productosalebourgactulizados.json');
 
   try {
