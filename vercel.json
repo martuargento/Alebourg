@@ -1,0 +1,35 @@
+{
+  "version": 2,
+  "functions": {
+    "api/precios-utils.js": {
+      "runtime": "nodejs18.x"
+    },
+    "api/descuentos.js": {
+      "runtime": "nodejs18.x"
+    },
+    "api/productos.js": {
+      "runtime": "nodejs18.x"
+    },
+    "api/categorias.js": {
+      "runtime": "nodejs18.x"
+    }
+  },
+  "routes": [
+    {
+      "src": "/api/precios-utils",
+      "dest": "/api/precios-utils.js"
+    },
+    {
+      "src": "/api/descuentos",
+      "dest": "/api/descuentos.js"
+    },
+    {
+      "src": "/api/productos",
+      "dest": "/api/productos.js"
+    },
+    {
+      "src": "/api/categorias",
+      "dest": "/api/categorias.js"
+    }
+  ]
+}
