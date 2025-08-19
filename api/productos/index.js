@@ -51,6 +51,7 @@ export default async function handler(req, res) {
     }
   } catch (err) {
     console.warn('Supabase no disponible o error al leer, usando JSON local. Detalle:', err.message);
+    console.log('[Backend] Error completo:', err);
   }
 
   // Fallback al JSON local

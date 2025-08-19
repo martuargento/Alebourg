@@ -6,6 +6,8 @@ const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE;
 
 if (!supabaseUrl || !supabaseServiceRoleKey) {
 	console.warn('SUPABASE_URL o SUPABASE_SERVICE_ROLE no están configuradas. Se usará el JSON local como fallback.');
+	console.log('SUPABASE_URL:', supabaseUrl ? 'SET' : 'NOT SET');
+	console.log('SUPABASE_SERVICE_ROLE:', supabaseServiceRoleKey ? 'SET' : 'NOT SET');
 }
 
 export const getSupabaseServerClient = () => {
