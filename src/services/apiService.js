@@ -31,6 +31,7 @@ export const getProductos = async () => {
         categoria: (p.categoria || '').toString(),
         titulo: p.titulo.toString(),
       }));
+    try { console.log('[Alebourg] Productos desde backend:', sane.length); } catch (_) {}
     productosCache = sane;
     lastFetch = Date.now();
     return sane;

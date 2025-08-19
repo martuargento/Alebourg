@@ -19,6 +19,7 @@ const ProductosLista = ({ categoria = null }) => {
     const cargarProductos = async () => {
       try {
         const data = await getProductos();
+        try { console.log('[Alebourg] Productos cargados en lista:', data.length); } catch (_) {}
         let filtrados = data;
         
         if (categoria) {
