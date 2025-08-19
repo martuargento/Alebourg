@@ -6,10 +6,10 @@ let categoriasCache = null;
 let lastFetch = 0;
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
 
-// Función para limpiar cache si ha expirado
-const isCacheValid = () => {
-  return productosCache && (Date.now() - lastFetch) < CACHE_DURATION;
-};
+  // Función para limpiar cache si ha expirado
+  const isCacheValid = () => {
+    return false; // Deshabilitar cache temporalmente
+  };
 
 // Obtener todos los productos
 export const getProductos = async () => {
@@ -20,7 +20,13 @@ export const getProductos = async () => {
   // Intentar primero desde el backend (Supabase). Si falla, usar JSON local como fallback
   try {
     // Forzar al backend a usar el modo paginado de Supabase para evitar fallback/limit
-    const response = await fetch(`${BACKEND_URL}/api/productos?page=0&pageSize=5000&_=${Date.now()}`, { cache: 'no-store' });
+    const response = await fetch(`${BACKEND_URL}/api/productos?page=0&pageSize=5000&_=${Date.now()}`, { 
+      cache: 'no-store',
+      headers: {
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache'
+      }
+    });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const productos = await response.json();
     // Sanitizar campos críticos
