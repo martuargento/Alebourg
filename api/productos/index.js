@@ -68,9 +68,14 @@ export default async function handler(req, res) {
         if (data && data.length > 0) {
           console.log('[Backend] Productos desde Supabase:', data.length);
           if (wantDebug) {
-            return res.json({ source: 'supabase', count: data.length, paged: false });
+            return res.json({ source: 'supabase', count: data.length, paged: false, totalInDb: count });
           }
           return res.json(data);
+        } else {
+          if (wantDebug) {
+            return res.json({ source: 'supabase', count: 0, paged: false, totalInDb: count });
+          }
+          return res.json([]);
         }
       }
     }
