@@ -49,6 +49,7 @@ export default async function handler(req, res) {
         return res.json(data ?? []);
       } else {
         // Traer todo sin paginado (más confiable)
+        console.log('[Backend] Ejecutando query Supabase...');
         const { data, error } = await supabase
           .from('productos')
           .select('*')
@@ -56,6 +57,14 @@ export default async function handler(req, res) {
           .limit(10000); // Forzar límite alto para traer todos
         if (error) throw error;
         console.log('[Backend] Query result:', { dataLength: data?.length, error: error?.message });
+        
+        // Verificar conteo total
+        const { count, error: countError } = await supabase
+          .from('productos')
+          .select('*', { count: 'exact', head: true });
+        
+        console.log('[Backend] Count query:', { count, countError: countError?.message });
+        
         if (data && data.length > 0) {
           console.log('[Backend] Productos desde Supabase:', data.length);
           if (wantDebug) {
