@@ -21,11 +21,7 @@ export const getProductos = async () => {
   try {
     // Forzar al backend a usar el modo paginado de Supabase para evitar fallback/limit
     const response = await fetch(`${BACKEND_URL}/api/productos?page=0&pageSize=5000&_=${Date.now()}`, { 
-      cache: 'no-store',
-      headers: {
-        'Cache-Control': 'no-cache',
-        'Pragma': 'no-cache'
-      }
+      cache: 'no-store'
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const productos = await response.json();
