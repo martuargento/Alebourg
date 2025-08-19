@@ -19,6 +19,12 @@ export default async function handler(req, res) {
   try {
     const supabase = getSupabaseServerClient();
     console.log('[Backend] Supabase client:', supabase ? 'OK' : 'NULL');
+    console.log('[Backend] Environment check:', {
+      hasUrl: !!process.env.SUPABASE_URL,
+      hasKey: !!process.env.SUPABASE_SERVICE_ROLE,
+      urlLength: process.env.SUPABASE_URL?.length || 0,
+      keyLength: process.env.SUPABASE_SERVICE_ROLE?.length || 0
+    });
     const wantDebug = req.query.debug === '1' || req.query.debug === 'true';
     if (supabase) {
       const pageParam = parseInt(req.query.page ?? '');
@@ -45,6 +51,7 @@ export default async function handler(req, res) {
           .select('*')
           .order('id', { ascending: true });
         if (error) throw error;
+        console.log('[Backend] Query result:', { dataLength: data?.length, error: error?.message });
         if (data && data.length > 0) {
           console.log('[Backend] Productos desde Supabase:', data.length);
           if (wantDebug) {
