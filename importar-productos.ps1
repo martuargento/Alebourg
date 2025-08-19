@@ -6,6 +6,9 @@ param(
     [string]$ArchivoJSON
 )
 
+$AdminToken = "Alebourg-Admin-2025-Secure"
+$BaseUrl = "https://alebourg-tau.vercel.app"
+
 Write-Host "Importando productos desde: $ArchivoJSON" -ForegroundColor Green
 
 try {
@@ -17,6 +20,11 @@ try {
         throw "El archivo no contiene un array JSON de productos"
     }
 
+    # 1) Limpiar tabla
+    Write-Host "Limpiando tabla en Supabase..." -ForegroundColor Yellow
+    Invoke-RestMethod -Uri "$BaseUrl/api/productos/clear" -Method Post -Headers @{ "X-ADMIN-TOKEN"=$AdminToken }
+
+    # 2) Importar en chunks
     $Total = $Productos.Count
     $ChunkSize = 800
     $Offset = 0
@@ -26,16 +34,15 @@ try {
         $Chunk = $Productos[$Offset..([Math]::Min($Offset + $ChunkSize - 1, $Total - 1))]
         $ChunkJson = ($Chunk | ConvertTo-Json -Depth 5)
 
-        $Mode = if ($Offset -eq 0) { 'replace' } else { 'append' }
-        Write-Host ("Enviando chunk {0}-{1} de {2} (modo: {3})" -f ($Offset+1), ([Math]::Min($Offset+$ChunkSize,$Total)), $Total, $Mode) -ForegroundColor Cyan
+        Write-Host ("Enviando chunk {0}-{1} de {2}" -f ($Offset+1), ([Math]::Min($Offset+$ChunkSize,$Total)), $Total) -ForegroundColor Cyan
 
         $Headers = @{ 
             "Content-Type" = "application/json"; 
-            "X-ADMIN-TOKEN" = "Alebourg-Admin-2025-Secure"; 
-            "X-IMPORT-MODE" = $Mode 
+            "X-ADMIN-TOKEN" = $AdminToken; 
+            "X-IMPORT-MODE" = "append" 
         }
 
-        $Response = Invoke-RestMethod -Uri "https://alebourg-tau.vercel.app/api/productos/import" -Method Post -Headers $Headers -Body $ChunkJson
+        $Response = Invoke-RestMethod -Uri "$BaseUrl/api/productos/import" -Method Post -Headers $Headers -Body $ChunkJson
         if ($Response.ok -ne $true) { throw "Respuesta no OK" }
         $Insertados += [int]$Response.inserted
 
