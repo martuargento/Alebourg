@@ -52,7 +52,8 @@ export default async function handler(req, res) {
         const { data, error } = await supabase
           .from('productos')
           .select('*')
-          .order('id', { ascending: true });
+          .order('id', { ascending: true })
+          .limit(10000); // Forzar límite alto para traer todos
         if (error) throw error;
         console.log('[Backend] Query result:', { dataLength: data?.length, error: error?.message });
         if (data && data.length > 0) {
