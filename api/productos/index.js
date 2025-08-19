@@ -16,6 +16,8 @@ export default async function handler(req, res) {
   }
 
   // Intentar leer desde Supabase si está configurado
+  console.log('[Backend] Request query:', req.query);
+  console.log('[Backend] Debug param:', req.query.debug);
   try {
     const supabase = getSupabaseServerClient();
     console.log('[Backend] Supabase client:', supabase ? 'OK' : 'NULL');
