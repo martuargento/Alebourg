@@ -19,7 +19,7 @@ export const getProductos = async () => {
 
   // Intentar primero desde el backend (Supabase). Si falla, usar JSON local como fallback
   try {
-    const response = await fetch(`${BACKEND_URL}/api/productos`, { cache: 'no-store' });
+    const response = await fetch(`${BACKEND_URL}/api/productos?_=${Date.now()}`, { cache: 'no-store' });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const productos = await response.json();
     // Sanitizar campos críticos
