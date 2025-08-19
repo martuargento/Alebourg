@@ -29,6 +29,28 @@ export default async function handler(req, res) {
     });
     const wantDebug = req.query.debug === '1' || req.query.debug === 'true';
     console.log('[Backend] Debug mode:', wantDebug, 'query:', req.query);
+    
+    // Si es debug, devolver solo el conteo
+    if (wantDebug) {
+      const supabase = getSupabaseServerClient();
+      if (supabase) {
+        const { count, error: countError } = await supabase
+          .from('productos')
+          .select('*', { count: 'exact', head: true });
+        
+        const { data, error } = await supabase
+          .from('productos')
+          .select('*')
+          .limit(10000);
+        
+        return res.json({ 
+          source: 'supabase', 
+          count: data?.length || 0, 
+          totalInDb: count || 0,
+          error: error?.message || countError?.message
+        });
+      }
+    }
     if (supabase) {
       const pageParam = parseInt(req.query.page ?? '');
       const pageSizeParam = parseInt(req.query.pageSize ?? '');
