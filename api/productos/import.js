@@ -40,6 +40,17 @@ export default async function handler(req, res) {
   const importMode = (req.headers['x-import-mode'] || 'replace').toString().toLowerCase();
 
   try {
+    // Deduplicar por id dentro del lote recibido (conservar última ocurrencia)
+    const receivedCount = productos.length;
+    const idToProduct = new Map();
+    for (const item of productos) {
+      if (item && typeof item.id !== 'undefined' && item.id !== null) {
+        idToProduct.set(item.id, item);
+      }
+    }
+    productos = Array.from(idToProduct.values());
+    const uniqueCount = productos.length;
+
     if (importMode === 'replace') {
       const { error: delError } = await supabase.from('productos').delete().neq('id', -1);
       if (delError) throw delError;
@@ -51,7 +62,20 @@ export default async function handler(req, res) {
       .upsert(productos, { onConflict: 'id' });
     if (upsertError) throw upsertError;
 
-    return res.json({ ok: true, inserted: productos.length, mode: importMode });
+    // Contar total real en tabla
+    const { count, error: countError } = await supabase
+      .from('productos')
+      .select('id', { count: 'exact', head: true });
+    if (countError) throw countError;
+
+    return res.json({
+      ok: true,
+      mode: importMode,
+      received: receivedCount,
+      uniqueInPayload: uniqueCount,
+      inserted: uniqueCount,
+      totalInTable: count
+    });
   } catch (err) {
     console.error('Fallo importación:', err);
     return res.status(500).json({ error: 'Error al importar productos', detail: err.message });

@@ -17,16 +17,26 @@ export const getProductos = async () => {
     return productosCache;
   }
 
+  // Intentar primero desde el backend (Supabase). Si falla, usar JSON local como fallback
   try {
-    // Usar el archivo JSON local como fuente principal
-    const module = await import('../assets/productosalebourgactulizados.json');
-    const productos = module.default;
+    const response = await fetch(`${BACKEND_URL}/api/productos`);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const productos = await response.json();
     productosCache = productos;
     lastFetch = Date.now();
     return productos;
-  } catch (error) {
-    console.error('Error al obtener productos:', error);
-    return [];
+  } catch (err) {
+    console.warn('Fallo obteniendo productos desde backend, usando archivo local:', err.message);
+    try {
+      const module = await import('../assets/productosalebourgactulizados.json');
+      const productos = module.default;
+      productosCache = productos;
+      lastFetch = Date.now();
+      return productos;
+    } catch (error) {
+      console.error('Error al obtener productos locales:', error);
+      return [];
+    }
   }
 };
 

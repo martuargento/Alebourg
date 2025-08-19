@@ -20,6 +20,15 @@ try {
         throw "El archivo no contiene un array JSON de productos"
     }
 
+    # Deduplicar por id: conservar el último registro de cada ID
+    $grupos = $Productos | Group-Object id
+    $duplicados = $grupos | Where-Object Count -gt 1
+    if ($duplicados.Count -gt 0) {
+        Write-Host ("Se encontraron {0} IDs duplicados. Se tomará el último registro de cada ID." -f $duplicados.Count) -ForegroundColor Yellow
+        $duplicados | Select-Object -First 20 | ForEach-Object { Write-Host ("{0} x{1}" -f $_.Name, $_.Count) }
+    }
+    $Productos = $grupos | ForEach-Object { $_.Group[-1] }
+
     # 1) Limpiar tabla
     Write-Host "Limpiando tabla en Supabase..." -ForegroundColor Yellow
     Invoke-RestMethod -Uri "$BaseUrl/api/productos/clear" -Method Post -Headers @{ "X-ADMIN-TOKEN"=$AdminToken }
