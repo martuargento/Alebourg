@@ -22,8 +22,8 @@ export default async function handler(req, res) {
   try {
     const supabase = getSupabaseServerClient();
     if (supabase) {
-      const { data, error } = await supabase.from('productos').select('*').eq('id', parseInt(id)).single();
-      if (error && error.code !== 'PGRST116') throw error; // PGRST116: not found
+      const { data, error } = await supabase.from('productos').select('*').eq('id', parseInt(id)).maybeSingle();
+      if (error) throw error;
       if (data) {
         return res.json(data);
       }

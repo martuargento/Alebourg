@@ -20,10 +20,24 @@ export default async function handler(req, res) {
   try {
     const supabase = getSupabaseServerClient();
     if (supabase) {
-      const { data, error } = await supabase.from('productos').select('*');
-      if (error) throw error;
-      if (Array.isArray(data) && data.length > 0) {
-        return res.json(data);
+      // Paginado para evitar límite de filas por request en PostgREST
+      const pageSize = 1000;
+      let allRows = [];
+      let from = 0;
+      while (true) {
+        const to = from + pageSize - 1;
+        const { data, error } = await supabase
+          .from('productos')
+          .select('*')
+          .range(from, to);
+        if (error) throw error;
+        if (!data || data.length === 0) break;
+        allRows = allRows.concat(data);
+        if (data.length < pageSize) break;
+        from += pageSize;
+      }
+      if (allRows.length > 0) {
+        return res.json(allRows);
       }
     }
   } catch (err) {
