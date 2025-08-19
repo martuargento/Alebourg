@@ -6,6 +6,7 @@ import { usarCarrito } from '../context/CarritoContexto';
 import logo from '../assets/logo.png';
 import ThemeToggle from './ThemeToggle';
 import { getCategorias } from '../services/apiService';
+import { slugifyCategory } from '../utils/slug';
 
 const Header = () => {
   const { carrito } = usarCarrito();
@@ -103,12 +104,7 @@ const Header = () => {
     navigate('/');
   };
 
-  const formatCategory = (name) => {
-    return name.toLowerCase()
-      .replace(/\s+/g, '-')
-      .replace(/[\/&]/g, '-')
-      .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-  };
+  const formatCategory = (name) => slugifyCategory(name);
 
   const cantidadTotal = carrito.reduce((total, p) => total + p.cantidad, 0);
   const estaLogueado = localStorage.getItem('logueado') === 'true';

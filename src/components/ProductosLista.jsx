@@ -5,6 +5,7 @@ import { usarCarrito } from '../context/CarritoContexto';
 import Swal from 'sweetalert2';
 import Buscador from './Buscador';
 import { getProductos } from '../services/apiService';
+import { categorySlugEquals } from '../utils/slug';
 
 const ProductosLista = ({ categoria = null }) => {
   const [productos, setProductos] = useState([]);
@@ -21,18 +22,7 @@ const ProductosLista = ({ categoria = null }) => {
         let filtrados = data;
         
         if (categoria) {
-          const categoriaNormalizada = categoria.toLowerCase()
-            .replace(/-/g, '')
-            .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        
-          filtrados = data.filter(producto => {
-            const productCategory = producto.categoria.toLowerCase()
-              .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-              .replace(/\s+/g, '')
-              .replace(/[\/&]/g, '');
-            
-            return productCategory === categoriaNormalizada;
-          });
+          filtrados = data.filter(producto => categorySlugEquals(producto.categoria, categoria));
         }
         
         setProductos(filtrados);

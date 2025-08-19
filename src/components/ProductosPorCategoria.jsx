@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 import ProductosLista from './ProductosLista';
 import { Row, Col } from 'react-bootstrap';
 import { getProductos } from '../services/apiService';
+import { categorySlugEquals, slugifyCategory } from '../utils/slug';
 
 const ProductosPorCategoria = () => {
   const { nombreCategoria } = useParams();
@@ -14,18 +15,11 @@ const ProductosPorCategoria = () => {
       try {
         const data = await getProductos();
         
-        const producto = data.find(p => {
-          const categoriaURL = p.categoria.toLowerCase()
-            .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-            .replace(/\s+/g, '')
-            .replace(/[\/&]/g, '');
-          return categoriaURL === nombreCategoria;
-        });
+        const producto = data.find(p => categorySlugEquals(p.categoria, nombreCategoria));
 
         if (producto) {
           // Separar palabras cuando hay mayúsculas
-          const categoriaConEspacios = producto.categoria.trim().replace(/([A-Z])/g, ' $1').trim();
-          setCategoriaFormateada(categoriaConEspacios);
+          setCategoriaFormateada(producto.categoria);
         }
       } catch (error) {
         console.error('Error al obtener la categoría:', error);
