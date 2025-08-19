@@ -24,7 +24,6 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Supabase no configurado en el servidor' });
   }
 
-  // Parseo robusto del body
   let productos = req.body;
   if (typeof productos === 'string') {
     try {
@@ -46,9 +45,11 @@ export default async function handler(req, res) {
       if (delError) throw delError;
     }
 
-    // Inserción del chunk recibido
-    const { error: insError } = await supabase.from('productos').insert(productos);
-    if (insError) throw insError;
+    // Upsert para evitar fallas por IDs duplicados
+    const { error: upsertError } = await supabase
+      .from('productos')
+      .upsert(productos, { onConflict: 'id' });
+    if (upsertError) throw upsertError;
 
     return res.json({ ok: true, inserted: productos.length, mode: importMode });
   } catch (err) {

@@ -26,7 +26,7 @@ try {
 
     # 2) Importar en chunks
     $Total = $Productos.Count
-    $ChunkSize = 800
+    $ChunkSize = 400
     $Offset = 0
     $Insertados = 0
 
@@ -46,6 +46,7 @@ try {
         if ($Response.ok -ne $true) { throw "Respuesta no OK" }
         $Insertados += [int]$Response.inserted
 
+        Start-Sleep -Milliseconds 300
         $Offset += $ChunkSize
     }
 
