@@ -19,8 +19,8 @@ export const getProductos = async () => {
 
   // Intentar primero desde el backend (Supabase). Si falla, usar JSON local como fallback
   try {
-    // Pide todo sin paginar (backend hace paginado interno). Si querés, podemos pasar page/pageSize
-    const response = await fetch(`${BACKEND_URL}/api/productos?_=${Date.now()}`, { cache: 'no-store' });
+    // Forzar al backend a usar el modo paginado de Supabase para evitar fallback/limit
+    const response = await fetch(`${BACKEND_URL}/api/productos?page=0&pageSize=5000&_=${Date.now()}`, { cache: 'no-store' });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const productos = await response.json();
     // Sanitizar campos críticos
