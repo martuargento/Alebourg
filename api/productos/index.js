@@ -36,25 +36,14 @@ export default async function handler(req, res) {
         if (error) throw error;
         return res.json(data ?? []);
       } else {
-        // Modo compat: traer todo (puede ser pesado)
-        const pageSize = 1000;
-        let allRows = [];
-        let from = 0;
-        while (true) {
-          const to = from + pageSize - 1;
-          const { data, error } = await supabase
-            .from('productos')
-            .select('*')
-            .order('id', { ascending: true })
-            .range(from, to);
-          if (error) throw error;
-          if (!data || data.length === 0) break;
-          allRows = allRows.concat(data);
-          if (data.length < pageSize) break;
-          from += pageSize;
-        }
-        if (allRows.length > 0) {
-          return res.json(allRows);
+        // Traer todo sin paginado (más confiable)
+        const { data, error } = await supabase
+          .from('productos')
+          .select('*')
+          .order('id', { ascending: true });
+        if (error) throw error;
+        if (data && data.length > 0) {
+          return res.json(data);
         }
       }
     }
