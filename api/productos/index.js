@@ -1,5 +1,3 @@
-import fs from 'fs';
-import path from 'path';
 import { getSupabaseServerClient } from '../_supabaseClient.js';
 
 export default async function handler(req, res) {
@@ -56,27 +54,12 @@ export default async function handler(req, res) {
         }
       }
     }
+    
+    // Si llegamos aquí, no hay datos de Supabase
+    return res.status(500).json({ error: 'No se pudo obtener productos desde Supabase' });
   } catch (err) {
-    console.warn('Supabase no disponible o error al leer, usando JSON local. Detalle:', err.message);
+    console.error('Error al leer desde Supabase:', err.message);
     console.log('[Backend] Error completo:', err);
-  }
-
-  // Fallback al JSON local
-  const productosPath = path.join(process.cwd(), 'public', 'productosalebourgactulizados.json');
-
-  try {
-    if (!fs.existsSync(productosPath)) {
-      return res.json([]);
-    }
-
-    const data = fs.readFileSync(productosPath, 'utf8');
-    const productos = JSON.parse(data);
-    console.log('[Backend] Productos desde JSON local:', productos.length);
-    if (req.query.debug === '1' || req.query.debug === 'true') {
-      return res.json({ source: 'json', count: productos.length });
-    }
-    res.json(productos);
-  } catch (err) {
-    res.status(500).json({ error: 'No se pudo leer productos.' });
+    return res.status(500).json({ error: 'Error al conectar con Supabase', detail: err.message });
   }
 }
