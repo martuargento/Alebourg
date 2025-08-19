@@ -29,6 +29,7 @@ export default async function handler(req, res) {
         const { data, error } = await supabase
           .from('productos')
           .select('*')
+          .order('id', { ascending: true })
           .range(from, to);
         if (error) throw error;
         if (!data || data.length === 0) break;

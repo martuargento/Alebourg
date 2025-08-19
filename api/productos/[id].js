@@ -22,7 +22,12 @@ export default async function handler(req, res) {
   try {
     const supabase = getSupabaseServerClient();
     if (supabase) {
-      const { data, error } = await supabase.from('productos').select('*').eq('id', parseInt(id)).maybeSingle();
+      const { data, error } = await supabase
+        .from('productos')
+        .select('*')
+        .eq('id', parseInt(id))
+        .limit(1)
+        .single();
       if (error) throw error;
       if (data) {
         return res.json(data);

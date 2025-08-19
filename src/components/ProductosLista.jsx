@@ -50,10 +50,12 @@ const ProductosLista = ({ categoria = null }) => {
   const productosFiltrados = useMemo(() => {
     if (!busqueda) return productos;
     
-    const busquedaLower = busqueda.toLowerCase();
-    return productos.filter(producto => 
-      producto.titulo.toLowerCase().includes(busquedaLower)
-    );
+    const q = busqueda.toLowerCase();
+    return productos.filter(producto => {
+      const t = (producto.titulo || '').toLowerCase();
+      const c = (producto.categoria || '').toLowerCase();
+      return t.includes(q) || c.includes(q) || String(producto.id).includes(q);
+    });
   }, [productos, busqueda]);
 
   const productosOrdenados = useMemo(() => {

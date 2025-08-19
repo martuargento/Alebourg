@@ -22,9 +22,17 @@ export const getProductos = async () => {
     const response = await fetch(`${BACKEND_URL}/api/productos`);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const productos = await response.json();
-    productosCache = productos;
+    // Sanitizar campos críticos
+    const sane = productos
+      .filter(p => p && typeof p.id !== 'undefined' && p.titulo)
+      .map(p => ({
+        ...p,
+        categoria: (p.categoria || '').toString(),
+        titulo: p.titulo.toString(),
+      }));
+    productosCache = sane;
     lastFetch = Date.now();
-    return productos;
+    return sane;
   } catch (err) {
     console.warn('Fallo obteniendo productos desde backend, usando archivo local:', err.message);
     try {
