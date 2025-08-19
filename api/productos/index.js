@@ -21,6 +21,7 @@ export default async function handler(req, res) {
   try {
     const supabase = getSupabaseServerClient();
     console.log('[Backend] Supabase client:', supabase ? 'OK' : 'NULL');
+    const wantDebug = req.query.debug === '1' || req.query.debug === 'true';
     if (supabase) {
       const pageParam = parseInt(req.query.page ?? '');
       const pageSizeParam = parseInt(req.query.pageSize ?? '');
@@ -35,6 +36,9 @@ export default async function handler(req, res) {
           .order('id', { ascending: true })
           .range(from, to);
         if (error) throw error;
+        if (wantDebug) {
+          return res.json({ source: 'supabase', count: (data ?? []).length, paged: true, pageParam, pageSizeParam });
+        }
         return res.json(data ?? []);
       } else {
         // Traer todo sin paginado (más confiable)
@@ -45,6 +49,9 @@ export default async function handler(req, res) {
         if (error) throw error;
         if (data && data.length > 0) {
           console.log('[Backend] Productos desde Supabase:', data.length);
+          if (wantDebug) {
+            return res.json({ source: 'supabase', count: data.length, paged: false });
+          }
           return res.json(data);
         }
       }
@@ -65,6 +72,9 @@ export default async function handler(req, res) {
     const data = fs.readFileSync(productosPath, 'utf8');
     const productos = JSON.parse(data);
     console.log('[Backend] Productos desde JSON local:', productos.length);
+    if (req.query.debug === '1' || req.query.debug === 'true') {
+      return res.json({ source: 'json', count: productos.length });
+    }
     res.json(productos);
   } catch (err) {
     res.status(500).json({ error: 'No se pudo leer productos.' });
