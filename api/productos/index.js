@@ -20,6 +20,7 @@ export default async function handler(req, res) {
   // Intentar leer desde Supabase si está configurado
   try {
     const supabase = getSupabaseServerClient();
+    console.log('[Backend] Supabase client:', supabase ? 'OK' : 'NULL');
     if (supabase) {
       const pageParam = parseInt(req.query.page ?? '');
       const pageSizeParam = parseInt(req.query.pageSize ?? '');
@@ -43,6 +44,7 @@ export default async function handler(req, res) {
           .order('id', { ascending: true });
         if (error) throw error;
         if (data && data.length > 0) {
+          console.log('[Backend] Productos desde Supabase:', data.length);
           return res.json(data);
         }
       }
@@ -61,6 +63,7 @@ export default async function handler(req, res) {
 
     const data = fs.readFileSync(productosPath, 'utf8');
     const productos = JSON.parse(data);
+    console.log('[Backend] Productos desde JSON local:', productos.length);
     res.json(productos);
   } catch (err) {
     res.status(500).json({ error: 'No se pudo leer productos.' });
