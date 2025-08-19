@@ -26,6 +26,7 @@ export default async function handler(req, res) {
       keyLength: process.env.SUPABASE_SERVICE_ROLE?.length || 0
     });
     const wantDebug = req.query.debug === '1' || req.query.debug === 'true';
+    console.log('[Backend] Debug mode:', wantDebug, 'query:', req.query);
     if (supabase) {
       const pageParam = parseInt(req.query.page ?? '');
       const pageSizeParam = parseInt(req.query.pageSize ?? '');
