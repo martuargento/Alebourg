@@ -40,8 +40,7 @@ export default async function handler(req, res) {
         
         const { data: productos, error: productosError } = await supabase
           .from('productos')
-          .select('*')
-          .limit(1000);
+          .select('*');
         
         if (productosError) {
           console.error('Error obteniendo productos:', productosError);

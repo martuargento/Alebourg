@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { getSupabaseServerClient } from './_supabaseClient.js';
+import { getSupabaseClient } from './_supabaseClient.js';
 
 export default async function handler(req, res) {
   // Configurar CORS
