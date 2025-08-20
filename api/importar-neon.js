@@ -1,5 +1,6 @@
 import { getNeonClient } from './_neonClient.js';
-import productosData from '../productosalebourgactulizados.json' assert { type: 'json' };
+import fs from 'fs';
+import path from 'path';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -21,6 +22,13 @@ export default async function handler(req, res) {
     
     const pool = getNeonClient();
     
+    // Leer el archivo JSON desde el sistema de archivos
+    const jsonPath = path.join(process.cwd(), 'productosalebourgactulizados.json');
+    const jsonData = fs.readFileSync(jsonPath, 'utf8');
+    const productosData = JSON.parse(jsonData);
+    
+    console.log(`[Importar Neon] Archivo JSON leído: ${productosData.length} productos`);
+    
     // Limpiar tabla existente
     await pool.query('DELETE FROM productos');
     console.log('[Importar Neon] Tabla limpiada');
@@ -38,21 +46,22 @@ export default async function handler(req, res) {
 
     console.log(`[Importar Neon] Preparando ${productos.length} productos para importar`);
 
-    // Insertar productos en lotes de 100
-    const batchSize = 100;
+    // Insertar productos en lotes de 50 (reducido para evitar timeouts)
+    const batchSize = 50;
     let insertedCount = 0;
 
     for (let i = 0; i < productos.length; i += batchSize) {
       const batch = productos.slice(i, i + batchSize);
       
-      const values = batch.map((producto, index) => {
-        const offset = i + index;
-        return `($${offset * 6 + 1}, $${offset * 6 + 2}, $${offset * 6 + 3}, $${offset * 6 + 4}, $${offset * 6 + 5}, $${offset * 6 + 6})`;
+      // Crear query dinámico para cada lote
+      const placeholders = batch.map((_, index) => {
+        const offset = index * 7;
+        return `($${offset + 1}, $${offset + 2}, $${offset + 3}, $${offset + 4}, $${offset + 5}, $${offset + 6}, $${offset + 7})`;
       }).join(', ');
 
       const query = `
         INSERT INTO productos (id, titulo, descripcion, precio, categoria, imagen, stock)
-        VALUES ${values}
+        VALUES ${placeholders}
         ON CONFLICT (id) DO UPDATE SET
           titulo = EXCLUDED.titulo,
           descripcion = EXCLUDED.descripcion,
