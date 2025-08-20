@@ -21,7 +21,7 @@ export default async function handler(req, res) {
   
   try {
     const supabase = getSupabaseClient();
-    console.log('[Backend] Supabase client:', supabase ? 'OK' : 'NULL');
+    console.log('[Backend] Supabase client:', supabase ? 'OK - V2' : 'NULL');
     
     const wantDebug = req.query.debug === '1' || req.query.debug === 'true';
     console.log('[Backend] Debug mode:', wantDebug, 'query:', req.query);
