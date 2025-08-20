@@ -71,7 +71,7 @@ export default async function handler(req, res) {
           .select('*')
           .range(from, to)
           .order('orden', { ascending: true, nullsLast: true }) // Ordenar por campo personalizado
-          .order('id', { ascending: true }); // Orden secundario por ID
+          .order('id', { ascending: true }); // Orden secundario por ID para productos sin orden
         
         if (pageError) {
           console.error('Error obteniendo página de productos:', pageError);
@@ -95,8 +95,50 @@ export default async function handler(req, res) {
       
       console.log(`[Backend] Total de productos obtenidos de Supabase: ${allProductos.length}`);
       
+      // Aplicar lógica de ordenamiento inteligente
+      console.log('[Backend] Aplicando ordenamiento inteligente...');
+      
+      // Separar productos con orden personalizado y sin orden
+      const productosConOrden = allProductos.filter(p => p.orden && p.orden > 0);
+      const productosSinOrden = allProductos.filter(p => !p.orden || p.orden === 0);
+      
+      console.log(`[Backend] Productos con orden personalizado: ${productosConOrden.length}`);
+      console.log(`[Backend] Productos sin orden personalizado: ${productosSinOrden.length}`);
+      
+      // Ordenar productos con orden personalizado
+      productosConOrden.sort((a, b) => a.orden - b.orden);
+      
+      // Ordenar productos sin orden por ID (orden original)
+      productosSinOrden.sort((a, b) => a.id - b.id);
+      
+      // Crear array final con ordenamiento inteligente
+      let productosOrdenados = [];
+      let posicionActual = 1;
+      
+      // Procesar productos con orden personalizado
+      for (const producto of productosConOrden) {
+        // Si hay un gap en las posiciones, llenarlo con productos sin orden
+        while (posicionActual < producto.orden) {
+          if (productosSinOrden.length > 0) {
+            productosOrdenados.push(productosSinOrden.shift());
+            posicionActual++;
+          } else {
+            break;
+          }
+        }
+        
+        // Agregar el producto con orden personalizado
+        productosOrdenados.push(producto);
+        posicionActual = producto.orden + 1;
+      }
+      
+      // Agregar los productos sin orden restantes al final
+      productosOrdenados = productosOrdenados.concat(productosSinOrden);
+      
+      console.log(`[Backend] Productos ordenados inteligentemente: ${productosOrdenados.length}`);
+      
       // Sanitizar campos críticos
-      const sane = allProductos
+      const sane = productosOrdenados
         .filter(p => p && typeof p.id !== 'undefined' && p.titulo)
         .map(p => ({
           ...p,
