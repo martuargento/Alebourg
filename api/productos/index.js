@@ -70,7 +70,8 @@ export default async function handler(req, res) {
           .from('productos')
           .select('*')
           .range(from, to)
-          .order('id');
+          .order('orden', { ascending: true, nullsLast: true }) // Ordenar por campo personalizado
+          .order('id', { ascending: true }); // Orden secundario por ID
         
         if (pageError) {
           console.error('Error obteniendo página de productos:', pageError);
