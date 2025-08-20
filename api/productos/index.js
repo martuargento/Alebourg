@@ -54,17 +54,42 @@ export default async function handler(req, res) {
         });
       }
       
-      // Obtener todos los productos sin límite de paginación
-      console.log('[Backend] Obteniendo todos los productos desde Supabase...');
+      // Obtener todos los productos con paginación para superar el límite de 1000
+      console.log('[Backend] Obteniendo todos los productos desde Supabase con paginación...');
       
-      const { data: allProductos, error: productosError } = await supabase
-        .from('productos')
-        .select('*')
-        .order('id');
+      const pageSize = 1000; // Tamaño máximo por página en Supabase
+      let allProductos = [];
+      let from = 0;
+      let hasMore = true;
       
-      if (productosError) {
-        console.error('Error obteniendo productos:', productosError);
-        return res.status(500).json({ error: 'Error obteniendo productos desde Supabase' });
+      while (hasMore) {
+        const to = from + pageSize - 1;
+        console.log(`[Backend] Obteniendo productos del ${from} al ${to}...`);
+        
+        const { data: pageProductos, error: pageError } = await supabase
+          .from('productos')
+          .select('*')
+          .range(from, to)
+          .order('id');
+        
+        if (pageError) {
+          console.error('Error obteniendo página de productos:', pageError);
+          return res.status(500).json({ error: 'Error obteniendo productos desde Supabase' });
+        }
+        
+        if (!pageProductos || pageProductos.length === 0) {
+          hasMore = false;
+        } else {
+          allProductos = allProductos.concat(pageProductos);
+          console.log(`[Backend] Productos obtenidos en esta página: ${pageProductos.length}`);
+          
+          // Si obtenemos menos productos que el tamaño de página, hemos llegado al final
+          if (pageProductos.length < pageSize) {
+            hasMore = false;
+          } else {
+            from += pageSize;
+          }
+        }
       }
       
       console.log(`[Backend] Total de productos obtenidos de Supabase: ${allProductos.length}`);

@@ -20,7 +20,7 @@ export default async function handler(req, res) {
 
   // Intentar leer desde Supabase
   try {
-    const supabase = getSupabaseServerClient();
+    const supabase = getSupabaseClient();
     if (supabase) {
       // Paginado para traer todas las categorías
       const pageSize = 1000;
