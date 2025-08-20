@@ -1,4 +1,4 @@
-import { getNeonClient } from '../_neonClient.js';
+import { getSupabaseClient } from '../_supabaseClient.js';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -20,35 +20,55 @@ export default async function handler(req, res) {
   console.log('[Backend] Debug param:', req.query.debug);
   
   try {
-    const pool = getNeonClient();
-    console.log('[Backend] Neon client:', pool ? 'OK' : 'NULL');
+    const supabase = getSupabaseClient();
+    console.log('[Backend] Supabase client:', supabase ? 'OK' : 'NULL');
     
     const wantDebug = req.query.debug === '1' || req.query.debug === 'true';
     console.log('[Backend] Debug mode:', wantDebug, 'query:', req.query);
     
-    if (pool) {
+    if (supabase) {
       // Si es debug, devolver solo el conteo
       if (wantDebug) {
-        const countResult = await pool.query('SELECT COUNT(*) FROM productos');
-        const totalCount = parseInt(countResult.rows[0].count);
+        const { count: totalCount, error: countError } = await supabase
+          .from('productos')
+          .select('*', { count: 'exact', head: true });
         
-        const productosResult = await pool.query('SELECT * FROM productos LIMIT 1000');
-        const productos = productosResult.rows;
+        if (countError) {
+          console.error('Error contando productos:', countError);
+          return res.status(500).json({ error: 'Error contando productos' });
+        }
+        
+        const { data: productos, error: productosError } = await supabase
+          .from('productos')
+          .select('*')
+          .limit(1000);
+        
+        if (productosError) {
+          console.error('Error obteniendo productos:', productosError);
+          return res.status(500).json({ error: 'Error obteniendo productos' });
+        }
         
         return res.json({ 
-          source: 'neon', 
+          source: 'supabase', 
           count: productos?.length || 0, 
           totalInDb: totalCount || 0
         });
       }
       
       // Obtener todos los productos sin límite de paginación
-      console.log('[Backend] Obteniendo todos los productos desde Neon...');
+      console.log('[Backend] Obteniendo todos los productos desde Supabase...');
       
-      const productosResult = await pool.query('SELECT * FROM productos ORDER BY id');
-      const allProductos = productosResult.rows;
+      const { data: allProductos, error: productosError } = await supabase
+        .from('productos')
+        .select('*')
+        .order('id');
       
-      console.log(`[Backend] Total de productos obtenidos de Neon: ${allProductos.length}`);
+      if (productosError) {
+        console.error('Error obteniendo productos:', productosError);
+        return res.status(500).json({ error: 'Error obteniendo productos desde Supabase' });
+      }
+      
+      console.log(`[Backend] Total de productos obtenidos de Supabase: ${allProductos.length}`);
       
       // Sanitizar campos críticos
       const sane = allProductos
@@ -57,17 +77,17 @@ export default async function handler(req, res) {
           ...p,
           categoria: (p.categoria || '').toString().toLowerCase().trim(),
           precio: (p.precio || 0).toString(),
-          stock: parseInt(p.stock) || 0
+          stock: 0 // Supabase no tiene campo stock, usar 0 por defecto
         }));
       
       return res.json(sane);
     }
     
-    // Si llegamos aquí, no hay datos de Neon
-    return res.status(500).json({ error: 'No se pudo obtener productos desde Neon' });
+    // Si llegamos aquí, no hay datos de Supabase
+    return res.status(500).json({ error: 'No se pudo obtener productos desde Supabase' });
   } catch (err) {
-    console.error('Error al leer desde Neon:', err.message);
+    console.error('Error al leer desde Supabase:', err.message);
     console.log('[Backend] Error completo:', err);
-    return res.status(500).json({ error: 'Error al conectar con Neon', detail: err.message });
+    return res.status(500).json({ error: 'Error al conectar con Supabase', detail: err.message });
   }
 }
