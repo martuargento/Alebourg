@@ -1,4 +1,4 @@
-import { getSupabaseServerClient } from '../_supabaseClient.js';
+import { getNeonClient } from '../_neonClient.js';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -15,98 +15,59 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Método no permitido' });
   }
 
-  // Intentar leer desde Supabase si está configurado
+  // Intentar leer desde Neon si está configurado
   console.log('[Backend] Request query:', req.query);
   console.log('[Backend] Debug param:', req.query.debug);
+  
   try {
-    const supabase = getSupabaseServerClient();
-    console.log('[Backend] Supabase client:', supabase ? 'OK' : 'NULL');
-    console.log('[Backend] Environment check:', {
-      hasUrl: !!process.env.SUPABASE_URL,
-      hasKey: !!process.env.SUPABASE_SERVICE_ROLE,
-      urlLength: process.env.SUPABASE_URL?.length || 0,
-      keyLength: process.env.SUPABASE_SERVICE_ROLE?.length || 0
-    });
+    const pool = getNeonClient();
+    console.log('[Backend] Neon client:', pool ? 'OK' : 'NULL');
+    
     const wantDebug = req.query.debug === '1' || req.query.debug === 'true';
     console.log('[Backend] Debug mode:', wantDebug, 'query:', req.query);
     
-    // Si es debug, devolver solo el conteo
-    if (wantDebug) {
-      const supabase = getSupabaseServerClient();
-      if (supabase) {
-        const { count, error: countError } = await supabase
-          .from('productos')
-          .select('*', { count: 'exact', head: true });
+    if (pool) {
+      // Si es debug, devolver solo el conteo
+      if (wantDebug) {
+        const countResult = await pool.query('SELECT COUNT(*) FROM productos');
+        const totalCount = parseInt(countResult.rows[0].count);
         
-        const { data, error } = await supabase
-          .from('productos')
-          .select('*')
-          .limit(10000);
+        const productosResult = await pool.query('SELECT * FROM productos LIMIT 1000');
+        const productos = productosResult.rows;
         
         return res.json({ 
-          source: 'supabase', 
-          count: data?.length || 0, 
-          totalInDb: count || 0,
-          error: error?.message || countError?.message
+          source: 'neon', 
+          count: productos?.length || 0, 
+          totalInDb: totalCount || 0
         });
       }
-    }
-    if (supabase) {
-      const pageParam = parseInt(req.query.page ?? '');
-      const pageSizeParam = parseInt(req.query.pageSize ?? '');
-      const usePaging = Number.isFinite(pageParam) && Number.isFinite(pageSizeParam) && pageSizeParam > 0;
-
-      if (usePaging) {
-        const from = pageParam * pageSizeParam;
-        const to = from + pageSizeParam - 1;
-        const { data, error } = await supabase
-          .from('productos')
-          .select('*')
-          .order('id', { ascending: true })
-          .range(from, to);
-        if (error) throw error;
-        if (wantDebug) {
-          return res.json({ source: 'supabase', count: (data ?? []).length, paged: true, pageParam, pageSizeParam });
-        }
-        return res.json(data ?? []);
-      } else {
-        // Traer todo sin paginado (más confiable)
-        console.log('[Backend] Ejecutando query Supabase...');
-        const { data, error } = await supabase
-          .from('productos')
-          .select('*')
-          .order('id', { ascending: true })
-          .limit(10000); // Forzar límite alto para traer todos
-        if (error) throw error;
-        console.log('[Backend] Query result:', { dataLength: data?.length, error: error?.message });
-        
-        // Verificar conteo total
-        const { count, error: countError } = await supabase
-          .from('productos')
-          .select('*', { count: 'exact', head: true });
-        
-        console.log('[Backend] Count query:', { count, countError: countError?.message });
-        
-        if (data && data.length > 0) {
-          console.log('[Backend] Productos desde Supabase:', data.length);
-          if (wantDebug) {
-            return res.json({ source: 'supabase', count: data.length, paged: false, totalInDb: count });
-          }
-          return res.json(data);
-        } else {
-          if (wantDebug) {
-            return res.json({ source: 'supabase', count: 0, paged: false, totalInDb: count });
-          }
-          return res.json([]);
-        }
-      }
+      
+      // Obtener todos los productos sin límite de paginación
+      console.log('[Backend] Obteniendo todos los productos desde Neon...');
+      
+      const productosResult = await pool.query('SELECT * FROM productos ORDER BY id');
+      const allProductos = productosResult.rows;
+      
+      console.log(`[Backend] Total de productos obtenidos de Neon: ${allProductos.length}`);
+      
+      // Sanitizar campos críticos
+      const sane = allProductos
+        .filter(p => p && typeof p.id !== 'undefined' && p.titulo)
+        .map(p => ({
+          ...p,
+          categoria: (p.categoria || '').toString().toLowerCase().trim(),
+          precio: parseFloat(p.precio) || 0,
+          stock: parseInt(p.stock) || 0
+        }));
+      
+      return res.json(sane);
     }
     
-    // Si llegamos aquí, no hay datos de Supabase
-    return res.status(500).json({ error: 'No se pudo obtener productos desde Supabase' });
+    // Si llegamos aquí, no hay datos de Neon
+    return res.status(500).json({ error: 'No se pudo obtener productos desde Neon' });
   } catch (err) {
-    console.error('Error al leer desde Supabase:', err.message);
+    console.error('Error al leer desde Neon:', err.message);
     console.log('[Backend] Error completo:', err);
-    return res.status(500).json({ error: 'Error al conectar con Supabase', detail: err.message });
+    return res.status(500).json({ error: 'Error al conectar con Neon', detail: err.message });
   }
 }
