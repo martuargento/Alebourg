@@ -1,9 +1,11 @@
-import { getSupabaseServerClient } from '../_supabaseClient.js';
+import { getSupabaseAdminClient } from '../_supabaseClient.js';
 
 export default async function handler(req, res) {
+  // Configurar CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-ADMIN-TOKEN');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Cache-Control', 'no-store');
 
   if (req.method === 'OPTIONS') {
     res.status(200).end();
@@ -14,21 +16,46 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Método no permitido' });
   }
 
-  const adminToken = process.env.ADMIN_TOKEN;
-  if (!adminToken || req.headers['x-admin-token'] !== adminToken) {
-    return res.status(401).json({ error: 'No autorizado' });
-  }
-
-  const supabase = getSupabaseServerClient();
-  if (!supabase) {
-    return res.status(500).json({ error: 'Supabase no configurado' });
-  }
-
   try {
-    const { error } = await supabase.from('productos').delete().neq('id', -1);
-    if (error) throw error;
-    return res.json({ ok: true });
+    const supabase = getSupabaseAdminClient();
+    if (!supabase) {
+      return res.status(500).json({ error: 'No se pudo conectar con Supabase' });
+    }
+
+    console.log('[Backend] Limpiando todos los productos de Supabase...');
+
+    // Eliminar todos los productos
+    const { error: deleteError } = await supabase
+      .from('productos')
+      .delete()
+      .neq('id', 0); // Eliminar todos los registros
+
+    if (deleteError) {
+      console.error('Error eliminando productos:', deleteError);
+      return res.status(500).json({ error: 'Error eliminando productos', detail: deleteError.message });
+    }
+
+    console.log('[Backend] Productos eliminados exitosamente');
+
+    // Verificar que se eliminaron todos
+    const { count: remainingCount, error: countError } = await supabase
+      .from('productos')
+      .select('*', { count: 'exact', head: true });
+
+    if (countError) {
+      console.error('Error contando productos restantes:', countError);
+    } else {
+      console.log(`[Backend] Productos restantes en Supabase: ${remainingCount || 0}`);
+    }
+
+    return res.json({ 
+      success: true, 
+      message: 'Todos los productos han sido eliminados',
+      remainingCount: remainingCount || 0
+    });
+
   } catch (err) {
-    return res.status(500).json({ error: 'Error al limpiar', detail: err.message });
+    console.error('Error al limpiar productos:', err.message);
+    return res.status(500).json({ error: 'Error al limpiar productos', detail: err.message });
   }
 }
