@@ -2,6 +2,7 @@
 # Uso: .\agregar-campo-orden.ps1
 
 param(
+    [string]$JsonFile = "productosalebourgactualizados.json",
     [string]$BackendUrl = "https://alebourg-tau.vercel.app"
 )
 
