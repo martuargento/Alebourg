@@ -6,7 +6,6 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  res.setHeader('Cache-Control', 'no-store');
 
   if (req.method === 'OPTIONS') {
     res.status(200).end();
@@ -18,81 +17,82 @@ export default async function handler(req, res) {
   }
 
   try {
-    console.log('[Importar Neon] Iniciando importación...');
+    console.log('🔄 Iniciando importación de productos...');
     
     const pool = getNeonClient();
     
-    // Leer el archivo JSON desde el sistema de archivos
-    const jsonPath = path.join(process.cwd(), 'productosalebourgactulizados.json');
-    const jsonData = fs.readFileSync(jsonPath, 'utf8');
-    const productosData = JSON.parse(jsonData);
-    
-    console.log(`[Importar Neon] Archivo JSON leído: ${productosData.length} productos`);
-    
-    // Limpiar tabla existente
-    await pool.query('DELETE FROM productos');
-    console.log('[Importar Neon] Tabla limpiada');
-    
-    // Preparar productos para inserción
-    const productos = productosData.map(producto => ({
-      id: producto.id,
-      titulo: producto.titulo || '',
-      descripcion: producto.descripcion || '',
-      precio: parseFloat(producto.precio) || 0,
-      categoria: producto.categoria || '',
-      imagen: producto.imagen || '',
-      stock: parseInt(producto.stock) || 0
-    }));
-
-    console.log(`[Importar Neon] Preparando ${productos.length} productos para importar`);
-
-    // Insertar productos en lotes de 50 (reducido para evitar timeouts)
-    const batchSize = 50;
-    let insertedCount = 0;
-
-    for (let i = 0; i < productos.length; i += batchSize) {
-      const batch = productos.slice(i, i + batchSize);
-      
-      // Crear query dinámico para cada lote
-      const placeholders = batch.map((_, index) => {
-        const offset = index * 7;
-        return `($${offset + 1}, $${offset + 2}, $${offset + 3}, $${offset + 4}, $${offset + 5}, $${offset + 6}, $${offset + 7})`;
-      }).join(', ');
-
-      const query = `
-        INSERT INTO productos (id, titulo, descripcion, precio, categoria, imagen, stock)
-        VALUES ${placeholders}
-        ON CONFLICT (id) DO UPDATE SET
-          titulo = EXCLUDED.titulo,
-          descripcion = EXCLUDED.descripcion,
-          precio = EXCLUDED.precio,
-          categoria = EXCLUDED.categoria,
-          imagen = EXCLUDED.imagen,
-          stock = EXCLUDED.stock,
-          updated_at = CURRENT_TIMESTAMP
-      `;
-
-      const params = batch.flatMap(producto => [
-        producto.id,
-        producto.titulo,
-        producto.descripcion,
-        producto.precio,
-        producto.categoria,
-        producto.imagen,
-        producto.stock
-      ]);
-
-      await pool.query(query, params);
-      insertedCount += batch.length;
-      console.log(`[Importar Neon] Lote ${Math.floor(i / batchSize) + 1} completado: ${insertedCount}/${productos.length}`);
+    if (!pool) {
+      console.error('No se pudo conectar a Neon');
+      return res.status(500).json({ error: 'No se pudo conectar a Neon' });
     }
 
-    // Verificar importación
+    // Leer el archivo JSON
+    const jsonPath = path.join(process.cwd(), 'productosalebourgactulizados.json');
+    const productosData = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
+    
+    console.log('🔄 Limpiando tabla productos...');
+    
+    // Limpiar tabla productos
+    await pool.query('DELETE FROM productos');
+    console.log('✅ Tabla productos limpiada');
+    
+    console.log(`📦 Importando ${productosData.length} productos...`);
+    
+    // Insertar productos en lotes para evitar timeouts
+    const batchSize = 50;
+    let insertedCount = 0;
+    
+    for (let i = 0; i < productosData.length; i += batchSize) {
+      const batch = productosData.slice(i, i + batchSize);
+      
+      for (const producto of batch) {
+        // Asegurar que el precio tenga el formato correcto (con coma y espacio al final)
+        let precioFormateado = producto.precio;
+        if (typeof precioFormateado === 'string') {
+          // Si ya tiene coma, asegurar que termine con espacio
+          if (precioFormateado.includes(',')) {
+            precioFormateado = precioFormateado.trim() + ' ';
+          } else {
+            // Si no tiene coma, convertir punto a coma y agregar espacio
+            precioFormateado = precioFormateado.replace('.', ',') + ' ';
+          }
+        } else {
+          // Si es número, convertir a string con coma y espacio
+          precioFormateado = producto.precio.toString().replace('.', ',') + ' ';
+        }
+        
+        const query = `
+          INSERT INTO productos (id, titulo, descripcion, precio, categoria, imagen, stock, created_at, updated_at)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        `;
+        
+        const values = [
+          producto.id,
+          producto.titulo,
+          producto.descripcion || '',
+          precioFormateado,
+          producto.categoria || '',
+          producto.imagen || '',
+          producto.stock || 0,
+          new Date().toISOString(),
+          new Date().toISOString()
+        ];
+        
+        await pool.query(query, values);
+        insertedCount++;
+      }
+      
+      console.log(`✅ Lote completado: ${insertedCount}/${productosData.length} productos`);
+    }
+    
+    console.log(`🎉 Importación completada: ${insertedCount} productos importados`);
+    
+    // Verificar la importación
     const countResult = await pool.query('SELECT COUNT(*) FROM productos');
     const finalCount = parseInt(countResult.rows[0].count);
-
-    console.log(`[Importar Neon] Importación completada: ${finalCount} productos`);
-
+    
+    console.log(`📊 Total de productos en la base de datos: ${finalCount}`);
+    
     return res.json({
       success: true,
       message: 'Importación completada exitosamente',
@@ -100,9 +100,9 @@ export default async function handler(req, res) {
       finalCount: finalCount,
       timestamp: new Date().toISOString()
     });
-
+    
   } catch (error) {
-    console.error('[Importar Neon] Error:', error);
+    console.error('❌ Error durante la importación:', error);
     return res.status(500).json({
       error: 'Error en la importación',
       details: error.message,

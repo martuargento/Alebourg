@@ -56,7 +56,7 @@ export default async function handler(req, res) {
         .map(p => ({
           ...p,
           categoria: (p.categoria || '').toString().toLowerCase().trim(),
-          precio: (p.precio || 0).toString().replace(',', '.') + ' ',
+          precio: (p.precio || 0).toString(),
           stock: parseInt(p.stock) || 0
         }));
       
