@@ -46,37 +46,37 @@ export default async function handler(req, res) {
       const batch = productosData.slice(i, i + batchSize);
       
       for (const producto of batch) {
-        // Asegurar que el precio tenga el formato correcto (con coma y espacio al final)
-        let precioFormateado = producto.precio;
-        if (typeof precioFormateado === 'string') {
-          // Si ya tiene coma, asegurar que termine con espacio
-          if (precioFormateado.includes(',')) {
-            precioFormateado = precioFormateado.trim() + ' ';
-          } else {
-            // Si no tiene coma, convertir punto a coma y agregar espacio
-            precioFormateado = precioFormateado.replace('.', ',') + ' ';
-          }
-        } else {
-          // Si es número, convertir a string con coma y espacio
-          precioFormateado = producto.precio.toString().replace('.', ',') + ' ';
-        }
+                 // Formatear precio como string con coma y espacio al final
+         let precioFormateado = producto.precio;
+         if (typeof precioFormateado === 'string') {
+           // Si ya tiene coma, asegurar que termine con espacio
+           if (precioFormateado.includes(',')) {
+             precioFormateado = precioFormateado.trim() + ' ';
+           } else {
+             // Si no tiene coma, convertir punto a coma y agregar espacio
+             precioFormateado = precioFormateado.replace('.', ',') + ' ';
+           }
+         } else {
+           // Si es número, convertir a string con coma y espacio
+           precioFormateado = producto.precio.toString().replace('.', ',') + ' ';
+         }
         
         const query = `
           INSERT INTO productos (id, titulo, descripcion, precio, categoria, imagen, stock, created_at, updated_at)
           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
         `;
         
-        const values = [
-          producto.id,
-          producto.titulo,
-          producto.descripcion || '',
-          precioFormateado,
-          producto.categoria || '',
-          producto.imagen || '',
-          producto.stock || 0,
-          new Date().toISOString(),
-          new Date().toISOString()
-        ];
+                 const values = [
+           producto.id,
+           producto.titulo,
+           producto.descripcion || '',
+           precioFormateado,
+           producto.categoria || '',
+           producto.imagen || '',
+           (producto.stock || 0).toString(),
+           new Date().toISOString(),
+           new Date().toISOString()
+         ];
         
         await pool.query(query, values);
         insertedCount++;
