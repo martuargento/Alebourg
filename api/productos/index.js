@@ -49,7 +49,7 @@ export default async function handler(req, res) {
         }
         
         return res.json({ 
-          source: 'supabase', 
+          source: 'SUPABASE_MIGRADO', 
           count: productos?.length || 0, 
           totalInDb: totalCount || 0
         });
