@@ -1,6 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 import { getSupabaseServerClient } from '../_supabaseClient.js';
+import jwt from 'jsonwebtoken';
+import { ajustarPrecioServidor } from '../precios-utils.js';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -18,6 +20,19 @@ export default async function handler(req, res) {
   }
 
   const { id } = req.query;
+  // Verificar token opcional (admin)
+  const authHeader = req.headers.authorization || '';
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  let esAdmin = false;
+  if (token) {
+    try {
+      const secret = process.env.JWT_SECRET || 'alebourg_super_secret_key_replace_in_env';
+      const payload = jwt.verify(token, secret);
+      esAdmin = !!payload?.esAdmin;
+    } catch (_) {
+      esAdmin = false;
+    }
+  }
 
   // Intentar leer desde Supabase si está configurado
   try {
@@ -31,7 +46,13 @@ export default async function handler(req, res) {
         .single();
       if (error) throw error;
       if (data) {
-        return res.json(data);
+        const precioBase = (data.precio || 0).toString();
+        const precioAjustado = ajustarPrecioServidor(precioBase, data.titulo, data.categoria);
+        if (esAdmin) {
+          return res.json({ ...data, precio: precioBase, precioAjustado });
+        }
+        const { precio, ...rest } = data;
+        return res.json({ ...rest, precio: precioAjustado.toString() });
       }
     }
   } catch (err) {
@@ -54,7 +75,13 @@ export default async function handler(req, res) {
       return res.status(404).json({ error: 'Producto no encontrado' });
     }
 
-    res.json(producto);
+    const precioBase = (producto.precio || 0).toString();
+    const precioAjustado = ajustarPrecioServidor(precioBase, producto.titulo, producto.categoria);
+    if (esAdmin) {
+      return res.json({ ...producto, precio: precioBase, precioAjustado });
+    }
+    const { precio, ...rest } = producto;
+    res.json({ ...rest, precio: precioAjustado.toString() });
   } catch (err) {
     res.status(500).json({ error: 'No se pudo leer productos.' });
   }

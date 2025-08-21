@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Button } from 'react-bootstrap';
 import { usarCarrito } from '../context/CarritoContexto';
-import { ajustarPrecio, formatearPrecio } from '../utils/preciosUtils';
+import { ajustarPrecio, formatearPrecio, obtenerPrecioVisible } from '../utils/preciosUtils';
 import Swal from 'sweetalert2';
 import { BACKEND_URL } from '../config';
 import { getProductoById } from '../services/apiService';
@@ -155,8 +155,8 @@ const DetalleProducto = () => {
     );
   }
 
-  // Calcular el precio ajustado
-  const precioAjustado = formatearPrecio(ajustarPrecio(producto.precio, producto.titulo, producto.categoria));
+  // Calcular el precio visible sin re-ajustar si ya viene ajustado del backend
+  const precioAjustado = formatearPrecio(obtenerPrecioVisible(producto));
 
   return (
     <>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { usarCarrito } from '../context/CarritoContexto';
 import { Container, Row, Col, Button } from 'react-bootstrap';
-import { ajustarPrecio, formatearPrecio, parsearPrecio } from '../utils/preciosUtils';
+import { ajustarPrecio, formatearPrecio, parsearPrecio, obtenerPrecioVisible } from '../utils/preciosUtils';
 import { calcularDescuento } from '../utils/descuentosUtils';
 import { FaTrash } from 'react-icons/fa';
 import jsPDF from 'jspdf';
@@ -29,15 +29,17 @@ const VerPedido = () => {
 
   // Calcular el total del carrito
   const total = carrito.reduce((acc, producto) => {
-    const precioNumerico = ajustarPrecio(producto.precio, producto.titulo, producto.categoria);
+    const precioNumerico = obtenerPrecioVisible(producto);
     return acc + (precioNumerico * producto.cantidad);
   }, 0);
 
   // Calcular la ganancia total
+  const esAdmin = typeof window !== 'undefined' && localStorage.getItem('esAdmin') === 'true';
   const gananciaTotal = carrito.reduce((acc, producto) => {
-    const precioAjustado = ajustarPrecio(producto.precio, producto.titulo, producto.categoria);
-    const precioBase = parsearPrecio(producto.precio);
-    return acc + ((precioAjustado - precioBase) * producto.cantidad);
+    if (!esAdmin) return acc; // No calcular para no admins
+    const precioAjustado = obtenerPrecioVisible(producto);
+    const precioBase = typeof producto.precio === 'string' ? parsearPrecio(producto.precio) : (producto.precioBase ? parsearPrecio(producto.precioBase) : 0);
+    return acc + Math.max(0, (precioAjustado - precioBase) * producto.cantidad);
   }, 0);
 
   useEffect(() => {
@@ -47,7 +49,7 @@ const VerPedido = () => {
   const totalConDescuento = Math.max(0, total - descuento);
 
   // Calcular la ganancia neta después del descuento
-  const gananciaNeta = gananciaTotal - descuento;
+  const gananciaNeta = esAdmin ? (gananciaTotal - descuento) : 0;
 
   // Incentivo de descuentos para rango_precio múltiple
   let mensajeDescuento = '';
@@ -129,7 +131,7 @@ const VerPedido = () => {
     let mensaje = "Alebourg!, Quiero realizar el siguiente pedido:\n\n";
     
     carrito.forEach(producto => {
-      const precioUnitario = ajustarPrecio(producto.precio, producto.titulo, producto.categoria);
+      const precioUnitario = obtenerPrecioVisible(producto);
       const subtotal = precioUnitario * producto.cantidad;
       
       // Calcular el descuento de este producto específico
@@ -141,8 +143,8 @@ const VerPedido = () => {
       
       // Calcular cuántos productos en el carrito están en el mismo rango de precio
       const productosEnMismoRango = carrito.filter(p => {
-        const precioP = ajustarPrecio(p.precio, p.titulo, p.categoria);
-        const precioActual = ajustarPrecio(producto.precio, producto.titulo, producto.categoria);
+        const precioP = obtenerPrecioVisible(p);
+        const precioActual = obtenerPrecioVisible(producto);
         
         // Buscar si ambos productos están en el mismo rango
         for (const regla of reglasRango) {
@@ -243,7 +245,7 @@ const VerPedido = () => {
     
     for (let i = 0; i < carrito.length; i++) {
       const producto = carrito[i];
-      const precioUnitario = ajustarPrecio(producto.precio, producto.titulo, producto.categoria);
+      const precioUnitario = obtenerPrecioVisible(producto);
       const subtotal = precioUnitario * producto.cantidad;
       
       // Calcular descuento del producto
@@ -252,8 +254,8 @@ const VerPedido = () => {
       
       const reglasRango = reglasDescuento.filter(r => r.tipo === 'rango_precio');
       const productosEnMismoRango = carrito.filter(p => {
-        const precioP = ajustarPrecio(p.precio, p.titulo, p.categoria);
-        const precioActual = ajustarPrecio(producto.precio, producto.titulo, producto.categoria);
+        const precioP = obtenerPrecioVisible(p);
+        const precioActual = obtenerPrecioVisible(producto);
         
         for (const regla of reglasRango) {
           const rangoP = regla.rangos.find(r => precioP >= r.min && (r.max === null || precioP <= r.max));
@@ -359,7 +361,7 @@ const VerPedido = () => {
   };
 
   // Verificar si es admin
-  const esAdmin = typeof window !== 'undefined' && localStorage.getItem('esAdmin') === 'true';
+  // esAdmin ya declarado arriba
 
   if (carrito.length === 0) {
     return (

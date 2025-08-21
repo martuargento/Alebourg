@@ -1,5 +1,12 @@
 import { BACKEND_URL } from '../config';
 
+const getAuthHeaders = () => {
+  if (typeof window === 'undefined') return {};
+  const token = localStorage.getItem('authToken');
+  if (!token) return {};
+  return { Authorization: `Bearer ${token}` };
+};
+
 // Cache para productos
 let productosCache = null;
 let categoriasCache = null;
@@ -21,11 +28,12 @@ export const getProductos = async () => {
   try {
     // El backend ahora maneja la paginación automáticamente para traer todos los productos
     const response = await fetch(`${BACKEND_URL}/api/productos?_=${Date.now()}`, { 
-      cache: 'no-store'
+      cache: 'no-store',
+      headers: { ...getAuthHeaders() }
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const productos = await response.json();
-    // Sanitizar campos críticos
+    // Mapear respuesta para compatibilidad: si viene precioAjustado y precio base, mantener ambos
     const sane = productos
       .filter(p => p && typeof p.id !== 'undefined' && p.titulo)
       .map(p => ({
@@ -55,7 +63,7 @@ export const getProductos = async () => {
 // Obtener producto por ID
 export const getProductoById = async (id) => {
   try {
-    const response = await fetch(`${BACKEND_URL}/api/productos/${id}`);
+    const response = await fetch(`${BACKEND_URL}/api/productos/${id}`, { headers: { ...getAuthHeaders() } });
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }

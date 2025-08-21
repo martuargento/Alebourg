@@ -5,7 +5,7 @@ import { FaShoppingCart, FaChevronDown, FaTimes, FaChevronUp } from 'react-icons
 import { usarCarrito } from '../context/CarritoContexto';
 import logo from '../assets/logo.png';
 import ThemeToggle from './ThemeToggle';
-import { getCategorias } from '../services/apiService';
+import { getCategorias, clearCache } from '../services/apiService';
 import { slugifyCategory } from '../utils/slug';
 
 const Header = () => {
@@ -101,6 +101,8 @@ const Header = () => {
   const manejarLogout = () => {
     localStorage.removeItem('logueado');
     localStorage.removeItem('esAdmin');
+    localStorage.removeItem('authToken');
+    try { clearCache(); } catch (_) {}
     navigate('/');
   };
 

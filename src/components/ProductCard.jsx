@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button, Card } from 'react-bootstrap';
 import { usarCarrito } from '../context/CarritoContexto';
 import Swal from 'sweetalert2';
-import { ajustarPrecio, formatearPrecio } from '../utils/preciosUtils';
+import { ajustarPrecio, formatearPrecio, obtenerPrecioVisible } from '../utils/preciosUtils';
 import { useNavigate } from 'react-router-dom';
 import { BACKEND_URL } from '../config';
 
@@ -13,16 +13,13 @@ const ProductCard = ({ producto }) => {
   const [mostrarBarra, setMostrarBarra] = useState(false);
   const [fadeOut, setFadeOut] = useState(false);
 
-  // Calcular y formatear el precio ajustado para mostrar
-  const precioAjustado = formatearPrecio(ajustarPrecio(producto.precio, producto.titulo, producto.categoria));
+  // Calcular y formatear el precio visible (ya ajustado por backend para invitados)
+  const precioAjustado = formatearPrecio(obtenerPrecioVisible(producto));
 
   const manejarClick = (e) => {
     e.stopPropagation();
     // Crear una copia del producto con el precio original (sin formatear)
-    const productoParaCarrito = {
-      ...producto,
-      precio: producto.precio // Mantenemos el precio original para poder ajustarlo después
-    };
+    const productoParaCarrito = { ...producto };
     agregarAlCarrito(productoParaCarrito);
 
     // Calcular incentivo de descuento

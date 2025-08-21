@@ -51,3 +51,14 @@ export const ajustarPrecio = (precioOriginal, titulo = '', categoria = '') => {
 };
 
 export const formatearPrecio = (precio) => precio.toLocaleString('es-AR');
+
+// Obtiene el precio que se debe mostrar/calcular al cliente sin volver a ajustar si ya viene ajustado desde backend
+export const obtenerPrecioVisible = (producto) => {
+  if (!producto) return 0;
+  if (typeof producto.precioAjustado !== 'undefined' && producto.precioAjustado !== null) {
+    return producto.precioAjustado;
+  }
+  // Para invitados el backend ya envía precio ajustado en `precio`, por lo que no debemos volver a ajustar aquí
+  const posibleAjustado = parsearPrecio(producto.precio ?? 0);
+  return Number.isNaN(posibleAjustado) ? 0 : posibleAjustado;
+};

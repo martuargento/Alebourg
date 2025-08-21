@@ -1,4 +1,6 @@
 import { getSupabaseClient } from '../_supabaseClient.js';
+import jwt from 'jsonwebtoken';
+import { ajustarPrecioServidor } from '../precios-utils.js';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -20,6 +22,19 @@ export default async function handler(req, res) {
   console.log('[Backend] Debug param:', req.query.debug);
   
   try {
+    // Verificar token si viene para acceso admin
+    const authHeader = req.headers.authorization || '';
+    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+    let esAdmin = false;
+    if (token) {
+      try {
+        const secret = process.env.JWT_SECRET || 'alebourg_super_secret_key_replace_in_env';
+        const payload = jwt.verify(token, secret);
+        esAdmin = !!payload?.esAdmin;
+      } catch (_) {
+        esAdmin = false;
+      }
+    }
     const supabase = getSupabaseClient();
     console.log('[Backend] Supabase client:', supabase ? 'OK' : 'NULL');
     
@@ -137,15 +152,25 @@ export default async function handler(req, res) {
       
       console.log(`[Backend] Productos ordenados inteligentemente: ${productosOrdenados.length}`);
       
-      // Sanitizar campos críticos
+      // Sanitizar y calcular precios según auth
       const sane = productosOrdenados
         .filter(p => p && typeof p.id !== 'undefined' && p.titulo)
-        .map(p => ({
-          ...p,
-          categoria: (p.categoria || '').toString().toLowerCase().trim(),
-          precio: (p.precio || 0).toString(),
-          stock: 0 // Supabase no tiene campo stock, usar 0 por defecto
-        }));
+        .map(p => {
+          const precioBase = (p.precio || 0).toString();
+          const precioAjustado = ajustarPrecioServidor(precioBase, p.titulo, p.categoria);
+          const comun = {
+            id: p.id,
+            titulo: p.titulo,
+            categoria: (p.categoria || '').toString().toLowerCase().trim(),
+            imagen: p.imagen,
+            orden: p.orden,
+            stock: 0
+          };
+          if (esAdmin) {
+            return { ...comun, precio: precioBase, precioAjustado };
+          }
+          return { ...comun, precio: precioAjustado.toString() };
+        });
       
       return res.json(sane);
     }

@@ -1,38 +1,51 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import { BACKEND_URL } from '../config';
+import { clearCache } from '../services/apiService';
 
 const Login = () => {
   const [usuario, setUsuario] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
-  const manejarLogin = (e) => {
+  const manejarLogin = async (e) => {
     e.preventDefault();
-
-    if (usuario === 'martinalejandronuniez@gmail.com' && password === 'alebourg912') {
-      // Guardamos estado de login en localStorage
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: usuario, password })
+      });
+      if (!res.ok) {
+        throw new Error('Credenciales inválidas');
+      }
+      const data = await res.json();
+      localStorage.setItem('authToken', data.token);
       localStorage.setItem('logueado', 'true');
       localStorage.setItem('esAdmin', 'true');
       Swal.fire({
-      title: '¡Éxito!',
-      text: 'Has iniciado sesión correctamente',
-      icon: 'success',
-      background: '#1e1e1e',
-      color: '#fff',
-      confirmButtonColor: '#3085d6'
-    });
-      navigate('/admin/precios'); // redirigimos a la página de admin precios
-    } else {
+        title: '¡Éxito!',
+        text: 'Has iniciado sesión correctamente',
+        icon: 'success',
+        background: '#1e1e1e',
+        color: '#fff',
+        confirmButtonColor: '#3085d6'
+      });
+      try { clearCache(); } catch (_) {}
+      navigate('/admin/precios');
+    } catch (err) {
+      localStorage.removeItem('authToken');
       localStorage.setItem('esAdmin', 'false');
+      localStorage.removeItem('logueado');
       Swal.fire({
-      title: 'Error',
-      text: 'Usuario o contraseña incorrectos',
-      icon: 'error',
-      background: '#1e1e1e',
-      color: '#fff',
-      confirmButtonColor: '#d33'  
-    });
+        title: 'Error',
+        text: 'Usuario o contraseña incorrectos',
+        icon: 'error',
+        background: '#1e1e1e',
+        color: '#fff',
+        confirmButtonColor: '#d33'
+      });
     }
   };
 
