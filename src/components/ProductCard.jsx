@@ -256,6 +256,18 @@ const ProductCard = ({ producto }) => {
           <div className="mt-auto">
             <div>Precio:</div>
             <h4>${precioAjustado}</h4>
+            {/* Precio base solo para admins */}
+            {typeof window !== 'undefined' && localStorage.getItem('esAdmin') === 'true' && producto.precioBase && (
+              <div style={{
+                fontSize: '0.75rem',
+                color: '#666',
+                opacity: 0.7,
+                marginTop: '2px',
+                fontStyle: 'italic'
+              }}>
+                Base: ${producto.precioBase}
+              </div>
+            )}
           </div>
           <Button 
             onClick={manejarClick} 

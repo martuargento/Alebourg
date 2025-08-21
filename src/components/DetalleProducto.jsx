@@ -290,6 +290,20 @@ const DetalleProducto = () => {
                     }}>
                       ${precioAjustado}
                     </div>
+                    {/* Precio base solo para admins */}
+                    {typeof window !== 'undefined' && localStorage.getItem('esAdmin') === 'true' && producto.precioBase && (
+                      <div style={{
+                        fontSize: '0.85rem',
+                        color: '#666',
+                        opacity: 0.6,
+                        marginTop: '8px',
+                        fontStyle: 'italic',
+                        borderTop: '1px solid rgba(0,0,0,0.1)',
+                        paddingTop: '8px'
+                      }}>
+                        Precio base: ${producto.precioBase}
+                      </div>
+                    )}
                   </div>
 
                   <div className="categoria-container" style={{

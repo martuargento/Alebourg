@@ -167,7 +167,7 @@ export default async function handler(req, res) {
             stock: 0
           };
           if (esAdmin) {
-            return { ...comun, precio: precioBase, precioAjustado };
+            return { ...comun, precio: precioBase, precioAjustado: precioAjustado.toString(), precioBase: precioBase };
           }
           return { ...comun, precio: precioAjustado.toString() };
         });
