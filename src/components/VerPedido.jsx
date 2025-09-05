@@ -35,9 +35,21 @@ const VerPedido = () => {
 
   // Calcular la ganancia total
   const gananciaTotal = carrito.reduce((acc, producto) => {
+    // Verificar que el producto tenga precio
+    if (!producto.precio) {
+      return acc;
+    }
+    
     const precioAjustado = ajustarPrecio(producto.precio, producto.titulo, producto.categoria);
     const precioBase = parsearPrecio(producto.precio);
-    return acc + ((precioAjustado - precioBase) * producto.cantidad);
+    const gananciaUnitaria = precioAjustado - precioBase;
+    
+    // Verificar que los valores sean números válidos
+    if (isNaN(precioAjustado) || isNaN(precioBase)) {
+      return acc;
+    }
+    
+    return acc + (gananciaUnitaria * producto.cantidad);
   }, 0);
 
   useEffect(() => {

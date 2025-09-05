@@ -1,7 +1,17 @@
 // Función para parsear el precio desde el string del JSON
 export const parsearPrecio = (precioStr) => {
-  const precioLimpio = precioStr.trim().replace(/,/g, '');
-  return parseFloat(precioLimpio);
+  if (!precioStr) return 0;
+  
+  // Convertir a string si no lo es
+  const str = String(precioStr);
+  
+  // Limpiar el string: quitar espacios, comas y otros caracteres no numéricos excepto el punto decimal
+  const precioLimpio = str.trim().replace(/[,\s]/g, '').replace(/[^\d.]/g, '');
+  
+  const resultado = parseFloat(precioLimpio);
+  
+  // Verificar que el resultado sea un número válido
+  return isNaN(resultado) ? 0 : resultado;
 };
 
 export const redondearA500 = (precio) => {
