@@ -1,5 +1,3 @@
-import fs from 'fs';
-import path from 'path';
 import { getSupabaseAdminClient } from '../_supabaseClient.js';
 
 export default async function handler(req, res) {
@@ -24,17 +22,10 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'No se pudo conectar con Supabase' });
     }
 
-    console.log('[Backend] Importando productos desde JSON a Supabase...');
+    console.log('[Backend] Importando productos desde el body de la petición a Supabase...');
 
-    // Leer el archivo JSON
-    const jsonPath = path.join(process.cwd(), 'productosalebourgactualizados.json');
-    
-    if (!fs.existsSync(jsonPath)) {
-      return res.status(404).json({ error: 'Archivo productosalebourgactualizados.json no encontrado' });
-    }
-
-    const jsonContent = fs.readFileSync(jsonPath, 'utf8');
-    const productos = JSON.parse(jsonContent);
+    // Obtener productos desde el body de la petición
+    const productos = req.body;
 
     if (!Array.isArray(productos)) {
       return res.status(400).json({ error: 'El archivo JSON no contiene un array válido' });
