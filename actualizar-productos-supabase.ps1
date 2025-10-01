@@ -13,8 +13,8 @@ Write-Host ""
 
 # Verificar que el archivo existe
 if (-not (Test-Path $JsonFile)) {
-    Write-Host "ERROR: No se encontró el archivo $JsonFile" -ForegroundColor Red
-    Write-Host "Asegúrate de que el archivo esté en la raíz del proyecto" -ForegroundColor Red
+    Write-Host "ERROR: No se encontro el archivo $JsonFile" -ForegroundColor Red
+    Write-Host "Asegurate de que el archivo este en la raiz del proyecto" -ForegroundColor Red
     exit 1
 }
 
@@ -30,7 +30,7 @@ try {
     exit 1
 }
 
-# Función para limpiar productos en Supabase
+# Funcion para limpiar productos en Supabase
 function Clear-SupabaseProducts {
     Write-Host "Limpiando productos existentes en Supabase..." -ForegroundColor Yellow
     
@@ -44,9 +44,9 @@ function Clear-SupabaseProducts {
     }
 }
 
-# Función para importar productos a Supabase
+# Funcion para importar productos a Supabase
 function Import-SupabaseProducts {
-    Write-Host "📤 Importando productos a Supabase..." -ForegroundColor Yellow
+    Write-Host "Importando productos a Supabase..." -ForegroundColor Yellow
     
     try {
         # Convertir el objeto de PowerShell de nuevo a un string JSON para enviarlo
@@ -57,15 +57,15 @@ function Import-SupabaseProducts {
         Write-Host "Respuesta del servidor:" -ForegroundColor Green
         Write-Host "  - Mensaje: $($response.message)" -ForegroundColor White
         Write-Host "  - Productos en JSON: $($response.totalEnJson)" -ForegroundColor White
-        Write-Host "  - Productos válidos: $($response.totalValidos)" -ForegroundColor White
+        Write-Host "  - Productos validos: $($response.totalValidos)" -ForegroundColor White
         Write-Host "  - Productos importados: $($response.totalImportados)" -ForegroundColor White
         Write-Host "  - Total final en DB: $($response.totalEnSupabase)" -ForegroundColor White
 
         if ($response.exitoso) {
-            Write-Host "✅ Importación completada exitosamente" -ForegroundColor Green
+            Write-Host "OK: Importacion completada exitosamente" -ForegroundColor Green
             return $true
         } else {
-            Write-Host "⚠️ Hubo errores durante la importación:" -ForegroundColor Yellow
+            Write-Host "ADVERTENCIA: Hubo errores durante la importacion:" -ForegroundColor Yellow
             $response.errores | ForEach-Object {
                 Write-Host "  - Lote: $($_.lote), Error: $($_.error)" -ForegroundColor Yellow
             }
@@ -85,9 +85,9 @@ function Import-SupabaseProducts {
     }
 }
 
-# Función para verificar el estado
+# Funcion para verificar el estado
 function Test-SupabaseProducts {
-    Write-Host "🔍 Verificando estado de productos en Supabase..." -ForegroundColor Yellow
+    Write-Host "Verificando estado de productos en Supabase..." -ForegroundColor Yellow
     
     try {
         $response = Invoke-RestMethod -Uri "$BackendUrl/api/productos?debug=1"
@@ -103,7 +103,8 @@ function Test-SupabaseProducts {
 }
 
 # Ejecutar el proceso completo
-Write-Host "🚀 INICIANDO PROCESO DE ACTUALIZACIÓN..." -ForegroundColor Cyan
+Write-Host ""
+Write-Host "INICIANDO PROCESO DE ACTUALIZACION..." -ForegroundColor Cyan
 Write-Host ""
 
 # Paso 1: Limpiar productos existentes
@@ -116,7 +117,7 @@ Write-Host ""
 
 # Paso 2: Importar nuevos productos
 if (-not (Import-SupabaseProducts)) {
-    Write-Host "FALLO en la importación. Abortando proceso." -ForegroundColor Red
+    Write-Host "FALLO en la importacion. Abortando proceso." -ForegroundColor Red
     exit 1
 }
 
@@ -124,15 +125,15 @@ Write-Host ""
 
 # Paso 3: Verificar estado final
 if (-not (Test-SupabaseProducts)) {
-    Write-Host "FALLO en la verificación. Revisa manualmente." -ForegroundColor Red
+    Write-Host "FALLO en la verificacion. Revisa manualmente." -ForegroundColor Red
     exit 1
 }
 
 Write-Host ""
-Write-Host "¡ACTUALIZACIÓN COMPLETADA EXITOSAMENTE!" -ForegroundColor Green
+Write-Host "ACTUALIZACION COMPLETADA EXITOSAMENTE!" -ForegroundColor Green
 Write-Host " Productos limpiados" -ForegroundColor Green
 Write-Host "Productos importados" -ForegroundColor Green
 Write-Host "Estado verificado" -ForegroundColor Green
 Write-Host ""
-Write-Host "Tu aplicación ahora tiene los productos más recientes" -ForegroundColor Cyan
-Write-Host "Recarga la página para ver los cambios" -ForegroundColor Cyan
+Write-Host "Tu aplicacion ahora tiene los productos mas recientes" -ForegroundColor Cyan
+Write-Host "Recarga la pagina para ver los cambios" -ForegroundColor Cyan
