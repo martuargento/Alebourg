@@ -454,6 +454,28 @@ const Header = () => {
                     </Link>
                   </li>
                 )}
+                {esAdmin && (
+                  <li className="mobile-menu-item" style={{ marginTop: '1rem' }}>
+                    <div className="form-check form-switch d-flex justify-content-center align-items-center gap-2">
+                      <input
+                        className="form-check-input"
+                        type="checkbox"
+                        role="switch"
+                        id="mostrarPreciosSwitchMobile"
+                        checked={mostrarPreciosAdmin}
+                        onChange={toggleMostrarPreciosAdmin}
+                        style={{ cursor: 'pointer' }}
+                      />
+                      <label 
+                        className="form-check-label" 
+                        htmlFor="mostrarPreciosSwitchMobile"
+                        style={{ fontSize: '0.85rem', cursor: 'pointer', color: 'var(--text-color)' }}
+                      >
+                        Mostrar precios admin
+                      </label>
+                    </div>
+                  </li>
+                )}
                 <li className="mobile-menu-item" style={{ marginTop: '1rem' }}>
                   <div className="d-flex justify-content-center">
                     <ThemeToggle />
