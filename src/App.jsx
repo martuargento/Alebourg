@@ -12,6 +12,7 @@ import AdminMetricas from './components/AdminMetricas';
 import { useEffect } from 'react';
 import { trackVisit } from './services/apiService';
 import { ProveedorCarrito } from './context/CarritoContexto';
+import { AdminConfigProvider } from './context/AdminConfigContexto';
 import './App.css';
 
 function App() {
@@ -22,19 +23,23 @@ function App() {
   }, [location.pathname]);
 
   return (
-    <ProveedorCarrito>
-      <Header />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/verpedido" element={<VerPedido />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/categoria/:nombreCategoria" element={<ProductosPorCategoria />} />
-        <Route path="/producto/:id" element={<DetalleProducto />} />
-        <Route path="/admin/precios" element={<AdminPrecios />} />
-        <Route path="/admin/metricas" element={<AdminMetricas />} />
-      </Routes>
-      <Footer />
-    </ProveedorCarrito>
+    <AdminConfigProvider>
+      <ProveedorCarrito>
+        <div>
+          <Header />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/verpedido" element={<VerPedido />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/categoria/:nombreCategoria" element={<ProductosPorCategoria />} />
+            <Route path="/producto/:id" element={<DetalleProducto />} />
+            <Route path="/admin/precios" element={<AdminPrecios />} />
+            <Route path="/admin/metricas" element={<AdminMetricas />} />
+          </Routes>
+          <Footer />
+        </div>
+      </ProveedorCarrito>
+    </AdminConfigProvider>
   );
 }
 

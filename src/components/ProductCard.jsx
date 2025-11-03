@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Button, Card } from 'react-bootstrap';
 import { usarCarrito } from '../context/CarritoContexto';
+import { usarAdminConfig } from '../context/AdminConfigContexto';
 import Swal from 'sweetalert2';
 import { ajustarPrecio, formatearPrecio, parsearPrecio } from '../utils/preciosUtils';
 import { useNavigate } from 'react-router-dom';
@@ -13,6 +14,7 @@ const ProductCard = ({ producto }) => {
   const [mensajeDescuento, setMensajeDescuento] = useState('');
   const [mostrarBarra, setMostrarBarra] = useState(false);
   const [fadeOut, setFadeOut] = useState(false);
+  const { mostrarPreciosAdmin } = usarAdminConfig();
 
   // Calcular precios (base proveedor y ajustado)
   const esAdmin = typeof window !== 'undefined' && localStorage.getItem('esAdmin') === 'true';
@@ -270,7 +272,7 @@ const ProductCard = ({ producto }) => {
         <Card.Body className="d-flex flex-column p-2">
           <Card.Title className="mb-3 text-break">{producto.titulo}</Card.Title>
           <div className="mt-auto">
-          {esAdmin && (
+          {esAdmin && mostrarPreciosAdmin && (
             <div style={{ marginBottom: '4px' }}>
               <div style={{ fontSize: '0.8rem', color: 'rgba(97, 68, 159, 0.52)' }}>
                 Proveedor: ${formatearPrecio(precioProveedor)}
@@ -279,7 +281,7 @@ const ProductCard = ({ producto }) => {
                 Ganancia: ${formatearPrecio(ganancia)}
               </div>
             </div>
-            )}
+          )}
             <div>Precio:</div>
             <h4>${precioAjustado}</h4>
           </div>

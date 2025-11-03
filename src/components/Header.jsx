@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaShoppingCart, FaChevronDown, FaTimes, FaChevronUp } from 'react-icons/fa';
 import { usarCarrito } from '../context/CarritoContexto';
+import { usarAdminConfig } from '../context/AdminConfigContexto';
 import logo from '../assets/logo.png';
 import ThemeToggle from './ThemeToggle';
 import { getCategorias } from '../services/apiService';
@@ -108,6 +109,8 @@ const Header = () => {
 
   const cantidadTotal = carrito.reduce((total, p) => total + p.cantidad, 0);
   const estaLogueado = localStorage.getItem('logueado') === 'true';
+  const esAdmin = localStorage.getItem('esAdmin') === 'true';
+  const { mostrarPreciosAdmin, toggleMostrarPreciosAdmin } = usarAdminConfig();
 
   return (
     <>
@@ -182,6 +185,26 @@ const Header = () => {
           </ul>
 
           <div className="d-flex align-items-center gap-3">
+            {esAdmin && (
+              <div className="form-check form-switch">
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  role="switch"
+                  id="mostrarPreciosSwitch"
+                  checked={mostrarPreciosAdmin}
+                  onChange={toggleMostrarPreciosAdmin}
+                  style={{ cursor: 'pointer' }}
+                />
+                <label 
+                  className="form-check-label text-white" 
+                  htmlFor="mostrarPreciosSwitch"
+                  style={{ fontSize: '0.85rem', cursor: 'pointer' }}
+                >
+                  Mostrar precios admin
+                </label>
+              </div>
+            )}
             {estaLogueado ? (
               <button 
                 className="btn btn-outline-danger"
