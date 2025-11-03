@@ -115,3 +115,18 @@ export const clearCache = () => {
   categoriasCache = null;
   lastFetch = 0;
 };
+
+// ---------- Analytics (cliente) ----------
+export const trackVisit = async (path = window.location.pathname) => {
+  try {
+    // Evitar contaminar métricas cuando está logueado como admin
+    if (typeof window !== 'undefined' && localStorage.getItem('esAdmin') === 'true') return;
+    await fetch(`${BACKEND_URL}/api/analytics/track`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path, ts: Date.now() })
+    });
+  } catch (_) {
+    // silencioso
+  }
+};

@@ -174,6 +174,11 @@ const Header = () => {
                 <Link className="nav-link" to="/admin/precios">Admin Precios</Link>
               </li>
             )}
+            {localStorage.getItem('esAdmin') === 'true' && (
+              <li className="nav-item">
+                <Link className="nav-link" to="/admin/metricas">Métricas</Link>
+              </li>
+            )}
           </ul>
 
           <div className="d-flex align-items-center gap-3">
@@ -412,6 +417,17 @@ const Header = () => {
                       onClick={handleToggleMobileMenu}
                     >
                       Admin Precios
+                    </Link>
+                  </li>
+                )}
+                {localStorage.getItem('esAdmin') === 'true' && (
+                  <li className="mobile-menu-item">
+                    <Link 
+                      to="/admin/metricas" 
+                      className="mobile-menu-link"
+                      onClick={handleToggleMobileMenu}
+                    >
+                      Métricas
                     </Link>
                   </li>
                 )}
