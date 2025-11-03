@@ -85,7 +85,7 @@ const ProductosLista = ({ categoria = null }) => {
         <div className="flex-grow-1">
           <Buscador onBuscar={setBusqueda} />
         </div>
-        {categoria && (
+        {(categoria || productosFiltrados.length > 1) && (
           <Dropdown className="ordenamiento-dropdown">
             <Dropdown.Toggle variant="outline-light" id="dropdown-ordenamiento">
               {ordenamiento === 'menor' ? 'Menor precio' : 
