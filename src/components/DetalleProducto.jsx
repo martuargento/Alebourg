@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Button } from 'react-bootstrap';
 import { usarCarrito } from '../context/CarritoContexto';
-import { ajustarPrecio, formatearPrecio } from '../utils/preciosUtils';
+import { ajustarPrecio, formatearPrecio, parsearPrecio } from '../utils/preciosUtils';
 import Swal from 'sweetalert2';
 import { BACKEND_URL } from '../config';
 import { getProductoById } from '../services/apiService';
+import { usarAdminConfig } from '../context/AdminConfigContexto';
 
 const DetalleProducto = () => {
   const { id } = useParams();
@@ -16,6 +17,8 @@ const DetalleProducto = () => {
   const [mensajeDescuento, setMensajeDescuento] = useState('');
   const [mostrarBarra, setMostrarBarra] = useState(false);
   const [fadeOut, setFadeOut] = useState(false);
+  const { mostrarPreciosAdmin } = usarAdminConfig();
+  const esAdmin = typeof window !== 'undefined' && localStorage.getItem('esAdmin') === 'true';
 
   useEffect(() => {
     // Hacer scroll al inicio cuando el componente se monta
@@ -103,7 +106,7 @@ const DetalleProducto = () => {
             if (rangosFijos.length > 0) {
               const montos = rangosFijos.map(r => r.descuento);
               const maxM = Math.max(...montos);
-              mensajePartes.push(`hasta $${maxM} de descuento fijo`);
+              mensajePartes.push(`hasta ${maxM} de descuento fijo`);
             }
             
             if (mensajePartes.length > 0) {
@@ -157,6 +160,9 @@ const DetalleProducto = () => {
 
   // Calcular el precio ajustado
   const precioAjustado = formatearPrecio(ajustarPrecio(producto.precio, producto.titulo, producto.categoria));
+  const precioProveedor = parsearPrecio(producto.precio);
+  const precioAjustadoNumero = ajustarPrecio(producto.precio, producto.titulo, producto.categoria);
+  const ganancia = Math.max(0, precioAjustadoNumero - precioProveedor);
 
   return (
     <>
@@ -274,7 +280,16 @@ const DetalleProducto = () => {
                     padding: '1.5rem',
                     textAlign: 'center'
                   }}>
-
+                    {esAdmin && mostrarPreciosAdmin && (
+                      <div style={{ marginBottom: '4px' }}>
+                        <div style={{ fontSize: '0.8rem', color: document.documentElement.getAttribute('data-theme') === 'dark' ? 'rgba(150, 120, 200, 0.9)' : 'rgba(97, 68, 159, 0.52)' }}>
+                          Proveedor: ${formatearPrecio(precioProveedor)}
+                        </div>
+                        <div style={{ fontSize: '0.8rem', color: document.documentElement.getAttribute('data-theme') === 'dark' ? 'rgb(50, 200, 100)' : 'rgb(7, 56, 25)' }}>
+                          Ganancia: ${formatearPrecio(ganancia)}
+                        </div>
+                      </div>
+                    )}
                     <div style={{
                       fontSize: '0.9rem',
                       opacity: '0.8',
