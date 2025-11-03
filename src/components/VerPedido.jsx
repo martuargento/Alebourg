@@ -7,6 +7,7 @@ import { FaTrash } from 'react-icons/fa';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { BACKEND_URL } from '../config';
+import { trackEvent } from '../services/apiService';
 
 const VerPedido = () => {
   const { 
@@ -25,6 +26,13 @@ const VerPedido = () => {
       .then(res => res.json())
       .then(setReglasDescuento)
       .catch(() => setReglasDescuento([]));
+  }, []);
+
+  // Track vista de carrito
+  useEffect(() => {
+    try { trackEvent('view_cart', { items: carrito.map(p => ({ id: p.id, qty: p.cantidad })) }); } catch (_) {}
+    // Solo al montar
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Calcular el total del carrito

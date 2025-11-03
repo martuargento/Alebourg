@@ -5,6 +5,7 @@ import Swal from 'sweetalert2';
 import { ajustarPrecio, formatearPrecio, parsearPrecio } from '../utils/preciosUtils';
 import { useNavigate } from 'react-router-dom';
 import { BACKEND_URL } from '../config';
+import { trackEvent } from '../services/apiService';
 
 const ProductCard = ({ producto }) => {
   const { agregarAlCarrito, carrito } = usarCarrito();
@@ -28,6 +29,14 @@ const ProductCard = ({ producto }) => {
       precio: producto.precio // Mantenemos el precio original para poder ajustarlo después
     };
     agregarAlCarrito(productoParaCarrito);
+    try {
+      trackEvent('add_to_cart', {
+        productId: producto.id,
+        price: producto.precio,
+        title: producto.titulo,
+        categoria: producto.categoria
+      });
+    } catch (_) {}
 
     // Calcular incentivo de descuento
     fetch(`${BACKEND_URL}/api/descuentos`)

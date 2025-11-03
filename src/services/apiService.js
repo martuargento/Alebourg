@@ -130,3 +130,32 @@ export const trackVisit = async (path = window.location.pathname) => {
     // silencioso
   }
 };
+
+// ---------- Analytics de eventos (add_to_cart, view_cart, etc.) ----------
+const getOrCreateSessionId = () => {
+  try {
+    const key = 'alebourg_session_id';
+    let sid = localStorage.getItem(key);
+    if (!sid) {
+      sid = Math.random().toString(36).slice(2) + Date.now().toString(36);
+      localStorage.setItem(key, sid);
+    }
+    return sid;
+  } catch (_) {
+    return 'unknown';
+  }
+};
+
+export const trackEvent = async (type, payload = {}) => {
+  try {
+    if (typeof window !== 'undefined' && localStorage.getItem('esAdmin') === 'true') return;
+    const sessionId = getOrCreateSessionId();
+    await fetch(`${BACKEND_URL}/api/analytics/event`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type, payload, ts: Date.now(), sessionId })
+    });
+  } catch (_) {
+    // silencioso
+  }
+};
