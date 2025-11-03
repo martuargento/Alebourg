@@ -1,10 +1,14 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Form } from 'react-bootstrap';
 import { FaSearch } from 'react-icons/fa';
 
-const Buscador = ({ onBuscar }) => {
-  const [busqueda, setBusqueda] = useState('');
+const Buscador = ({ onBuscar, busquedaInicial = '' }) => {
+  const [busqueda, setBusqueda] = useState(busquedaInicial);
   const inputRef = useRef(null);
+
+  useEffect(() => {
+    setBusqueda(busquedaInicial);
+  }, [busquedaInicial]);
 
   const handleChange = (e) => {
     const valor = e.target.value;

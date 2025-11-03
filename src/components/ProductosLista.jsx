@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { Container, Row, Col, Dropdown, Button } from 'react-bootstrap';
+import { useSearchParams } from 'react-router-dom';
 import ProductCard from './ProductCard';
 import { usarCarrito } from '../context/CarritoContexto';
 import Swal from 'sweetalert2';
@@ -11,9 +12,17 @@ const ProductosLista = ({ categoria = null }) => {
   const [productos, setProductos] = useState([]);
   const [loading, setLoading] = useState(true);
   const { agregarAlCarrito } = usarCarrito();
-  const [busqueda, setBusqueda] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const busqueda = searchParams.get('q') || '';
   const [ordenamiento, setOrdenamiento] = useState('');
   const [productosVisibles, setProductosVisibles] = useState(20);
+
+  const handleBuscar = (valor) => {
+    setSearchParams(params => {
+      params.set('q', valor);
+      return params;
+    });
+  };
 
   useEffect(() => {
     const cargarProductos = async () => {
@@ -83,7 +92,7 @@ const ProductosLista = ({ categoria = null }) => {
     <Container fluid className="p-0">
       <div className={`d-flex flex-column flex-sm-row align-items-${categoria ? 'start' : 'center'} gap-2 mb-3 buscador-container px-2`}>
         <div className="flex-grow-1">
-          <Buscador onBuscar={setBusqueda} />
+          <Buscador onBuscar={handleBuscar} busquedaInicial={busqueda} />
         </div>
         {(categoria || productosFiltrados.length > 1) && (
           <Dropdown className="ordenamiento-dropdown">
