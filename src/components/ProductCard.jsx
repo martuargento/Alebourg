@@ -1,16 +1,15 @@
 import React, { useState } from 'react';
 import { Button, Card } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
 import { usarCarrito } from '../context/CarritoContexto';
 import { usarAdminConfig } from '../context/AdminConfigContexto';
 import Swal from 'sweetalert2';
 import { ajustarPrecio, formatearPrecio, parsearPrecio } from '../utils/preciosUtils';
-import { useNavigate } from 'react-router-dom';
 import { BACKEND_URL } from '../config';
 import { trackEvent } from '../services/apiService';
 
 const ProductCard = ({ producto }) => {
   const { agregarAlCarrito, carrito } = usarCarrito();
-  const navigate = useNavigate();
   const [mensajeDescuento, setMensajeDescuento] = useState('');
   const [mostrarBarra, setMostrarBarra] = useState(false);
   const [fadeOut, setFadeOut] = useState(false);
@@ -24,6 +23,7 @@ const ProductCard = ({ producto }) => {
   const ganancia = Math.max(0, precioAjustadoNumero - precioProveedor);
 
   const manejarClick = (e) => {
+    e.preventDefault();
     e.stopPropagation();
     // Crear una copia del producto con el precio original (sin formatear)
     const productoParaCarrito = {
@@ -182,10 +182,6 @@ const ProductCard = ({ producto }) => {
     });
   };
 
-  const irADetalle = () => {
-    navigate(`/producto/${producto.id}`);
-  };
-
   return (
     <>
       {/* Barra de incentivo de descuento */}
@@ -248,51 +244,52 @@ const ProductCard = ({ producto }) => {
           }
         }
       `}</style>
-      <Card 
-        className='cardsEstilos' 
-        style={{ 
-          minHeight: '100%', 
-          cursor: 'pointer',
-          width: '100%',
-          maxWidth: '100%',
-          overflow: 'hidden'
-        }}
-        onClick={irADetalle}
-      >
-        <Card.Img 
-          variant="top" 
-          src={producto.imagen} 
+      <Link to={`/producto/${producto.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+        <Card 
+          className='cardsEstilos' 
           style={{ 
-            height: '200px', 
-            objectFit: 'contain', 
-            padding: '10px',
-            maxWidth: '100%'
-          }} 
-        />
-        <Card.Body className="d-flex flex-column p-2">
-          <Card.Title className="mb-3 text-break">{producto.titulo}</Card.Title>
-          <div className="mt-auto">
-          {esAdmin && mostrarPreciosAdmin && (
-            <div style={{ marginBottom: '4px' }}>
-              <div style={{ fontSize: '0.8rem', color: 'rgba(97, 68, 159, 0.52)' }}>
-                Proveedor: ${formatearPrecio(precioProveedor)}
+            minHeight: '100%', 
+            cursor: 'pointer',
+            width: '100%',
+            maxWidth: '100%',
+            overflow: 'hidden'
+          }}
+        >
+          <Card.Img 
+            variant="top" 
+            src={producto.imagen} 
+            style={{ 
+              height: '200px', 
+              objectFit: 'contain', 
+              padding: '10px',
+              maxWidth: '100%'
+            }} 
+          />
+          <Card.Body className="d-flex flex-column p-2">
+            <Card.Title className="mb-3 text-break">{producto.titulo}</Card.Title>
+            <div className="mt-auto">
+            {esAdmin && mostrarPreciosAdmin && (
+              <div style={{ marginBottom: '4px' }}>
+                <div style={{ fontSize: '0.8rem', color: 'rgba(97, 68, 159, 0.52)' }}>
+                  Proveedor: ${formatearPrecio(precioProveedor)}
+                </div>
+                <div style={{ fontSize: '0.8rem', color: 'rgb(7, 56, 25)' }}>
+                  Ganancia: ${formatearPrecio(ganancia)}
+                </div>
               </div>
-              <div style={{ fontSize: '0.8rem', color: 'rgb(7, 56, 25)' }}>
-                Ganancia: ${formatearPrecio(ganancia)}
-              </div>
+            )}
+              <div>Precio:</div>
+              <h4>${precioAjustado}</h4>
             </div>
-          )}
-            <div>Precio:</div>
-            <h4>${precioAjustado}</h4>
-          </div>
-          <Button 
-            onClick={manejarClick} 
-            className="boton-productos mt-auto w-100"
-          >
-            Agregar al carrito
-          </Button>
-        </Card.Body>
-      </Card>
+            <Button 
+              onClick={manejarClick} 
+              className="boton-productos mt-auto w-100"
+            >
+              Agregar al carrito
+            </Button>
+          </Card.Body>
+        </Card>
+      </Link>
     </>
   );
 };
