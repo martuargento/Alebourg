@@ -121,7 +121,7 @@ export const trackVisit = async (path = window.location.pathname) => {
   try {
     // Evitar contaminar métricas cuando está logueado como admin
     if (typeof window !== 'undefined' && localStorage.getItem('esAdmin') === 'true') return;
-    await fetch(`${BACKEND_URL}/api/analytics/track`, {
+    await fetch(`${BACKEND_URL}/api/analytics?type=track`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ path, ts: Date.now() })
@@ -150,7 +150,7 @@ export const trackEvent = async (type, payload = {}) => {
   try {
     if (typeof window !== 'undefined' && localStorage.getItem('esAdmin') === 'true') return;
     const sessionId = getOrCreateSessionId();
-    await fetch(`${BACKEND_URL}/api/analytics/event`, {
+    await fetch(`${BACKEND_URL}/api/analytics?type=event`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ type, payload, ts: Date.now(), sessionId })

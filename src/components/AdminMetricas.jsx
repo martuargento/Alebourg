@@ -13,7 +13,7 @@ const AdminMetricas = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await fetch(`${BACKEND_URL}/api/analytics/stats?granularity=${granularity}&range=${range}`);
+        const res = await fetch(`${BACKEND_URL}/api/analytics?type=stats&granularity=${granularity}&range=${range}`);
         const json = await res.json();
         setStats(json);
       } catch (e) {
@@ -26,7 +26,7 @@ const AdminMetricas = () => {
   useEffect(() => {
     const fetchEventStats = async () => {
       try {
-        const res = await fetch(`${BACKEND_URL}/api/analytics/event-stats?granularity=${granularity}&range=${range}`);
+        const res = await fetch(`${BACKEND_URL}/api/analytics?type=event-stats&granularity=${granularity}&range=${range}`);
         const json = await res.json();
         setEventStats(json);
       } catch (e) {
@@ -39,7 +39,7 @@ const AdminMetricas = () => {
   useEffect(() => {
     const fetchInsights = async () => {
       try {
-        const res = await fetch(`${BACKEND_URL}/api/analytics/insights?range=${range}`);
+        const res = await fetch(`${BACKEND_URL}/api/analytics?type=insights&range=${range}`);
         const json = await res.json();
         setInsights(json);
       } catch (e) {
