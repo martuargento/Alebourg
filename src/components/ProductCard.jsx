@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button, Card } from 'react-bootstrap';
 import { usarCarrito } from '../context/CarritoContexto';
 import Swal from 'sweetalert2';
-import { ajustarPrecio, formatearPrecio } from '../utils/preciosUtils';
+import { ajustarPrecio, formatearPrecio, parsearPrecio } from '../utils/preciosUtils';
 import { useNavigate } from 'react-router-dom';
 import { BACKEND_URL } from '../config';
 
@@ -13,8 +13,12 @@ const ProductCard = ({ producto }) => {
   const [mostrarBarra, setMostrarBarra] = useState(false);
   const [fadeOut, setFadeOut] = useState(false);
 
-  // Calcular y formatear el precio ajustado para mostrar
-  const precioAjustado = formatearPrecio(ajustarPrecio(producto.precio, producto.titulo, producto.categoria));
+  // Calcular precios (base proveedor y ajustado)
+  const esAdmin = typeof window !== 'undefined' && localStorage.getItem('esAdmin') === 'true';
+  const precioProveedor = parsearPrecio(producto.precio);
+  const precioAjustadoNumero = ajustarPrecio(producto.precio, producto.titulo, producto.categoria);
+  const precioAjustado = formatearPrecio(precioAjustadoNumero);
+  const ganancia = Math.max(0, precioAjustadoNumero - precioProveedor);
 
   const manejarClick = (e) => {
     e.stopPropagation();
@@ -257,6 +261,16 @@ const ProductCard = ({ producto }) => {
         <Card.Body className="d-flex flex-column p-2">
           <Card.Title className="mb-3 text-break">{producto.titulo}</Card.Title>
           <div className="mt-auto">
+          {esAdmin && (
+            <div style={{ marginBottom: '4px' }}>
+              <div style={{ fontSize: '0.8rem', color: 'rgba(97, 68, 159, 0.52)' }}>
+                Proveedor: ${formatearPrecio(precioProveedor)}
+              </div>
+              <div style={{ fontSize: '0.8rem', color: 'rgb(7, 56, 25)' }}>
+                Ganancia: ${formatearPrecio(ganancia)}
+              </div>
+            </div>
+            )}
             <div>Precio:</div>
             <h4>${precioAjustado}</h4>
           </div>
