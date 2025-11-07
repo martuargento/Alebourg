@@ -14,8 +14,12 @@ const ProductosLista = ({ categoria = null }) => {
   const { agregarAlCarrito } = usarCarrito();
   const [searchParams, setSearchParams] = useSearchParams();
   const busqueda = searchParams.get('q') || '';
-  const [ordenamiento, setOrdenamiento] = useState('');
+  const [ordenamiento, setOrdenamiento] = useState(sessionStorage.getItem('ordenamiento') || '');
   const [productosVisibles, setProductosVisibles] = useState(20);
+
+  useEffect(() => {
+    sessionStorage.setItem('ordenamiento', ordenamiento);
+  }, [ordenamiento]);
 
   const handleBuscar = (valor) => {
     setSearchParams(params => {
