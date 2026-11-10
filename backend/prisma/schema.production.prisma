@@ -14,7 +14,7 @@ model Producto {
   titulo     String
   imagen     String   @default("")
   precio     String
-  categoria  String
+  categoria  String?
   orden      Int      @default(0)
 
   @@map("productos")

@@ -4,7 +4,7 @@ function serializarProducto(producto) {
   return {
     ...producto,
     precio: String(producto.precio),
-    categoria: producto.categoria.toLowerCase().trim(),
+    categoria: String(producto.categoria || '').toLowerCase().trim(),
   };
 }
 
