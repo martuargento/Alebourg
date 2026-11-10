@@ -1,0 +1,59 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma-production"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Producto {
+  id         Int      @id
+  titulo     String
+  imagen     String   @default("")
+  precio     String
+  categoria  String
+  orden      Int      @default(0)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@map("productos")
+}
+
+model AppSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("app_settings")
+}
+
+model AnalyticsVisit {
+  id        Int      @id @default(autoincrement())
+  ipHash    String   @map("ip_hash")
+  userAgent String   @default("") @map("user_agent")
+  referer   String   @default("")
+  path      String   @default("/")
+  isBot     Boolean  @default(false) @map("is_bot")
+  country   String   @default("")
+  ts        BigInt   @default(0)
+
+  @@index([ts])
+  @@map("analytics_visits")
+}
+
+model AnalyticsEvent {
+  id        Int      @id @default(autoincrement())
+  ipHash    String   @map("ip_hash")
+  userAgent String   @default("") @map("user_agent")
+  sessionId String   @default("") @map("session_id")
+  eventType String   @map("event_type")
+  payload   Json     @default("{}")
+  ts        BigInt   @default(0)
+
+  @@index([ts])
+  @@index([eventType, ts])
+  @@map("analytics_events")
+}
