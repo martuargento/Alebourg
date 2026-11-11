@@ -54,4 +54,10 @@ export const ajustarPrecio = (precioOriginal, titulo = '', categoria = '', confi
   return redondearA500(precioAjustado);
 };
 
+export const obtenerPrecioFinal = (producto, configuracion) => (
+  producto.precioFinal == null
+    ? ajustarPrecio(producto.precio, producto.titulo, producto.categoria, configuracion)
+    : parsearPrecio(producto.precioFinal)
+);
+
 export const formatearPrecio = (precio) => precio.toLocaleString('es-AR');

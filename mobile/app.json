@@ -1,0 +1,33 @@
+{
+  "expo": {
+    "name": "Alebourg",
+    "slug": "alebourg-mobile",
+    "version": "1.0.0",
+    "scheme": "alebourg",
+    "orientation": "portrait",
+    "icon": "./assets/app-icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.alebourg.mobile"
+    },
+    "android": {
+      "package": "com.alebourg.mobile",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "backgroundColor": "#FFFFFF",
+        "foregroundImage": "./assets/app-icon.png"
+      }
+    },
+    "plugins": [
+      "expo-secure-store",
+      [
+        "expo-navigation-bar",
+        {
+          "style": "dark",
+          "enforceContrast": false
+        }
+      ]
+    ]
+  }
+}

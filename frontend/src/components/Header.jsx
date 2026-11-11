@@ -152,6 +152,11 @@ const Header = () => {
                 <Link className="nav-link" to="/admin/metricas">Métricas</Link>
               </li>
             )}
+            {esAdmin && (
+              <li className="nav-item">
+                <Link className="nav-link" to="/admin/productos/nuevo">Agregar producto</Link>
+              </li>
+            )}
           </ul>
 
           <div className="d-flex align-items-center gap-3">
@@ -421,6 +426,17 @@ const Header = () => {
                       onClick={handleToggleMobileMenu}
                     >
                       Métricas
+                    </Link>
+                  </li>
+                )}
+                {esAdmin && (
+                  <li className="mobile-menu-item">
+                    <Link
+                      to="/admin/productos/nuevo"
+                      className="mobile-menu-link"
+                      onClick={handleToggleMobileMenu}
+                    >
+                      Agregar producto
                     </Link>
                   </li>
                 )}

@@ -15,6 +15,7 @@ import ProductosPorCategoria from './pages/ProductosPorCategoria';
 import DetalleProducto from './pages/DetalleProducto';
 import AdminPrecios from './pages/AdminPrecios';
 import AdminMetricas from './pages/AdminMetricas';
+import AdminProductoEditor from './components/AdminProductoEditor';
 
 function PaginaConPrecios({ children }) {
   const configuracion = usePreciosConfig();
@@ -67,6 +68,14 @@ export default function App() {
           element={
             <RutaProtegida>
               <AdminMetricas />
+            </RutaProtegida>
+          }
+        />
+        <Route
+          path="/admin/productos/nuevo"
+          element={
+            <RutaProtegida>
+              <AdminProductoEditor />
             </RutaProtegida>
           }
         />

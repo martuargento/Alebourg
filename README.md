@@ -28,6 +28,16 @@ Prisma, JWT y SQLite local/PostgreSQL en producción.
 El catálogo y los ajustes de precios se leen de la base de datos. No hay
 catálogo ni configuración predeterminada de respaldo en archivos.
 
+## Aplicación móvil
+
+La app Expo/React Native está en `mobile/` y reutiliza el catálogo, las
+categorías y los precios de la API. El carrito se guarda en el dispositivo y
+los pedidos se coordinan por WhatsApp; no hay cuentas de clientes ni pedidos
+persistidos en el backend. La sesión de administrador permite mostrar precio
+de proveedor y ganancia, y editar los rangos de precios desde la app. Consultá
+`mobile/README.md` para configurar la URL del backend y ejecutar la app en un
+dispositivo o emulador.
+
 ## Desarrollo local
 
 La base aislada está en `backend/prisma/dev.db`; no conecta con Supabase. Los
@@ -60,12 +70,29 @@ archivos `.env` y la base local no se versionan.
    Abrí la dirección que indique Vite, normalmente `http://localhost:5173`.
    Los cambios administrativos se guardan en la base SQLite local.
 
-## Producción, etapa posterior
+## Producción
 
-No hacer push ni desplegar esta migración hasta validar la versión local. El
-despliegue futuro previsto es Netlify (`frontend/`), Vercel (`backend/`) y
-Supabase PostgreSQL. Antes habrá que verificar el esquema real de Supabase,
-planificar la migración de catálogo y configuración y cargar secretos nuevos
-directamente en los paneles de hosting. No ejecutar `db:push:production` todavía.
+La tienda web y su API están desplegadas en Netlify (`frontend/`) y Vercel
+(`backend/`), con PostgreSQL en Supabase. La app móvil usa la misma API pública;
+no contiene credenciales de Supabase. No ejecutar `db:push:production`: la base
+de producción se administra por separado y su esquema ya fue alineado con Prisma.
 
-Las credenciales que estuvieron en Git deben rotarse antes de publicar.
+No subir credenciales al repositorio; configurarlas como variables en los
+proveedores de hosting.
+
+### Administración de productos
+
+Los cambios administrativos, productos manuales y el orden de la tienda se
+guardan en `app_settings`, separado del catálogo `productos`, para que una
+reimportación del catálogo no borre esas personalizaciones. La web y la app
+móvil permiten editar título, categoría, costo del proveedor, precio final y
+galería; las listas de Más vendidos y Ofertas se ordenan independientemente.
+En la tienda web se arrastran los productos para ordenarlos; en la app móvil se
+usan las flechas de posición.
+
+Para habilitar cargas de imágenes, creá un bucket público de Supabase Storage y
+configurá `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` y, opcionalmente,
+`SUPABASE_STORAGE_BUCKET` en el entorno privado del backend. La clave service
+role no debe llegar al frontend ni a la app. Cada foto acepta JPG, PNG o WebP,
+hasta 4 MB para respetar el límite de carga del backend desplegado en Vercel.
+Consultá `mobile/README.md` para los pasos y variables.

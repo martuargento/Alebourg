@@ -1,0 +1,17 @@
+export const colores = {
+  fondo: '#F9FAFB',
+  superficie: '#FFFFFF',
+  tinta: '#111827',
+  secundaria: '#687385',
+  primario: '#374151',
+  primarioOscuro: '#374151',
+  primarioClaro: '#E5E7EB',
+  cta: '#22C55E',
+  ctaHover: '#16A34A',
+  linea: '#E5E7EB',
+  error: '#DC2626',
+  errorClaro: '#FEF2F2',
+  aviso: '#F59E0B',
+  exito: '#16A34A',
+  sombra: '#17212F',
+}

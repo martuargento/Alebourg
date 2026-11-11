@@ -1,0 +1,333 @@
+import { useEffect, useState } from 'react'
+import {
+  Alert,
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  TextInput,
+  View,
+} from 'react-native'
+import * as ImagePicker from 'expo-image-picker'
+import { Feather } from '@expo/vector-icons'
+import { Boton, Cargando } from '../components/Controles'
+import {
+  crearProductoManual,
+  guardarConfiguracionProductos,
+  guardarEdicionProducto,
+  marcarProductoRevisado,
+  obtenerConfiguracionProductos,
+  subirImagenProducto,
+} from '../api/administracionProductos'
+import { obtenerErrorApi } from '../api/client'
+import { useCatalogo } from '../context/CatalogoContext'
+import { useAuth } from '../context/AuthContext'
+import { useTema } from '../context/TemaContext'
+
+export default function AdminProductoScreen({ route, navigation }) {
+  const productoInicial = route.params?.producto || null
+  const esNuevo = !productoInicial
+  const { colores } = useTema()
+  const estilos = crearEstilos(colores)
+  const { cargarCatalogo } = useCatalogo()
+  const { isAdmin, cargandoSesion } = useAuth()
+  const [esProductoNuevo, setEsProductoNuevo] = useState(esNuevo)
+  const [productoId, setProductoId] = useState(productoInicial?.id ?? null)
+  const [titulo, setTitulo] = useState(productoInicial?.titulo || '')
+  const [categoria, setCategoria] = useState(productoInicial?.categoria || '')
+  const [precioProveedor, setPrecioProveedor] = useState(productoInicial?.precio || '')
+  const [precioFinal, setPrecioFinal] = useState(productoInicial?.precioFinal || '')
+  const [imagenes, setImagenes] = useState(productoInicial?.imagenes || [])
+  const [pendienteRevision, setPendienteRevision] = useState(Boolean(productoInicial?.pendienteRevision))
+  const [masVendido, setMasVendido] = useState(false)
+  const [oferta, setOferta] = useState(false)
+  const [configuracion, setConfiguracion] = useState(null)
+  const [guardando, setGuardando] = useState(false)
+  const [cargando, setCargando] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    let activo = true
+    obtenerConfiguracionProductos()
+      .then((valor) => {
+        if (!activo) return
+        setConfiguracion(valor)
+        setMasVendido(valor.masVendidos.includes(productoInicial?.id))
+        setOferta(valor.ofertas.includes(productoInicial?.id))
+      })
+      .catch((errorCarga) => {
+        if (activo) setError(obtenerErrorApi(errorCarga, 'No se pudo cargar la configuración de productos.'))
+      })
+      .finally(() => { if (activo) setCargando(false) })
+    return () => { activo = false }
+  }, [productoInicial?.id])
+
+  async function seleccionarImagenes() {
+    setError('')
+    try {
+      const resultado = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsMultipleSelection: true,
+        quality: 0.85,
+        orderedSelection: true,
+      })
+      if (resultado.canceled) return
+      if (!productoId) {
+        Alert.alert('Guardá el producto primero', 'Después vas a poder agregarle fotos desde el celular.')
+        return
+      }
+      if (imagenes.length + resultado.assets.length > 12) {
+        Alert.alert('Máximo de fotos', 'Cada producto admite hasta 12 imágenes.')
+        return
+      }
+      if (resultado.assets.some((archivo) => archivo.fileSize > 4 * 1024 * 1024)) {
+        Alert.alert('Imagen demasiado grande', 'Cada imagen debe pesar 4 MB o menos.')
+        return
+      }
+      setGuardando(true)
+      const subidas = []
+      for (const archivo of resultado.assets) {
+        subidas.push(await subirImagenProducto(productoId, archivo))
+      }
+      setImagenes((actuales) => [...actuales, ...subidas])
+    } catch (errorCarga) {
+      setError(obtenerErrorApi(errorCarga, 'No se pudieron subir las imágenes.'))
+    } finally {
+      setGuardando(false)
+    }
+  }
+
+  async function guardar() {
+    setError('')
+    setGuardando(true)
+    try {
+      const datos = {
+        titulo: titulo.trim(),
+        categoria: categoria.trim(),
+        precioProveedor,
+        precioFinal: precioFinal.trim() || null,
+        imagenes,
+      }
+      let id = productoId
+      if (!id) {
+        const nuevo = await crearProductoManual({
+          ...datos,
+          precioFinal: precioFinal.trim() || precioProveedor || '0',
+          imagenes: [],
+        })
+        id = nuevo.id
+        setProductoId(id)
+        setEsProductoNuevo(false)
+      }
+      const actualizado = await guardarEdicionProducto(id, datos)
+      const base = configuracion || await obtenerConfiguracionProductos()
+      const nuevoConfig = {
+        ...base,
+        masVendidos: masVendido
+          ? [...new Set([...base.masVendidos, id])]
+          : base.masVendidos.filter((item) => item !== id),
+        ofertas: oferta
+          ? [...new Set([...base.ofertas, id])]
+          : base.ofertas.filter((item) => item !== id),
+        orden: base.ordenPersonalizadoActivo
+          ? [...new Set([...base.orden, id])]
+          : base.orden,
+      }
+      await guardarConfiguracionProductos(nuevoConfig)
+      setConfiguracion(nuevoConfig)
+      await cargarCatalogo()
+      if (actualizado.id !== productoId) navigation.setParams({ producto: actualizado })
+      Alert.alert('Producto guardado', 'Los cambios ya están guardados en la base de datos.')
+    } catch (errorGuardar) {
+      setError(obtenerErrorApi(errorGuardar, 'No se pudo guardar el producto.'))
+    } finally {
+      setGuardando(false)
+    }
+  }
+
+  async function confirmarRevision() {
+    try {
+      await marcarProductoRevisado(productoId)
+      setPendienteRevision(false)
+      await cargarCatalogo()
+    } catch (errorRevision) {
+      setError(obtenerErrorApi(errorRevision, 'No se pudo confirmar la revisión.'))
+    }
+  }
+
+  if (cargando || cargandoSesion) return <Cargando mensaje="Cargando edición..." />
+  if (!isAdmin) {
+    return (
+      <View style={[estilos.pantalla, estilos.sinAcceso]}>
+        <Text style={estilos.error}>Iniciá sesión como administrador para editar productos.</Text>
+        <Boton titulo="Volver" variante="secundario" onPress={() => navigation.goBack()} />
+      </View>
+    )
+  }
+
+  return (
+    <ScrollView style={estilos.pantalla} contentContainerStyle={estilos.contenido}>
+      <Text style={estilos.titulo}>{esProductoNuevo ? 'Agregar producto' : 'Editar producto'}</Text>
+      {!!error && <Text style={estilos.error}>{error}</Text>}
+      {pendienteRevision && (
+        <View style={estilos.revision}>
+          <Text style={estilos.revisionTitulo}>Hay datos nuevos del catálogo para revisar</Text>
+          <Text style={estilos.descripcion}>
+            Tus cambios se conservaron. El catálogo importado ahora informa:
+          </Text>
+          <Text style={estilos.descripcion}>
+            Título: {productoInicial?.datosImportados?.titulo || '—'}{'\n'}
+            Costo: {productoInicial?.datosImportados?.precio || '—'}{'\n'}
+            Categoría: {productoInicial?.datosImportados?.categoria || '—'}
+          </Text>
+          <Boton titulo="Marcar revisión como hecha" variante="secundario" onPress={confirmarRevision} />
+        </View>
+      )}
+      <Campo titulo="Título" valor={titulo} cambiar={setTitulo} estilos={estilos} />
+      <Campo titulo="Categoría" valor={categoria} cambiar={setCategoria} estilos={estilos} />
+      <Campo
+        titulo="Costo del proveedor"
+        valor={precioProveedor}
+        cambiar={setPrecioProveedor}
+        estilos={estilos}
+        teclado="decimal-pad"
+      />
+      <Campo
+        titulo="Precio final o promocional (vacío usa los rangos)"
+        valor={precioFinal}
+        cambiar={setPrecioFinal}
+        estilos={estilos}
+        teclado="decimal-pad"
+      />
+      <View style={estilos.tarjeta}>
+        <Text style={estilos.subtitulo}>Fotos ({imagenes.length}/12)</Text>
+        <ScrollView horizontal contentContainerStyle={estilos.galeria}>
+          {imagenes.map((url, indice) => (
+            <View key={`${url}-${indice}`} style={estilos.fotoContenedor}>
+              <Image source={{ uri: url }} style={estilos.foto} />
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`Quitar foto ${indice + 1}`}
+                style={estilos.quitarFoto}
+                onPress={() => setImagenes((actuales) => actuales.filter((_, posicion) => posicion !== indice))}
+              >
+                <Feather name="x" size={15} color={colores.superficie} />
+              </Pressable>
+            </View>
+          ))}
+        </ScrollView>
+        <Boton
+          titulo={guardando ? 'Subiendo...' : 'Agregar fotos desde el celular'}
+          variante="secundario"
+          onPress={seleccionarImagenes}
+          deshabilitado={guardando}
+        />
+      </View>
+      <Preferencia titulo="Mostrar en Más vendidos" valor={masVendido} cambiar={setMasVendido} estilos={estilos} colores={colores} />
+      <Preferencia titulo="Mostrar en Ofertas" valor={oferta} cambiar={setOferta} estilos={estilos} colores={colores} />
+      {oferta && (
+        <Text style={estilos.descripcion}>
+          Para mostrar un descuento, ingresá un precio final menor al precio normal.
+        </Text>
+      )}
+      <Boton titulo={guardando ? 'Guardando...' : 'Guardar cambios'} onPress={guardar} deshabilitado={guardando} />
+    </ScrollView>
+  )
+}
+
+function Campo({ titulo, valor, cambiar, estilos, teclado = 'default' }) {
+  return (
+    <View style={estilos.campo}>
+      <Text style={estilos.etiqueta}>{titulo}</Text>
+      <TextInput
+        value={valor}
+        onChangeText={cambiar}
+        keyboardType={teclado}
+        style={estilos.input}
+        placeholderTextColor="#687385"
+      />
+    </View>
+  )
+}
+
+function Preferencia({ titulo, valor, cambiar, estilos, colores }) {
+  return (
+    <View style={estilos.tarjetaPreferencia}>
+      <Text style={estilos.etiqueta}>{titulo}</Text>
+      <Switch
+        value={valor}
+        onValueChange={cambiar}
+        trackColor={{ false: colores.linea, true: colores.exito }}
+        thumbColor={colores.superficie}
+      />
+    </View>
+  )
+}
+
+function crearEstilos(colores) {
+  return StyleSheet.create({
+    pantalla: { flex: 1, backgroundColor: colores.fondo },
+    contenido: { flexGrow: 1, padding: 18, paddingBottom: 36, gap: 14 },
+    titulo: { color: colores.tinta, fontSize: 24, fontWeight: '800' },
+    subtitulo: { color: colores.tinta, fontSize: 17, fontWeight: '700' },
+    descripcion: { color: colores.secundaria, lineHeight: 20 },
+    campo: { gap: 6 },
+    etiqueta: { color: colores.tinta, fontSize: 14, fontWeight: '700' },
+    input: {
+      minHeight: 48,
+      paddingHorizontal: 12,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colores.linea,
+      backgroundColor: colores.superficie,
+      color: colores.tinta,
+      fontSize: 16,
+    },
+    tarjeta: {
+      padding: 14,
+      gap: 12,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: colores.linea,
+      backgroundColor: colores.superficie,
+    },
+    tarjetaPreferencia: {
+      paddingHorizontal: 14,
+      minHeight: 58,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      borderRadius: 14,
+      borderWidth: 1,
+      borderColor: colores.linea,
+      backgroundColor: colores.superficie,
+    },
+    galeria: { gap: 8 },
+    fotoContenedor: { position: 'relative' },
+    foto: { width: 82, height: 82, borderRadius: 8, backgroundColor: colores.fondo },
+    quitarFoto: {
+      position: 'absolute',
+      top: 3,
+      right: 3,
+      width: 23,
+      height: 23,
+      borderRadius: 12,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colores.error,
+    },
+    revision: {
+      padding: 14,
+      gap: 8,
+      borderRadius: 14,
+      backgroundColor: colores.errorClaro,
+      borderWidth: 1,
+      borderColor: colores.error,
+    },
+    revisionTitulo: { color: colores.error, fontWeight: '800' },
+    error: { color: colores.error, lineHeight: 20 },
+    sinAcceso: { justifyContent: 'center', padding: 22, gap: 16 },
+  })
+}

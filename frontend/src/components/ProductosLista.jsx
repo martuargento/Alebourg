@@ -1,23 +1,96 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { Container, Row, Col, Dropdown, Button } from 'react-bootstrap';
 import { useSearchParams } from 'react-router-dom';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import ProductCard from './ProductCard';
 import Buscador from './Buscador';
 import { sonCategoriasIguales } from '../utils/categoriasUtils';
-import { useProductos } from '../hooks/useProductos';
+import { productQueryKey, useProductos } from '../hooks/useProductos';
 import { usePreciosConfig } from '../hooks/useConfiguracion';
+import { useAuth } from '../hooks/useAuth';
+import {
+  guardarConfiguracionProductos,
+  obtenerConfiguracionProductos,
+  obtenerProductosDestacados,
+} from '../api/administracionProductos';
+import { obtenerErrorApi } from '../api/products';
 
 const ProductosLista = ({ categoria = null }) => {
   const { data: catalogo = [], isLoading, error } = useProductos();
+  const queryClient = useQueryClient();
   const { data: configuracionPrecios } = usePreciosConfig();
+  const { isAdmin } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const busqueda = searchParams.get('q') || '';
   const [ordenamiento, setOrdenamiento] = useState(sessionStorage.getItem('ordenamiento') || '');
   const [productosVisibles, setProductosVisibles] = useState(20);
+  const [configuracionAdmin, setConfiguracionAdmin] = useState(null);
+  const [productoArrastrado, setProductoArrastrado] = useState(null);
+  const [errorAdmin, setErrorAdmin] = useState('');
+  const {
+    data: destacados = { masVendidos: [], ofertas: [] },
+    error: errorDestacados,
+  } = useQuery({
+    queryKey: ['productos-destacados'],
+    queryFn: obtenerProductosDestacados,
+    enabled: !categoria,
+  });
 
   useEffect(() => {
     sessionStorage.setItem('ordenamiento', ordenamiento);
   }, [ordenamiento]);
+
+  useEffect(() => {
+    if (!isAdmin) {
+      setConfiguracionAdmin(null);
+      return undefined;
+    }
+    let activo = true;
+    obtenerConfiguracionProductos()
+      .then((configuracion) => { if (activo) setConfiguracionAdmin(configuracion); })
+      .catch((errorCarga) => {
+        if (activo) setErrorAdmin(obtenerErrorApi(errorCarga, 'No se pudo cargar la configuración de productos.'));
+      });
+    return () => { activo = false; };
+  }, [isAdmin]);
+
+  const guardarConfigAdmin = useCallback(async (configuracion) => {
+    setErrorAdmin('');
+    try {
+      const actualizada = await guardarConfiguracionProductos(configuracion);
+      setConfiguracionAdmin(actualizada);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: productQueryKey }),
+        queryClient.invalidateQueries({ queryKey: ['productos-destacados'] }),
+      ]);
+    } catch (errorGuardar) {
+      setErrorAdmin(obtenerErrorApi(errorGuardar, 'No se pudo guardar la configuración de productos.'));
+      throw errorGuardar;
+    }
+  }, [queryClient]);
+
+  const reordenarProductos = useCallback(async (idOrigen, idDestino, lista = 'catalogo') => {
+    if (!configuracionAdmin || !idOrigen || !idDestino || idOrigen === idDestino) return;
+    const campo = lista === 'masVendidos' ? 'masVendidos' : lista === 'ofertas' ? 'ofertas' : 'orden';
+    const idsBase = campo === 'orden' && !configuracionAdmin.orden.length
+      ? catalogo.map((producto) => producto.id)
+      : configuracionAdmin[campo];
+    const ids = campo === 'orden'
+      ? [
+        ...idsBase,
+        ...catalogo.map((producto) => producto.id).filter((id) => !idsBase.includes(id)),
+      ]
+      : [...idsBase];
+    const desde = ids.indexOf(idOrigen);
+    const hasta = ids.indexOf(idDestino);
+    if (desde < 0 || hasta < 0) return;
+    ids.splice(hasta, 0, ids.splice(desde, 1)[0]);
+    await guardarConfigAdmin({
+      ...configuracionAdmin,
+      [campo]: ids,
+      ...(campo === 'orden' ? { ordenPersonalizadoActivo: true } : {}),
+    });
+  }, [configuracionAdmin, catalogo, guardarConfigAdmin]);
 
   const handleBuscar = (valor) => {
     setSearchParams(params => {
@@ -54,6 +127,46 @@ const ProductosLista = ({ categoria = null }) => {
     });
   }, [productosFiltrados, ordenamiento]);
 
+  const modoOrdenPersonalizado = Boolean(
+    isAdmin
+    && configuracionAdmin?.ordenPersonalizadoActivo
+    && !ordenamiento
+    && !busqueda,
+  );
+
+  function renderizarDestacados(titulo, lista, clave) {
+    if (!lista?.length || categoria || busqueda) return null;
+    const puedeReordenar = isAdmin && configuracionAdmin && !busqueda;
+    return (
+      <section className="mb-4" aria-label={titulo}>
+        <h4 className="text-white mb-3">{titulo}</h4>
+        <div className="d-flex gap-3 overflow-auto pb-2">
+          {lista.map((producto) => (
+            <div
+              key={producto.id}
+              draggable={puedeReordenar}
+              onDragStart={() => setProductoArrastrado({ id: producto.id, lista: clave })}
+              onDragOver={(evento) => { if (puedeReordenar) evento.preventDefault(); }}
+              onDrop={(evento) => {
+                evento.preventDefault();
+                if (puedeReordenar && productoArrastrado?.lista === clave) {
+                  reordenarProductos(productoArrastrado.id, producto.id, clave)
+                    .catch(() => {});
+                }
+                setProductoArrastrado(null);
+              }}
+              onDragEnd={() => setProductoArrastrado(null)}
+              style={{ width: 190, flex: '0 0 190px', cursor: puedeReordenar ? 'grab' : undefined }}
+            >
+              <ProductCard producto={producto} configuracionPrecios={configuracionPrecios} />
+            </div>
+          ))}
+        </div>
+        {puedeReordenar && <small className="text-white-50">Arrastrá los productos para cambiar el orden.</small>}
+      </section>
+    );
+  }
+
   const cargarMasProductos = () => {
     setProductosVisibles(prev => prev + 20);
   };
@@ -70,6 +183,30 @@ const ProductosLista = ({ categoria = null }) => {
         <div className="flex-grow-1">
           <Buscador onBuscar={handleBuscar} busquedaInicial={busqueda} />
         </div>
+        {isAdmin && (
+          <div className="d-flex align-items-center gap-2 mb-3 px-2">
+            <FormSwitchOrden
+              activo={Boolean(configuracionAdmin?.ordenPersonalizadoActivo)}
+              deshabilitado={!configuracionAdmin}
+              alCambiar={(activo) => guardarConfigAdmin({
+                ...configuracionAdmin,
+                ordenPersonalizadoActivo: activo,
+                orden: configuracionAdmin.orden.length
+                  ? configuracionAdmin.orden
+                  : catalogo.map((producto) => producto.id),
+              }).catch(() => {})}
+            />
+            <span className="text-white">Orden personalizado</span>
+          </div>
+        )}
+        {errorAdmin && <div className="alert alert-danger mx-2" role="alert">{errorAdmin}</div>}
+        {errorDestacados && !categoria && (
+          <div className="alert alert-warning mx-2" role="alert">
+            No se pudieron cargar las listas destacadas. {obtenerErrorApi(errorDestacados, 'Intentá recargar la tienda.')}
+          </div>
+        )}
+        {renderizarDestacados('Más vendidos', destacados.masVendidos, 'masVendidos')}
+        {renderizarDestacados('Ofertas', destacados.ofertas, 'ofertas')}
         {(categoria || productosFiltrados.length > 1) && (
           <Dropdown className="ordenamiento-dropdown">
             <Dropdown.Toggle variant="outline-light" id="dropdown-ordenamiento">
@@ -96,7 +233,28 @@ const ProductosLista = ({ categoria = null }) => {
           <div className="productos-grid px-2">
             {productosAMostrar.map((producto) => (
               <div key={producto.id} className="producto-item">
-                <ProductCard producto={producto} configuracionPrecios={configuracionPrecios} />
+                <div
+                  draggable={modoOrdenPersonalizado}
+                  onDragStart={() => setProductoArrastrado({ id: producto.id, lista: 'catalogo' })}
+                  onDragOver={(evento) => { if (modoOrdenPersonalizado) evento.preventDefault(); }}
+                  onDrop={(evento) => {
+                    evento.preventDefault();
+                    if (modoOrdenPersonalizado && productoArrastrado?.lista === 'catalogo') {
+                      reordenarProductos(productoArrastrado.id, producto.id)
+                        .catch(() => {});
+                    }
+                    setProductoArrastrado(null);
+                  }}
+                  onDragEnd={() => setProductoArrastrado(null)}
+                  style={{ position: 'relative', cursor: modoOrdenPersonalizado ? 'grab' : undefined }}
+                >
+                  {modoOrdenPersonalizado && (
+                    <small className="position-absolute top-0 end-0 z-1 px-2 py-1 bg-dark text-white rounded-bottom-start">
+                      Arrastrar
+                    </small>
+                  )}
+                  <ProductCard producto={producto} configuracionPrecios={configuracionPrecios} />
+                </div>
               </div>
             ))}
           </div>
@@ -116,5 +274,19 @@ const ProductosLista = ({ categoria = null }) => {
     </Container>
   );
 };
+
+function FormSwitchOrden({ activo, deshabilitado, alCambiar }) {
+  return (
+    <input
+      type="checkbox"
+      className="form-check-input m-0"
+      role="switch"
+      aria-label="Activar orden personalizado"
+      checked={activo}
+      disabled={deshabilitado}
+      onChange={(evento) => alCambiar(evento.target.checked)}
+    />
+  );
+}
 
 export default ProductosLista;

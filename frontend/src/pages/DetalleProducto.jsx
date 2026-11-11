@@ -2,12 +2,13 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Button } from 'react-bootstrap';
 import { useCarritoStore as usarCarrito } from '../store/carritoStore';
-import { ajustarPrecio, formatearPrecio, parsearPrecio } from '../utils/preciosUtils';
+import { obtenerPrecioFinal, formatearPrecio, parsearPrecio } from '../utils/preciosUtils';
 import Swal from 'sweetalert2';
 import { useProducto } from '../hooks/useProductos';
 import { useAdminConfigStore as usarAdminConfig } from '../store/adminConfigStore';
 import { useAuth } from '../hooks/useAuth';
 import { usePreciosConfig } from '../hooks/useConfiguracion';
+import AdminProductoEditor from '../components/AdminProductoEditor';
 
 const DetalleProducto = () => {
   const { id } = useParams();
@@ -20,6 +21,8 @@ const DetalleProducto = () => {
   const [isDark, setIsDark] = useState(
     () => document.documentElement.getAttribute('data-theme') === 'dark',
   );
+  const [indiceImagen, setIndiceImagen] = useState(0);
+  const [editando, setEditando] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -69,15 +72,16 @@ const DetalleProducto = () => {
   }
 
   // Calcular el precio ajustado
-  const precioAjustadoNumero = ajustarPrecio(
-    producto.precio,
-    producto.titulo,
-    producto.categoria,
-    configuracionPrecios,
-  );
+  const precioAjustadoNumero = obtenerPrecioFinal(producto, configuracionPrecios);
   const precioAjustado = formatearPrecio(precioAjustadoNumero);
   const precioProveedor = parsearPrecio(producto.precio);
   const ganancia = Math.max(0, precioAjustadoNumero - precioProveedor);
+  const precioRegular = producto.enOferta
+    ? obtenerPrecioFinal({ ...producto, precioFinal: null }, configuracionPrecios)
+    : precioAjustadoNumero;
+  const tieneDescuento = producto.enOferta && precioAjustadoNumero < precioRegular;
+  const imagenes = producto.imagenes?.length ? producto.imagenes : producto.imagen ? [producto.imagen] : [];
+  const imagenSeleccionada = imagenes[indiceImagen] || producto.imagen;
 
   return (
     <>
@@ -98,6 +102,7 @@ const DetalleProducto = () => {
                 <div className="product-image-container" style={{ 
                   width: '100%',
                   display: 'flex',
+                  flexDirection: 'column',
                   justifyContent: 'center',
                   alignItems: 'center',
                   padding: '1rem',
@@ -105,8 +110,8 @@ const DetalleProducto = () => {
                   minHeight: '30vh'
                 }}>
                   <img
-                    src={producto.imagen}
-                    alt={producto.titulo}
+                    src={imagenSeleccionada}
+                    alt={`${producto.titulo}${imagenes.length > 1 ? `, foto ${indiceImagen + 1}` : ''}`}
                     style={{
                       width: '100%',
                       height: 'auto',
@@ -114,6 +119,29 @@ const DetalleProducto = () => {
                       maxHeight: '70vh'
                     }}
                   />
+                  {imagenes.length > 1 && (
+                    <div className="d-flex justify-content-center flex-wrap gap-2 mt-3">
+                      {imagenes.map((imagen, indice) => (
+                        <button
+                          key={`${imagen}-${indice}`}
+                          type="button"
+                          aria-label={`Ver foto ${indice + 1}`}
+                          aria-pressed={indiceImagen === indice}
+                          onClick={() => setIndiceImagen(indice)}
+                          style={{
+                            width: 64,
+                            height: 64,
+                            padding: 3,
+                            border: indiceImagen === indice ? '2px solid #198754' : '1px solid #aaa',
+                            borderRadius: 6,
+                            background: 'transparent',
+                          }}
+                        >
+                          <img src={imagen} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </Col>
               <Col xs={12} lg={4}>
@@ -154,6 +182,12 @@ const DetalleProducto = () => {
                     }}>
                       Precio:
                     </div>
+                    {producto.enOferta && <div className="badge text-bg-danger mb-2">OFERTA</div>}
+                    {tieneDescuento && (
+                      <div style={{ textDecoration: 'line-through', color: '#888', fontSize: '1.2rem' }}>
+                        ${formatearPrecio(precioRegular)}
+                      </div>
+                    )}
                     <div style={{
                       fontSize: 'clamp(2.5rem, 8vw, 3.5rem)',
                       fontWeight: '800',
@@ -208,10 +242,20 @@ const DetalleProducto = () => {
                       Volver
                     </Button>
                   </div>
+                  {esAdmin && (
+                    <Button
+                      variant="outline-primary"
+                      className="mt-3 w-100"
+                      onClick={() => setEditando((actual) => !actual)}
+                    >
+                      {editando ? 'Cerrar edición' : 'Editar producto'}
+                    </Button>
+                  )}
                 </div>
               </Col>
             </Row>
           </div>
+          {editando && esAdmin && <AdminProductoEditor producto={producto} />}
         </div>
         <style>
           {`

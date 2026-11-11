@@ -1,9 +1,36 @@
 const { prisma } = require('../lib/prisma');
 
 async function listaDeCategorias(req, res) {
-  const productos = await prisma.producto.findMany({ select: { categoria: true } });
+  const [base, personalizaciones] = await Promise.all([
+    prisma.producto.findMany({ select: { id: true, categoria: true } }),
+    prisma.appSetting.findMany({
+      where: { key: { startsWith: 'producto-admin:' } },
+      select: { value: true },
+    }),
+  ]);
+  const personalizacionesPorId = new Map(
+    personalizaciones.map((fila) => {
+      try {
+        const producto = JSON.parse(fila.value);
+        return [Number(producto.id), producto];
+      } catch {
+        throw new Error('Hay una personalización de producto dañada.');
+      }
+    }),
+  );
+  const productosPorId = new Map(base.map((producto) => {
+    const personalizacion = personalizacionesPorId.get(producto.id);
+    return [producto.id, {
+      categoria: personalizacion?.categoria ?? producto.categoria,
+    }];
+  }));
+  personalizacionesPorId.forEach((personalizacion) => {
+    if (personalizacion.manual) {
+      productosPorId.set(Number(personalizacion.id), { categoria: personalizacion.categoria });
+    }
+  });
   const conteo = new Map();
-  for (const producto of productos) {
+  for (const producto of productosPorId.values()) {
     const nombreOriginal = String(producto.categoria || '').trim();
     if (nombreOriginal) conteo.set(nombreOriginal, (conteo.get(nombreOriginal) || 0) + 1);
   }

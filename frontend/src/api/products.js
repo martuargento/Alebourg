@@ -5,7 +5,7 @@ function validarProducto(producto) {
   if (
     !producto
     || !Number.isSafeInteger(Number(producto.id))
-    || Number(producto.id) <= 0
+    || Number(producto.id) === 0
     || !String(producto.titulo || '').trim()
   ) {
     throw new Error('La base de datos devolvió un producto inválido.');
@@ -13,8 +13,14 @@ function validarProducto(producto) {
   parsearPrecio(producto.precio);
   return {
     ...producto,
+    id: Number(producto.id),
     categoria: String(producto.categoria || ''),
     titulo: String(producto.titulo),
+    imagen: String(producto.imagen || ''),
+    imagenes: Array.isArray(producto.imagenes)
+      ? producto.imagenes.map(String)
+      : producto.imagen ? [String(producto.imagen)] : [],
+    precioFinal: producto.precioFinal == null ? null : String(producto.precioFinal),
   };
 }
 

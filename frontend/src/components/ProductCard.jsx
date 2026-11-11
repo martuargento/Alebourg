@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useCarritoStore as usarCarrito } from '../store/carritoStore';
 import { useAdminConfigStore as usarAdminConfig } from '../store/adminConfigStore';
 import Swal from 'sweetalert2';
-import { ajustarPrecio, formatearPrecio, parsearPrecio } from '../utils/preciosUtils';
+import { obtenerPrecioFinal, formatearPrecio, parsearPrecio } from '../utils/preciosUtils';
 import { trackEvent } from '../api/analytics';
 import { useAuth } from '../hooks/useAuth';
 
@@ -14,13 +14,12 @@ const ProductCard = ({ producto, configuracionPrecios }) => {
 
   // Calcular precios (base proveedor y ajustado)
   const precioProveedor = parsearPrecio(producto.precio);
-  const precioAjustadoNumero = ajustarPrecio(
-    producto.precio,
-    producto.titulo,
-    producto.categoria,
-    configuracionPrecios,
-  );
+  const precioAjustadoNumero = obtenerPrecioFinal(producto, configuracionPrecios);
   const precioAjustado = formatearPrecio(precioAjustadoNumero);
+  const precioRegular = producto.enOferta
+    ? obtenerPrecioFinal({ ...producto, precioFinal: null }, configuracionPrecios)
+    : precioAjustadoNumero;
+  const tieneDescuento = producto.enOferta && precioAjustadoNumero < precioRegular;
   const ganancia = Math.max(0, precioAjustadoNumero - precioProveedor);
 
   const manejarClick = (e) => {
@@ -82,6 +81,12 @@ const ProductCard = ({ producto, configuracionPrecios }) => {
               </div>
             )}
               <div>Precio:</div>
+              {producto.enOferta && <span className="badge text-bg-danger mb-1 align-self-start">OFERTA</span>}
+              {tieneDescuento && (
+                <small className="text-decoration-line-through text-secondary">
+                  ${formatearPrecio(precioRegular)}
+                </small>
+              )}
               <h4>${precioAjustado}</h4>
             </div>
             <Button

@@ -5,7 +5,7 @@ import jsPDF from 'jspdf';
 import { useCarritoStore } from '../store/carritoStore';
 import { useAuth } from '../hooks/useAuth';
 import { trackEvent } from '../api/analytics';
-import { ajustarPrecio, formatearPrecio, parsearPrecio } from '../utils/preciosUtils';
+import { obtenerPrecioFinal, formatearPrecio, parsearPrecio } from '../utils/preciosUtils';
 import { usePreciosConfig } from '../hooks/useConfiguracion';
 
 const numeroWhatsApp = '5491133328382';
@@ -85,14 +85,14 @@ export default function VerPedido() {
   }, []);
 
   const lineas = carrito.map((producto) => {
-    const precio = ajustarPrecio(producto.precio, producto.titulo, producto.categoria, configuracionPrecios);
+    const precio = obtenerPrecioFinal(producto, configuracionPrecios);
     return { producto, precio, subtotal: precio * producto.cantidad };
   });
   const total = lineas.reduce((suma, linea) => suma + linea.subtotal, 0);
   const ganancia = carrito.reduce((suma, producto) => (
     suma + Math.max(
       0,
-      ajustarPrecio(producto.precio, producto.titulo, producto.categoria, configuracionPrecios)
+      obtenerPrecioFinal(producto, configuracionPrecios)
       - parsearPrecio(producto.precio),
     ) * producto.cantidad
   ), 0);
