@@ -16,6 +16,7 @@ import {
 } from 'react-native'
 import { Feather } from '@expo/vector-icons'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { useFocusEffect } from '@react-navigation/native'
 import Encabezado from '../components/Encabezado'
 import TarjetaProducto from '../components/TarjetaProducto'
 import { Cargando, Mensaje } from '../components/Controles'
@@ -134,19 +135,21 @@ export default function TiendaScreen({ navigation }) {
 
   useEffect(() => { recargar() }, [recargar])
 
-  useEffect(() => {
+  useFocusEffect(useCallback(() => {
     if (!isAdmin) {
       setConfiguracionAdmin(null)
-      return
+      return undefined
     }
     let activo = true
     obtenerConfiguracionProductos()
       .then((configuracion) => { if (activo) setConfiguracionAdmin(configuracion) })
       .catch((errorConfiguracion) => {
-        console.error('No se pudo cargar el orden de productos:', errorConfiguracion)
+        if (activo) {
+          Alert.alert('No se pudo cargar la configuración', obtenerErrorApi(errorConfiguracion, 'Volvé a intentarlo.'))
+        }
       })
     return () => { activo = false }
-  }, [isAdmin])
+  }, [isAdmin]))
 
   const categoriasVisibles = useMemo(() => (
     categorias
@@ -187,22 +190,23 @@ export default function TiendaScreen({ navigation }) {
     agregarAlCarrito(producto)
   }, [agregarAlCarrito])
   const moverProductoAlLugar = useCallback(async (id, destinoId) => {
-    if (!configuracionAdmin || guardandoOrden) return
-    const ordenBase = configuracionAdmin.orden.length
-      ? [...configuracionAdmin.orden]
-      : productos.map((producto) => producto.id)
-    const ordenActual = [
-      ...ordenBase,
-      ...productos.map((producto) => producto.id).filter((productoId) => !ordenBase.includes(productoId)),
-    ]
-    const indice = ordenActual.indexOf(id)
-    const destino = ordenActual.indexOf(destinoId)
-    if (indice < 0 || destino < 0 || destino >= ordenActual.length || indice === destino) return
-    ordenActual.splice(destino, 0, ordenActual.splice(indice, 1)[0])
+    if (!isAdmin || guardandoOrden) return
     setGuardandoOrden(true)
     try {
+      const configuracionActual = await obtenerConfiguracionProductos()
+      const ordenBase = configuracionActual.orden.length
+        ? [...configuracionActual.orden]
+        : productos.map((producto) => producto.id)
+      const ordenActual = [
+        ...ordenBase,
+        ...productos.map((producto) => producto.id).filter((productoId) => !ordenBase.includes(productoId)),
+      ]
+      const indice = ordenActual.indexOf(id)
+      const destino = ordenActual.indexOf(destinoId)
+      if (indice < 0 || destino < 0 || destino >= ordenActual.length || indice === destino) return
+      ordenActual.splice(destino, 0, ordenActual.splice(indice, 1)[0])
       const actualizada = await guardarConfiguracionProductos({
-        ...configuracionAdmin,
+        ...configuracionActual,
         orden: ordenActual,
         ordenPersonalizadoActivo: true,
       })
@@ -213,18 +217,19 @@ export default function TiendaScreen({ navigation }) {
     } finally {
       setGuardandoOrden(false)
     }
-  }, [configuracionAdmin, guardandoOrden, productos, cargarCatalogo])
+  }, [isAdmin, guardandoOrden, productos, cargarCatalogo])
   moverProductoRef.current = moverProductoAlLugar
 
   async function cambiarOrdenPersonalizado(activo) {
     if (!isAdmin || !configuracionAdmin || guardandoOrden) return
     setGuardandoOrden(true)
     try {
+      const configuracionActual = await obtenerConfiguracionProductos()
       const actualizada = await guardarConfiguracionProductos({
-        ...configuracionAdmin,
+        ...configuracionActual,
         ordenPersonalizadoActivo: activo,
-        orden: configuracionAdmin.orden.length
-          ? configuracionAdmin.orden
+        orden: configuracionActual.orden.length
+          ? configuracionActual.orden
           : productos.map((producto) => producto.id),
       })
       setConfiguracionAdmin(actualizada)
@@ -370,15 +375,16 @@ export default function TiendaScreen({ navigation }) {
 
   async function moverDestacado(listaId, productoId, desplazamiento) {
     if (!isAdmin || !configuracionAdmin || guardandoOrden) return
-    const ids = [...configuracionAdmin[listaId]]
-    const indice = ids.indexOf(productoId)
-    const destino = indice + desplazamiento
-    if (indice < 0 || destino < 0 || destino >= ids.length) return
-    ;[ids[indice], ids[destino]] = [ids[destino], ids[indice]]
     setGuardandoOrden(true)
     try {
+      const configuracionActual = await obtenerConfiguracionProductos()
+      const ids = [...configuracionActual[listaId]]
+      const indice = ids.indexOf(productoId)
+      const destino = indice + desplazamiento
+      if (indice < 0 || destino < 0 || destino >= ids.length) return
+      ;[ids[indice], ids[destino]] = [ids[destino], ids[indice]]
       const actualizada = await guardarConfiguracionProductos({
-        ...configuracionAdmin,
+        ...configuracionActual,
         [listaId]: ids,
       })
       setConfiguracionAdmin(actualizada)

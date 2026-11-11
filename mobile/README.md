@@ -26,7 +26,8 @@ La administración también permite editar productos y precios, gestionar fotos,
 productos manuales y las listas de más vendidos/ofertas. Los productos
 administrados se guardan como filas en `productos_admin` (y sus fotos como
 filas en `productos_admin_imagenes`) para que sean editables en Supabase y no
-se pierdan al reimportar el catálogo. En **Tienda**, al activar **Orden
+se pierdan al reimportar el catálogo. Los precios aceptan el formato del
+proveedor, por ejemplo `4,053`. En **Tienda**, al activar **Orden
 personalizado**, se puede mover con las flechas y cada cambio se guarda
 automáticamente. Desactivar la opción solo bloquea el reordenamiento; conserva
 el orden guardado.

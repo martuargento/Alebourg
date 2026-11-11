@@ -291,10 +291,13 @@ async function guardarConfigProductos(req, res) {
 
 function validarPrecio(valor, campo, opcional = false) {
   if (opcional && (valor === null || valor === '')) return null;
-  if (valor === undefined || !Number.isFinite(Number(valor)) || Number(valor) < 0) {
+  const texto = String(valor ?? '').trim();
+  const formatoValido = /^(?:\d+|\d{1,3}(?:,\d{3})+)(?:\.\d+)?$/.test(texto);
+  const normalizado = texto.replace(/,/g, '');
+  if (!formatoValido || !Number.isFinite(Number(normalizado)) || Number(normalizado) < 0) {
     throw errorValidacion(`El campo ${campo} debe ser un precio válido.`);
   }
-  return String(Number(valor));
+  return texto;
 }
 
 function validarUrlImagenes(imagenes) {
