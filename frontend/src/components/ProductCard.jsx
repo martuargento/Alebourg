@@ -32,12 +32,9 @@ const ProductCard = ({
   const intervaloSegundos = configuracionCarrusel?.mode === 'individual'
     ? configuracionCarrusel.productIntervals?.[String(producto.id)] ?? configuracionCarrusel.intervalSeconds
     : configuracionCarrusel?.intervalSeconds ?? 6;
-  const intervaloMs = intervaloSegundos * 1000;
   const tipoTransicion = configuracionCarrusel?.transition ?? 'fade';
-  const duracionTransicionMs = Math.min(
-    configuracionCarrusel?.transitionDurationMs ?? 1200,
-    Math.round(intervaloMs * 0.8),
-  );
+  const duracionTransicionMs = configuracionCarrusel?.transitionDurationMs ?? 1200;
+  const intervaloMs = Math.max(intervaloSegundos * 1000, duracionTransicionMs);
   const desfaseMs = configuracionCarrusel?.mode === 'individual'
     ? calcularDesfaseProducto(producto.id, intervaloMs)
     : 0;
@@ -132,7 +129,6 @@ const ProductCard = ({
         <Card
           className='cardsEstilos'
           style={{
-            height: '100%',
             cursor: 'pointer',
             width: '100%',
             maxWidth: '100%',
@@ -169,7 +165,7 @@ const ProductCard = ({
                 : undefined}
             />
           </div>
-          <Card.Body className="d-flex flex-column p-2">
+          <Card.Body className="product-card-body d-flex flex-column p-2">
             <Card.Title className="product-card-title mb-1 text-break">{producto.titulo}</Card.Title>
             <div>
             {esAdmin && mostrarPreciosAdmin && (
@@ -197,7 +193,7 @@ const ProductCard = ({
             </div>
             <Button
               onClick={manejarClick}
-              className="boton-productos mt-auto w-100"
+              className="boton-productos mt-2 w-100"
             >
               Agregar al carrito
             </Button>

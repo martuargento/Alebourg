@@ -889,23 +889,19 @@ html[data-theme="light"] button[style*="background: none"]:hover {
 .producto-item {
   width: 100% !important;
   min-width: 280px !important;
-  height: 100% !important;
   margin: 0 auto !important;
 }
 
 .producto-item > div {
   display: flex !important;
-  height: 100% !important;
 }
 
 .product-card-link {
   display: flex !important;
   width: 100% !important;
-  height: 100% !important;
 }
 
 .cardsEstilos {
-  height: 100% !important;
   width: 100% !important;
   margin: 0 !important;
   padding: 0 !important;
@@ -1037,6 +1033,11 @@ html[data-theme="light"] button[style*="background: none"]:hover {
   justify-content: space-between !important;
   padding: 1rem !important;
   height: 100% !important;
+}
+
+.product-card-body {
+  justify-content: flex-start !important;
+  height: auto !important;
 }
 
 .card-title {

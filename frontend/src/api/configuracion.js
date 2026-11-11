@@ -4,7 +4,7 @@ const MINIMO_SEGUNDOS_CARRUSEL = 2;
 const MAXIMO_SEGUNDOS_CARRUSEL = 60;
 const TIPOS_TRANSICION_CARRUSEL = ['fade', 'slide', 'zoom'];
 const DURACION_TRANSICION_MINIMA_MS = 300;
-const DURACION_TRANSICION_MAXIMA_MS = 2500;
+const DURACION_TRANSICION_MAXIMA_MS = 15000;
 
 function validarConfiguracionCarrusel(data) {
   const intervalos = data?.productIntervals;

@@ -13,7 +13,7 @@ import {
 const SEGUNDOS_MINIMOS = 2;
 const SEGUNDOS_MAXIMOS = 60;
 const DURACION_MINIMA_MS = 300;
-const DURACION_MAXIMA_MS = 2500;
+const DURACION_MAXIMA_MS = 15000;
 
 export default function AdminCarrusel() {
   const configuracionQuery = useCarruselConfig();
@@ -153,7 +153,7 @@ export default function AdminCarrusel() {
           </Form.Group>
           <Form.Group className="mb-4">
             <Form.Label htmlFor="carousel-transition-duration">
-              Velocidad de transición: {(duracionTransicion / 1000).toFixed(1)} segundos
+              Duración de la transición: {(duracionTransicion / 1000).toFixed(1)} segundos
             </Form.Label>
             <Form.Range
               id="carousel-transition-duration"
@@ -172,7 +172,7 @@ export default function AdminCarrusel() {
               <span>Más lenta</span>
             </div>
             <Form.Text>
-              La transición se limita si hace falta para terminar antes del próximo cambio de foto.
+              Hasta 15 segundos. Si supera el intervalo elegido, se espera a que termine antes de iniciar el próximo cambio.
             </Form.Text>
           </Form.Group>
           <Button
