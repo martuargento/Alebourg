@@ -8,6 +8,15 @@ import { obtenerPrecioFinal, formatearPrecio, parsearPrecio } from '../utils/pre
 import { trackEvent } from '../api/analytics';
 import { useAuth } from '../hooks/useAuth';
 
+function calcularDesfaseProducto(productoId, intervaloMs) {
+  const texto = String(productoId ?? '');
+  let hash = 2166136261;
+  for (let indice = 0; indice < texto.length; indice += 1) {
+    hash = Math.imul(hash ^ texto.charCodeAt(indice), 16777619);
+  }
+  return (hash >>> 0) % intervaloMs;
+}
+
 const ProductCard = ({
   producto,
   configuracionPrecios,
@@ -24,6 +33,10 @@ const ProductCard = ({
     ? configuracionCarrusel.productIntervals?.[String(producto.id)] ?? configuracionCarrusel.intervalSeconds
     : configuracionCarrusel?.intervalSeconds ?? 6;
   const intervaloMs = intervaloSegundos * 1000;
+  const duracionTransicionMs = Math.min(2200, Math.round(intervaloMs * 0.7));
+  const desfaseMs = configuracionCarrusel?.mode === 'individual'
+    ? calcularDesfaseProducto(producto.id, intervaloMs)
+    : 0;
   const firmaGaleria = imagenes.join('\u0000');
   const [faseCarrusel, setFaseCarrusel] = useState(0);
   const [transicionIniciada, setTransicionIniciada] = useState(false);
@@ -32,7 +45,7 @@ const ProductCard = ({
   const { isAdmin: esAdmin } = useAuth();
 
   useEffect(() => {
-    const tiempoTranscurrido = Math.max(0, Date.now() - inicioCarrusel);
+    const tiempoTranscurrido = Math.max(0, Date.now() - inicioCarrusel + desfaseMs);
     setFaseCarrusel(Math.floor(tiempoTranscurrido / intervaloMs));
     setTransicionIniciada(false);
     if (imagenes.length < 2) return undefined;
@@ -40,7 +53,7 @@ const ProductCard = ({
     let temporizador;
     const avanzarSincronizado = () => {
       const ahora = Date.now();
-      const transcurrido = Math.max(0, ahora - inicioCarrusel);
+      const transcurrido = Math.max(0, ahora - inicioCarrusel + desfaseMs);
       setFaseCarrusel(Math.floor(transcurrido / intervaloMs));
       setTransicionIniciada(true);
       temporizador = setTimeout(
@@ -52,7 +65,7 @@ const ProductCard = ({
     const demoraInicial = intervaloMs - (transcurrido % intervaloMs);
     temporizador = setTimeout(avanzarSincronizado, demoraInicial);
     return () => clearTimeout(temporizador);
-  }, [firmaGaleria, inicioCarrusel, intervaloMs, producto.id, imagenes.length]);
+  }, [desfaseMs, firmaGaleria, inicioCarrusel, intervaloMs, producto.id, imagenes.length]);
 
   // Calcular precios (base proveedor y ajustado)
   const precioProveedor = parsearPrecio(producto.precio);
@@ -127,6 +140,7 @@ const ProductCard = ({
                 alt=""
                 aria-hidden="true"
                 className="product-card-image-layer product-card-image-out"
+                style={{ animationDuration: `${duracionTransicionMs}ms` }}
               />
             )}
             <img
@@ -134,11 +148,14 @@ const ProductCard = ({
               src={imagenes[indiceImagen]}
               alt={`${producto.titulo}, foto ${indiceImagen + 1}`}
               className={`product-card-image-layer${transicionIniciada ? ' product-card-image-in' : ''}`}
+              style={transicionIniciada
+                ? { animationDuration: `${duracionTransicionMs}ms` }
+                : undefined}
             />
           </div>
           <Card.Body className="d-flex flex-column p-2">
             <Card.Title className="product-card-title mb-3 text-break">{producto.titulo}</Card.Title>
-            <div className="mt-auto">
+            <div>
             {esAdmin && mostrarPreciosAdmin && (
               <div style={{ marginBottom: '4px' }}>
                 <div style={{ fontSize: '0.8rem', color: 'rgba(97, 68, 159, 0.52)' }}>

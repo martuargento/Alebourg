@@ -937,12 +937,12 @@ html[data-theme="light"] button[style*="background: none"]:hover {
 
 .product-card-image-in {
   z-index: 2;
-  animation: product-card-image-in 1.15s ease-in-out both;
+  animation: product-card-image-in 2.2s ease-in-out both;
 }
 
 .product-card-image-out {
   z-index: 1;
-  animation: product-card-image-out 1.15s ease-in-out both;
+  animation: product-card-image-out 2.2s ease-in-out both;
 }
 
 @keyframes product-card-image-in {

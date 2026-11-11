@@ -132,4 +132,4 @@ sobre otra Alebourg ya instalada, elegí la misma cuenta/proyecto y conservá el
 mismo keystore de Android de la APK anterior; una firma distinta no puede
 actualizar esa instalación. Al terminar, EAS muestra el enlace para descargar
 la APK. Incrementá `versionCode` para cada nueva build; esta versión es
-`1.0.6` (`versionCode` 7).
+`1.0.7` (`versionCode` 8).

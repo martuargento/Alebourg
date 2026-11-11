@@ -54,6 +54,7 @@ function TarjetaProducto({
   centrarContenido = false,
   activo = true,
   configuracionCarrusel,
+  inicioCarrusel,
   alAbrir,
   agregarAlCarrito,
 }) {
@@ -84,6 +85,7 @@ function TarjetaProducto({
           activo={activo}
           configuracionCarrusel={configuracionCarrusel}
           productoId={producto.id}
+          inicioCarrusel={inicioCarrusel}
           accessibilityLabel={`${producto.titulo}, foto del producto`}
           style={[
             estilos.imagen,

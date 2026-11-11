@@ -149,6 +149,11 @@ const Header = () => {
             )}
             {esAdmin && (
               <li className="nav-item">
+                <Link className="nav-link" to="/admin/carrusel">Ritmo de fotos</Link>
+              </li>
+            )}
+            {esAdmin && (
+              <li className="nav-item">
                 <Link className="nav-link" to="/admin/metricas">Métricas</Link>
               </li>
             )}
@@ -415,6 +420,17 @@ const Header = () => {
                       onClick={handleToggleMobileMenu}
                     >
                       Admin Precios
+                    </Link>
+                  </li>
+                )}
+                {esAdmin && (
+                  <li className="mobile-menu-item">
+                    <Link
+                      to="/admin/carrusel"
+                      className="mobile-menu-link"
+                      onClick={handleToggleMobileMenu}
+                    >
+                      Ritmo de fotos
                     </Link>
                   </li>
                 )}

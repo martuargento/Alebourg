@@ -14,6 +14,7 @@ import VerPedido from './pages/VerPedido';
 import ProductosPorCategoria from './pages/ProductosPorCategoria';
 import DetalleProducto from './pages/DetalleProducto';
 import AdminPrecios from './pages/AdminPrecios';
+import AdminCarrusel from './pages/AdminCarrusel';
 import AdminMetricas from './pages/AdminMetricas';
 import AdminProductoEditor from './components/AdminProductoEditor';
 
@@ -60,6 +61,14 @@ export default function App() {
           element={
             <RutaProtegida>
               <AdminPrecios />
+            </RutaProtegida>
+          }
+        />
+        <Route
+          path="/admin/carrusel"
+          element={
+            <RutaProtegida>
+              <AdminCarrusel />
             </RutaProtegida>
           }
         />

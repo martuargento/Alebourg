@@ -111,15 +111,27 @@ export default function CarritoScreen({ navigation }) {
       ItemSeparatorComponent={() => <View style={estilos.separador} />}
       renderItem={({ item: { producto, precio, subtotal } }) => (
         <View style={estilos.producto}>
-          <Image
-            source={producto.imagen ? { uri: producto.imagen } : imagenSinProducto}
-            style={estilos.imagen}
-            resizeMode="contain"
-          />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`Ver ${producto.titulo}`}
+            onPress={() => navigation.navigate('DetalleProducto', { productoId: producto.id })}
+          >
+            <Image
+              source={producto.imagen ? { uri: producto.imagen } : imagenSinProducto}
+              style={estilos.imagen}
+              resizeMode="contain"
+            />
+          </Pressable>
           <View style={estilos.detalles}>
-            <Text style={estilos.nombre} numberOfLines={2}>{producto.titulo}</Text>
-            <Text style={estilos.precio}>{formatearPrecio(precio)} c/u</Text>
-            <Text style={estilos.subtotal}>Subtotal: {formatearPrecio(subtotal)}</Text>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Ver detalles de ${producto.titulo}`}
+              onPress={() => navigation.navigate('DetalleProducto', { productoId: producto.id })}
+            >
+              <Text style={estilos.nombre} numberOfLines={2}>{producto.titulo}</Text>
+              <Text style={estilos.precio}>{formatearPrecio(precio)} c/u</Text>
+              <Text style={estilos.subtotal}>Subtotal: {formatearPrecio(subtotal)}</Text>
+            </Pressable>
             <View style={estilos.controles}>
               <Pressable
                 accessibilityRole="button"

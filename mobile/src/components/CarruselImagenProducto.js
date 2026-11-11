@@ -1,7 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Animated, Easing, StyleSheet, View } from 'react-native'
+import { Animated, Easing } from 'react-native'
 
 const imagenSinProducto = require('../../assets/icon.png')
+
+function calcularDesfaseProducto(productoId, intervaloMs) {
+  const texto = String(productoId ?? '')
+  let hash = 2166136261
+  for (let indice = 0; indice < texto.length; indice += 1) {
+    hash = Math.imul(hash ^ texto.charCodeAt(indice), 16777619)
+  }
+  return (hash >>> 0) % intervaloMs
+}
 
 export default function CarruselImagenProducto({
   imagenes,
@@ -23,23 +32,23 @@ export default function CarruselImagenProducto({
     ? configuracionCarrusel.productIntervals?.[String(productoId)] ?? configuracionCarrusel.intervalSeconds
     : configuracionCarrusel?.intervalSeconds ?? 6
   const intervaloMs = intervaloSegundos * 1000
-  const [indices, setIndices] = useState({ anterior: null, actual: 0 })
-  const indicesRef = useRef(indices)
-  const opacidadActual = useRef(new Animated.Value(1)).current
-  const opacidadAnterior = useRef(new Animated.Value(0)).current
+  const desfaseMs = configuracionCarrusel?.mode === 'individual'
+    ? calcularDesfaseProducto(productoId, intervaloMs)
+    : 0
+  const [indice, setIndice] = useState(0)
+  const indiceRef = useRef(0)
+  const opacidad = useRef(new Animated.Value(1)).current
   const animacionRef = useRef(null)
 
   useEffect(() => {
-    const tiempoTranscurrido = Math.max(0, Date.now() - inicioCarrusel)
+    const tiempoTranscurrido = Math.max(0, Date.now() - inicioCarrusel + desfaseMs)
     const actual = lista.length
       ? Math.floor(tiempoTranscurrido / intervaloMs) % lista.length
       : 0
-    const reiniciados = { anterior: null, actual }
-    indicesRef.current = reiniciados
-    setIndices(reiniciados)
-    opacidadActual.setValue(1)
-    opacidadAnterior.setValue(0)
-  }, [firmaGaleria, inicioCarrusel, intervaloMs, lista.length, opacidadActual, opacidadAnterior])
+    indiceRef.current = actual
+    setIndice(actual)
+    opacidad.setValue(1)
+  }, [desfaseMs, firmaGaleria, inicioCarrusel, intervaloMs, lista.length, opacidad])
 
   useEffect(() => {
     if (!activo || lista.length < 2) return undefined
@@ -47,30 +56,27 @@ export default function CarruselImagenProducto({
     let temporizador
     const sincronizarFase = () => {
       const ahora = Date.now()
-      const transcurrido = Math.max(0, ahora - inicioCarrusel)
+      const transcurrido = Math.max(0, ahora - inicioCarrusel + desfaseMs)
       const siguiente = Math.floor(transcurrido / intervaloMs) % lista.length
-      const actual = indicesRef.current.actual
-      if (siguiente !== actual) {
-        const nuevosIndices = { anterior: actual, actual: siguiente }
-        indicesRef.current = nuevosIndices
-        setIndices(nuevosIndices)
-        opacidadActual.setValue(0)
-        opacidadAnterior.setValue(1)
-        animacionRef.current = Animated.parallel([
-          Animated.timing(opacidadActual, {
+      if (siguiente !== indiceRef.current) {
+        animacionRef.current = Animated.timing(opacidad, {
+          toValue: 0.2,
+          duration: Math.min(850, Math.round(intervaloMs * 0.18)),
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        })
+        animacionRef.current.start(({ finished }) => {
+          if (!finished) return
+          indiceRef.current = siguiente
+          setIndice(siguiente)
+          animacionRef.current = Animated.timing(opacidad, {
             toValue: 1,
-            duration: 1100,
-            easing: Easing.inOut(Easing.cubic),
+            duration: Math.min(2200, Math.round(intervaloMs * 0.4)),
+            easing: Easing.inOut(Easing.sin),
             useNativeDriver: true,
-          }),
-          Animated.timing(opacidadAnterior, {
-            toValue: 0,
-            duration: 1100,
-            easing: Easing.inOut(Easing.cubic),
-            useNativeDriver: true,
-          }),
-        ])
-        animacionRef.current.start()
+          })
+          animacionRef.current.start()
+        })
       }
       temporizador = setTimeout(
         sincronizarFase,
@@ -83,32 +89,16 @@ export default function CarruselImagenProducto({
     return () => {
       clearTimeout(temporizador)
       animacionRef.current?.stop()
+      opacidad.stopAnimation()
     }
-  }, [activo, firmaGaleria, inicioCarrusel, intervaloMs, lista.length, opacidadActual, opacidadAnterior])
+  }, [activo, desfaseMs, firmaGaleria, inicioCarrusel, intervaloMs, lista.length, opacidad])
 
   return (
-    <View
-      accessible
-      accessibilityRole="image"
+    <Animated.Image
+      source={lista.length ? { uri: lista[indice % lista.length] } : imagenSinProducto}
+      style={[style, { opacity: opacidad }]}
+      resizeMode={resizeMode}
       accessibilityLabel={accessibilityLabel}
-      style={[style, { overflow: 'hidden' }]}
-    >
-      {indices.anterior !== null && lista.length > 1 && (
-        <Animated.Image
-          source={lista.length ? { uri: lista[indices.anterior % lista.length] } : imagenSinProducto}
-          style={[StyleSheet.absoluteFillObject, { opacity: opacidadAnterior }]}
-          resizeMode={resizeMode}
-          accessibilityElementsHidden
-          importantForAccessibility="no-hide-descendants"
-        />
-      )}
-      <Animated.Image
-        source={lista.length ? { uri: lista[indices.actual % lista.length] } : imagenSinProducto}
-        style={[StyleSheet.absoluteFillObject, { opacity: opacidadActual }]}
-        resizeMode={resizeMode}
-        accessibilityElementsHidden
-        importantForAccessibility="no-hide-descendants"
-      />
-    </View>
+    />
   )
 }
