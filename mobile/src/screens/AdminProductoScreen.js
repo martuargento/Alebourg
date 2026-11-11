@@ -22,6 +22,10 @@ import {
   obtenerConfiguracionProductos,
   subirImagenProducto,
 } from '../api/administracionProductos'
+import {
+  guardarRitmoCarruselProducto,
+  obtenerConfiguracionCarrusel,
+} from '../api/configuracion'
 import { obtenerErrorApi } from '../api/client'
 import { useCatalogo } from '../context/CatalogoContext'
 import { useAuth } from '../context/AuthContext'
@@ -41,6 +45,8 @@ export default function AdminProductoScreen({ route, navigation }) {
   const [precioProveedor, setPrecioProveedor] = useState(productoInicial?.precio || '')
   const [precioFinal, setPrecioFinal] = useState(productoInicial?.precioFinal || '')
   const [imagenes, setImagenes] = useState(productoInicial?.imagenes || [])
+  const [configuracionCarrusel, setConfiguracionCarrusel] = useState(null)
+  const [intervaloFotoPropio, setIntervaloFotoPropio] = useState('')
   const [pendienteRevision, setPendienteRevision] = useState(Boolean(productoInicial?.pendienteRevision))
   const [masVendido, setMasVendido] = useState(false)
   const [oferta, setOferta] = useState(false)
@@ -62,6 +68,22 @@ export default function AdminProductoScreen({ route, navigation }) {
         if (activo) setError(obtenerErrorApi(errorCarga, 'No se pudo cargar la configuración de productos.'))
       })
       .finally(() => { if (activo) setCargando(false) })
+    return () => { activo = false }
+  }, [productoInicial?.id])
+
+  useEffect(() => {
+    let activo = true
+    obtenerConfiguracionCarrusel()
+      .then((valor) => {
+        if (!activo) return
+        setConfiguracionCarrusel(valor)
+        setIntervaloFotoPropio(String(valor.productIntervals[String(productoInicial?.id)] ?? ''))
+      })
+      .catch((errorConfiguracion) => {
+        if (activo) {
+          setError(obtenerErrorApi(errorConfiguracion, 'No se pudo cargar el ritmo de las fotos.'))
+        }
+      })
     return () => { activo = false }
   }, [productoInicial?.id])
 
@@ -112,6 +134,17 @@ export default function AdminProductoScreen({ route, navigation }) {
 
   async function guardar() {
     setError('')
+    const intervaloPropio = intervaloFotoPropio.trim() === ''
+      ? null
+      : Number(intervaloFotoPropio)
+    if (
+      configuracionCarrusel?.mode === 'individual'
+      && intervaloPropio !== null
+      && (!Number.isInteger(intervaloPropio) || intervaloPropio < 2 || intervaloPropio > 60)
+    ) {
+      setError('El ritmo propio debe ser un número entero entre 2 y 60 segundos.')
+      return
+    }
     setGuardando(true)
     try {
       const datos = {
@@ -133,6 +166,10 @@ export default function AdminProductoScreen({ route, navigation }) {
         setEsProductoNuevo(false)
       }
       const actualizado = await guardarEdicionProducto(id, datos)
+      if (configuracionCarrusel?.mode === 'individual') {
+        const configuracionActualizada = await guardarRitmoCarruselProducto(id, intervaloPropio)
+        setConfiguracionCarrusel(configuracionActualizada)
+      }
       const base = configuracion || await obtenerConfiguracionProductos()
       const nuevoConfig = {
         ...base,
@@ -243,6 +280,20 @@ export default function AdminProductoScreen({ route, navigation }) {
         estilos={estilos}
         teclado="decimal-pad"
       />
+      {configuracionCarrusel?.mode === 'individual' && (
+        <View style={estilos.campo}>
+          <Campo
+            titulo="Ritmo propio de fotos (segundos)"
+            valor={intervaloFotoPropio}
+            cambiar={(valor) => setIntervaloFotoPropio(valor.replace(/\D/g, ''))}
+            estilos={estilos}
+            teclado="number-pad"
+          />
+          <Text style={estilos.descripcion}>
+            Dejá vacío para usar el intervalo global de {configuracionCarrusel.intervalSeconds} segundos.
+          </Text>
+        </View>
+      )}
       <View style={estilos.tarjeta}>
         <Text style={estilos.subtitulo}>Fotos ({imagenes.length}/12)</Text>
         <Text style={estilos.descripcion}>Usá las flechas para cambiar el orden de las fotos.</Text>

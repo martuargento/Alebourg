@@ -919,24 +919,50 @@ html[data-theme="light"] button[style*="background: none"]:hover {
 }
 
 .product-card-image-carousel {
-  animation: product-card-image-in 0.55s ease both;
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  padding: 10px;
+  box-sizing: border-box;
+  border-radius: var(--bs-card-inner-border-radius) var(--bs-card-inner-border-radius) 0 0;
+}
+
+.product-card-image-layer {
+  position: absolute;
+  inset: 10px;
+  width: calc(100% - 20px);
+  height: calc(100% - 20px);
+  object-fit: contain;
+}
+
+.product-card-image-in {
+  z-index: 2;
+  animation: product-card-image-in 1.15s ease-in-out both;
+}
+
+.product-card-image-out {
+  z-index: 1;
+  animation: product-card-image-out 1.15s ease-in-out both;
 }
 
 @keyframes product-card-image-in {
-  from {
-    opacity: 0.45;
-    transform: scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes product-card-image-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .product-card-image-carousel {
+  .product-card-image-in,
+  .product-card-image-out {
     animation: none;
   }
+
+  .product-card-image-in { opacity: 1; }
+  .product-card-image-out { opacity: 0; }
 }
 
 /* Media queries para ajustar el grid según el tamaño de pantalla */

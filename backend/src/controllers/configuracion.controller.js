@@ -1,5 +1,64 @@
 const { prisma } = require('../lib/prisma');
 
+const CLAVE_CONFIGURACION_CARRUSEL = 'carousel-config';
+const SEGUNDOS_CARRUSEL_MINIMOS = 2;
+const SEGUNDOS_CARRUSEL_MAXIMOS = 60;
+const CONFIGURACION_CARRUSEL_PREDETERMINADA = {
+  mode: 'synchronized',
+  intervalSeconds: 6,
+  productIntervals: {},
+};
+
+function segundosCarruselValidos(valor) {
+  return Number.isInteger(valor)
+    && valor >= SEGUNDOS_CARRUSEL_MINIMOS
+    && valor <= SEGUNDOS_CARRUSEL_MAXIMOS;
+}
+
+function validarConfiguracionCarrusel(configuracion) {
+  if (
+    !configuracion
+    || !['synchronized', 'individual'].includes(configuracion.mode)
+    || !segundosCarruselValidos(configuracion.intervalSeconds)
+    || !configuracion.productIntervals
+    || typeof configuracion.productIntervals !== 'object'
+    || Array.isArray(configuracion.productIntervals)
+  ) {
+    throw new Error('La configuración de carrusel guardada no es válida.');
+  }
+
+  for (const [id, segundos] of Object.entries(configuracion.productIntervals)) {
+    if (!/^[1-9]\d*$/.test(id) || !segundosCarruselValidos(segundos)) {
+      throw new Error('La configuración de ritmo por producto no es válida.');
+    }
+  }
+
+  return configuracion;
+}
+
+async function leerConfiguracionCarrusel() {
+  const guardado = await prisma.appSetting.findUnique({
+    where: { key: CLAVE_CONFIGURACION_CARRUSEL },
+  });
+  if (!guardado) {
+    return {
+      ...CONFIGURACION_CARRUSEL_PREDETERMINADA,
+      productIntervals: {},
+    };
+  }
+  return validarConfiguracionCarrusel(JSON.parse(guardado.value));
+}
+
+async function persistirConfiguracionCarrusel(configuracion) {
+  const value = JSON.stringify(configuracion);
+  await prisma.appSetting.upsert({
+    where: { key: CLAVE_CONFIGURACION_CARRUSEL },
+    create: { key: CLAVE_CONFIGURACION_CARRUSEL, value },
+    update: { value },
+  });
+  return configuracion;
+}
+
 async function obtenerConfiguracionPrecios(req, res) {
   const guardado = await prisma.appSetting.findUnique({ where: { key: 'precios-config' } });
   if (!guardado) {
@@ -69,7 +128,58 @@ async function guardarConfiguracionPrecios(req, res) {
   return res.json(configuracion);
 }
 
+async function obtenerConfiguracionCarrusel(req, res) {
+  return res.json(await leerConfiguracionCarrusel());
+}
+
+async function guardarConfiguracionCarrusel(req, res) {
+  const { mode, intervalSeconds } = req.body || {};
+  if (!['synchronized', 'individual'].includes(mode)) {
+    return res.status(400).json({ error: 'El modo de rotación no es válido.' });
+  }
+  if (!segundosCarruselValidos(intervalSeconds)) {
+    return res.status(400).json({
+      error: `El intervalo debe ser un número entero entre ${SEGUNDOS_CARRUSEL_MINIMOS} y ${SEGUNDOS_CARRUSEL_MAXIMOS} segundos.`,
+    });
+  }
+
+  const actual = await leerConfiguracionCarrusel();
+  const configuracion = {
+    ...actual,
+    mode,
+    intervalSeconds,
+  };
+  return res.json(await persistirConfiguracionCarrusel(configuracion));
+}
+
+async function guardarRitmoCarruselProducto(req, res) {
+  const id = String(req.params.id || '');
+  if (!/^[1-9]\d*$/.test(id) || !Number.isSafeInteger(Number(id))) {
+    return res.status(400).json({ error: 'El identificador del producto no es válido.' });
+  }
+
+  const intervalSeconds = req.body?.intervalSeconds;
+  if (intervalSeconds !== null && !segundosCarruselValidos(intervalSeconds)) {
+    return res.status(400).json({
+      error: `El intervalo debe ser nulo o un número entero entre ${SEGUNDOS_CARRUSEL_MINIMOS} y ${SEGUNDOS_CARRUSEL_MAXIMOS} segundos.`,
+    });
+  }
+
+  const configuracion = await leerConfiguracionCarrusel();
+  const productIntervals = { ...configuracion.productIntervals };
+  if (intervalSeconds === null) delete productIntervals[id];
+  else productIntervals[id] = intervalSeconds;
+
+  return res.json(await persistirConfiguracionCarrusel({
+    ...configuracion,
+    productIntervals,
+  }));
+}
+
 module.exports = {
   obtenerConfiguracionPrecios,
   guardarConfiguracionPrecios,
+  obtenerConfiguracionCarrusel,
+  guardarConfiguracionCarrusel,
+  guardarRitmoCarruselProducto,
 };

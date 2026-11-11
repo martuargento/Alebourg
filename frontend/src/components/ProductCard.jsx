@@ -8,28 +8,51 @@ import { obtenerPrecioFinal, formatearPrecio, parsearPrecio } from '../utils/pre
 import { trackEvent } from '../api/analytics';
 import { useAuth } from '../hooks/useAuth';
 
-const ProductCard = ({ producto, configuracionPrecios, cantidadVisible = 20 }) => {
+const ProductCard = ({
+  producto,
+  configuracionPrecios,
+  configuracionCarrusel,
+  inicioCarrusel,
+  cantidadVisible = 20,
+}) => {
   const location = useLocation();
   const imagenes = useMemo(() => {
     const galeria = Array.isArray(producto.imagenes) ? producto.imagenes.filter(Boolean) : [];
     return galeria.length ? galeria : producto.imagen ? [producto.imagen] : [];
   }, [producto.imagen, producto.imagenes]);
-  const [indiceImagen, setIndiceImagen] = useState(0);
+  const intervaloSegundos = configuracionCarrusel?.mode === 'individual'
+    ? configuracionCarrusel.productIntervals?.[String(producto.id)] ?? configuracionCarrusel.intervalSeconds
+    : configuracionCarrusel?.intervalSeconds ?? 6;
+  const intervaloMs = intervaloSegundos * 1000;
+  const firmaGaleria = imagenes.join('\u0000');
+  const [faseCarrusel, setFaseCarrusel] = useState(0);
+  const [transicionIniciada, setTransicionIniciada] = useState(false);
   const { agregarAlCarrito } = usarCarrito();
   const { mostrarPreciosAdmin } = usarAdminConfig();
   const { isAdmin: esAdmin } = useAuth();
 
   useEffect(() => {
-    setIndiceImagen(0);
-  }, [producto.id, imagenes]);
-
-  useEffect(() => {
+    const tiempoTranscurrido = Math.max(0, Date.now() - inicioCarrusel);
+    setFaseCarrusel(Math.floor(tiempoTranscurrido / intervaloMs));
+    setTransicionIniciada(false);
     if (imagenes.length < 2) return undefined;
-    const intervalo = setInterval(() => {
-      setIndiceImagen((actual) => (actual + 1) % imagenes.length);
-    }, 3000);
-    return () => clearInterval(intervalo);
-  }, [imagenes.length, producto.id]);
+
+    let temporizador;
+    const avanzarSincronizado = () => {
+      const ahora = Date.now();
+      const transcurrido = Math.max(0, ahora - inicioCarrusel);
+      setFaseCarrusel(Math.floor(transcurrido / intervaloMs));
+      setTransicionIniciada(true);
+      temporizador = setTimeout(
+        avanzarSincronizado,
+        intervaloMs - (transcurrido % intervaloMs),
+      );
+    };
+    const transcurrido = Math.max(0, Date.now() - inicioCarrusel);
+    const demoraInicial = intervaloMs - (transcurrido % intervaloMs);
+    temporizador = setTimeout(avanzarSincronizado, demoraInicial);
+    return () => clearTimeout(temporizador);
+  }, [firmaGaleria, inicioCarrusel, intervaloMs, producto.id, imagenes.length]);
 
   // Calcular precios (base proveedor y ajustado)
   const precioProveedor = parsearPrecio(producto.precio);
@@ -40,6 +63,10 @@ const ProductCard = ({ producto, configuracionPrecios, cantidadVisible = 20 }) =
     : precioAjustadoNumero;
   const tieneDescuento = producto.enOferta && precioAjustadoNumero < precioRegular;
   const ganancia = Math.max(0, precioAjustadoNumero - precioProveedor);
+  const indiceImagen = imagenes.length ? faseCarrusel % imagenes.length : 0;
+  const indiceAnterior = imagenes.length
+    ? (indiceImagen + imagenes.length - 1) % imagenes.length
+    : 0;
 
   const manejarClick = (e) => {
     e.preventDefault();
@@ -85,19 +112,30 @@ const ProductCard = ({ producto, configuracionPrecios, cantidadVisible = 20 }) =
             overflow: 'hidden'
           }}
         >
-          <Card.Img
-            variant="top"
-            key={imagenes[indiceImagen]}
-            src={imagenes[indiceImagen] || ''}
-            alt={`${producto.titulo}, foto ${indiceImagen + 1}`}
+          <div
             className="product-card-image-carousel"
+            role="img"
+            aria-label={`${producto.titulo}, foto ${indiceImagen + 1}`}
             style={{
               height: '200px',
-              objectFit: 'contain',
-              padding: '10px',
-              maxWidth: '100%'
             }}
-          />
+          >
+            {transicionIniciada && (
+              <img
+                key={`anterior-${faseCarrusel}`}
+                src={imagenes[indiceAnterior]}
+                alt=""
+                aria-hidden="true"
+                className="product-card-image-layer product-card-image-out"
+              />
+            )}
+            <img
+              key={`actual-${faseCarrusel}`}
+              src={imagenes[indiceImagen]}
+              alt={`${producto.titulo}, foto ${indiceImagen + 1}`}
+              className={`product-card-image-layer${transicionIniciada ? ' product-card-image-in' : ''}`}
+            />
+          </div>
           <Card.Body className="d-flex flex-column p-2">
             <Card.Title className="product-card-title mb-3 text-break">{producto.titulo}</Card.Title>
             <div className="mt-auto">

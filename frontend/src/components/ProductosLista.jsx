@@ -6,7 +6,7 @@ import ProductCard from './ProductCard';
 import Buscador from './Buscador';
 import { sonCategoriasIguales } from '../utils/categoriasUtils';
 import { productQueryKey, useProductos } from '../hooks/useProductos';
-import { usePreciosConfig } from '../hooks/useConfiguracion';
+import { useCarruselConfig, usePreciosConfig } from '../hooks/useConfiguracion';
 import { useAuth } from '../hooks/useAuth';
 import {
   guardarConfiguracionProductos,
@@ -21,6 +21,8 @@ const ProductosLista = ({ categoria = null }) => {
   const queryClient = useQueryClient();
   const location = useLocation();
   const { data: configuracionPrecios } = usePreciosConfig();
+  const { data: configuracionCarrusel } = useCarruselConfig();
+  const [inicioCarrusel] = useState(() => Date.now());
   const { isAdmin } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const busqueda = searchParams.get('q') || '';
@@ -196,6 +198,8 @@ const ProductosLista = ({ categoria = null }) => {
               <ProductCard
                 producto={producto}
                 configuracionPrecios={configuracionPrecios}
+                configuracionCarrusel={configuracionCarrusel}
+                inicioCarrusel={inicioCarrusel}
                 cantidadVisible={productosVisibles}
               />
             </div>
@@ -310,6 +314,8 @@ const ProductosLista = ({ categoria = null }) => {
                   <ProductCard
                     producto={producto}
                     configuracionPrecios={configuracionPrecios}
+                    configuracionCarrusel={configuracionCarrusel}
+                    inicioCarrusel={inicioCarrusel}
                     cantidadVisible={productosVisibles}
                   />
                 </div>

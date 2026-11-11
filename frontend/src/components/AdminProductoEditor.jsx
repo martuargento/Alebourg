@@ -11,7 +11,9 @@ import {
   obtenerConfiguracionProductos,
   subirImagenProducto,
 } from '../api/administracionProductos';
+import { guardarRitmoCarruselProducto } from '../api/configuracion';
 import { obtenerErrorApi } from '../api/products';
+import { carouselConfigQueryKey, useCarruselConfig } from '../hooks/useConfiguracion';
 import { productQueryKey } from '../hooks/useProductos';
 
 const MAX_IMAGENES = 12;
@@ -21,6 +23,10 @@ export default function AdminProductoEditor({ producto = null }) {
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
+  const {
+    data: configuracionCarrusel,
+    error: errorConfiguracionCarrusel,
+  } = useCarruselConfig();
   const [titulo, setTitulo] = useState(producto?.titulo || '');
   const [categoria, setCategoria] = useState(producto?.categoria || '');
   const [precioProveedor, setPrecioProveedor] = useState(producto?.precio || '');
@@ -28,6 +34,7 @@ export default function AdminProductoEditor({ producto = null }) {
   const [fotos, setFotos] = useState(() => (
     (producto?.imagenes || []).map((url, indice) => ({ id: `existente-${indice}`, url }))
   ));
+  const [intervaloFotoPropio, setIntervaloFotoPropio] = useState('');
   const siguienteIdFoto = useRef(0);
   const [configuracion, setConfiguracion] = useState(null);
   const [masVendido, setMasVendido] = useState(false);
@@ -51,6 +58,13 @@ export default function AdminProductoEditor({ producto = null }) {
       });
     return () => { activo = false; };
   }, [producto?.id]);
+
+  useEffect(() => {
+    if (!configuracionCarrusel) return;
+    setIntervaloFotoPropio(String(
+      configuracionCarrusel.productIntervals[String(producto?.id)] ?? '',
+    ));
+  }, [configuracionCarrusel, producto?.id]);
 
   const previsualizaciones = useMemo(
     () => fotos.map((foto) => ({
@@ -126,6 +140,17 @@ export default function AdminProductoEditor({ producto = null }) {
       setError('No se pudo cargar la configuración de destacados. Recargá e intentá de nuevo.');
       return;
     }
+    const intervaloPropio = intervaloFotoPropio.trim() === ''
+      ? null
+      : Number(intervaloFotoPropio);
+    if (
+      configuracionCarrusel?.mode === 'individual'
+      && intervaloPropio !== null
+      && (!Number.isInteger(intervaloPropio) || intervaloPropio < 2 || intervaloPropio > 60)
+    ) {
+      setError('El ritmo propio debe ser un número entero entre 2 y 60 segundos.');
+      return;
+    }
     setGuardando(true);
     try {
       const datos = {
@@ -145,6 +170,10 @@ export default function AdminProductoEditor({ producto = null }) {
       }
 
       await guardarEdicionProducto(id, datos);
+      if (configuracionCarrusel?.mode === 'individual') {
+        const configuracionActualizada = await guardarRitmoCarruselProducto(id, intervaloPropio);
+        queryClient.setQueryData(carouselConfigQueryKey, configuracionActualizada);
+      }
       const galeria = [];
       for (const foto of fotos) {
         galeria.push(foto.archivo
@@ -227,6 +256,11 @@ export default function AdminProductoEditor({ producto = null }) {
     <Form onSubmit={guardar} onPaste={pegarImagenes} className="container py-4" style={{ maxWidth: 760 }}>
       <h2 className="mb-4">{esNuevo ? 'Agregar producto manual' : 'Editar producto'}</h2>
       {error && <Alert variant="danger" role="alert">{error}</Alert>}
+      {errorConfiguracionCarrusel && (
+        <Alert variant="warning" role="alert">
+          No se pudo cargar la configuración de ritmo de fotos. {obtenerErrorApi(errorConfiguracionCarrusel, 'Intentá recargar.')}
+        </Alert>
+      )}
       {revisionPendiente && (
         <Alert variant="warning">
           <strong>Hay datos nuevos del catálogo para revisar.</strong>
@@ -257,6 +291,22 @@ export default function AdminProductoEditor({ producto = null }) {
           <Form.Text>Para mostrar un descuento, ingresá un precio final menor al precio normal.</Form.Text>
         )}
       </Form.Group>
+      {configuracionCarrusel?.mode === 'individual' && (
+        <Form.Group className="mb-3">
+          <Form.Label>Ritmo propio de fotos (segundos)</Form.Label>
+          <Form.Control
+            type="number"
+            min="2"
+            max="60"
+            step="1"
+            value={intervaloFotoPropio}
+            onChange={(evento) => setIntervaloFotoPropio(evento.target.value)}
+          />
+          <Form.Text>
+            Dejá vacío para usar el intervalo global de {configuracionCarrusel.intervalSeconds} segundos.
+          </Form.Text>
+        </Form.Group>
+      )}
       <Form.Group className="mb-3">
         <Form.Label>Fotos ({fotos.length}/{MAX_IMAGENES})</Form.Label>
         <Form.Control type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={seleccionarArchivos} />

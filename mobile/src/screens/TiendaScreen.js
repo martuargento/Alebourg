@@ -2,8 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Alert,
   FlatList,
+  Modal,
   PanResponder,
-  Platform,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -30,6 +30,7 @@ import {
   guardarConfiguracionProductos,
   obtenerConfiguracionProductos,
 } from '../api/administracionProductos'
+import { obtenerConfiguracionCarrusel } from '../api/configuracion'
 
 const CLAVE_PREFERENCIAS_TIENDA = 'alebourg-preferencias-tienda'
 const ORDEN_SIN_ORDENAR = 'original'
@@ -57,6 +58,7 @@ function normalizar(texto) {
 export default function TiendaScreen({ navigation }) {
   const { colores } = useTema()
   const pantallaEnfocada = useIsFocused()
+  const [inicioCarrusel, setInicioCarrusel] = useState(() => Date.now())
   const estilos = crearEstilos(colores)
   const {
     productos,
@@ -77,6 +79,8 @@ export default function TiendaScreen({ navigation }) {
   const [error, setError] = useState('')
   const [actualizando, setActualizando] = useState(false)
   const [mostrarVolverArriba, setMostrarVolverArriba] = useState(false)
+  const [mostrarModalOrden, setMostrarModalOrden] = useState(false)
+  const [configuracionCarrusel, setConfiguracionCarrusel] = useState(null)
   const [configuracionAdmin, setConfiguracionAdmin] = useState(null)
   const [guardandoOrden, setGuardandoOrden] = useState(false)
   const posicionesProductos = useRef(new Map())
@@ -167,6 +171,20 @@ export default function TiendaScreen({ navigation }) {
       })
     return () => { activo = false }
   }, [isAdmin]))
+
+  useFocusEffect(useCallback(() => {
+    let activo = true
+    obtenerConfiguracionCarrusel()
+      .then((configuracion) => { if (activo) setConfiguracionCarrusel(configuracion) })
+      .catch((errorConfiguracion) => {
+        console.error('No se pudo cargar el ritmo de las fotos:', errorConfiguracion)
+      })
+    return () => { activo = false }
+  }, []))
+
+  useEffect(() => {
+    if (pantallaEnfocada) setInicioCarrusel(Date.now())
+  }, [pantallaEnfocada])
 
   const categoriasVisibles = useMemo(() => (
     categorias
@@ -361,6 +379,8 @@ export default function TiendaScreen({ navigation }) {
         compacta={cantidadColumnas === 2}
         centrarContenido={cantidadColumnas === 1}
         activo={pantallaEnfocada}
+        configuracionCarrusel={configuracionCarrusel}
+        inicioCarrusel={inicioCarrusel}
         alAbrir={abrirDetalle}
         agregarAlCarrito={agregarProducto}
       />
@@ -399,6 +419,8 @@ export default function TiendaScreen({ navigation }) {
   ), [
     cantidadColumnas,
     configuracionPrecios,
+    configuracionCarrusel,
+    inicioCarrusel,
     pantallaEnfocada,
     abrirDetalle,
     agregarProducto,
@@ -459,6 +481,9 @@ export default function TiendaScreen({ navigation }) {
                     imagenes={producto.imagenes}
                     imagen={producto.imagen}
                     activo={pantallaEnfocada}
+                    configuracionCarrusel={configuracionCarrusel}
+                    productoId={producto.id}
+                    inicioCarrusel={inicioCarrusel}
                     accessibilityLabel={`${producto.titulo}, foto del producto`}
                     style={estilos.imagenDestacada}
                   />
@@ -501,6 +526,16 @@ export default function TiendaScreen({ navigation }) {
     )
   }
 
+  const opcionesOrden = [
+    { valor: ORDEN_MENOR_PRECIO, etiqueta: 'Menor precio' },
+    { valor: ORDEN_MAYOR_PRECIO, etiqueta: 'Mayor precio' },
+    ...(isAdmin ? [
+      { valor: ORDEN_GANANCIA_MENOR, etiqueta: 'Ganancia: menor a mayor' },
+      { valor: ORDEN_GANANCIA_MAYOR, etiqueta: 'Ganancia: mayor a menor' },
+    ] : []),
+    { valor: ORDEN_SIN_ORDENAR, etiqueta: 'Sin ordenar' },
+  ]
+
   const encabezadoLista = (
     <View>
       <View>
@@ -534,6 +569,48 @@ export default function TiendaScreen({ navigation }) {
             <Feather name="x-circle" size={18} color={colores.error} />
           </Pressable>
         )}
+        <Modal
+          transparent
+          visible={mostrarModalOrden}
+          animationType="fade"
+          onRequestClose={() => setMostrarModalOrden(false)}
+        >
+          <View style={estilos.fondoModalOrden}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Cerrar opciones de orden"
+              style={StyleSheet.absoluteFill}
+              onPress={() => setMostrarModalOrden(false)}
+            />
+            <View style={estilos.modalOrden}>
+              <Text style={estilos.tituloModalOrden}>Ordenar por precio</Text>
+              <Text style={estilos.descripcionModalOrden}>Elegí cómo ordenar los productos:</Text>
+              {opcionesOrden.map((opcion) => {
+                const seleccionada = opcion.valor === ordenPrecio
+                return (
+                  <Pressable
+                    key={opcion.valor}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: seleccionada }}
+                    onPress={() => {
+                      setOrdenPrecio(opcion.valor)
+                      setMostrarModalOrden(false)
+                    }}
+                    style={[estilos.opcionModalOrden, seleccionada && estilos.opcionModalOrdenSeleccionada]}
+                  >
+                    <Text style={[
+                      estilos.textoOpcionModalOrden,
+                      seleccionada && estilos.textoOpcionModalOrdenSeleccionada,
+                    ]}>
+                      {opcion.etiqueta}
+                    </Text>
+                    {seleccionada && <Feather name="check" size={18} color={colores.primario} />}
+                  </Pressable>
+                )
+              })}
+            </View>
+          </View>
+        </Modal>
       </View>
       <FlatList
         horizontal
@@ -581,23 +658,7 @@ export default function TiendaScreen({ navigation }) {
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`Orden actual: ${etiquetasOrden[ordenPrecio]}. Tocar para cambiar`}
-          onPress={() => {
-            const opciones = [
-              { text: 'Menor Precio', onPress: () => setOrdenPrecio(ORDEN_MENOR_PRECIO) },
-              { text: 'Mayor Precio', onPress: () => setOrdenPrecio(ORDEN_MAYOR_PRECIO) },
-              ...(isAdmin ? [
-                { text: 'Ganancia: menor a mayor', onPress: () => setOrdenPrecio(ORDEN_GANANCIA_MENOR) },
-                { text: 'Ganancia: mayor a menor', onPress: () => setOrdenPrecio(ORDEN_GANANCIA_MAYOR) },
-              ] : []),
-              { text: 'Sin ordenar', onPress: () => setOrdenPrecio(ORDEN_SIN_ORDENAR) },
-            ]
-            Alert.alert(
-              'Ordenar por precio',
-              'Elegí cómo ordenar los productos:',
-              Platform.OS === 'android' ? opciones.reverse() : opciones,
-              { cancelable: true },
-            )
-          }}
+          onPress={() => setMostrarModalOrden(true)}
           style={estilos.selectorOrden}
         >
           <Feather name="sliders" size={16} color={colores.primario} />
@@ -848,5 +909,32 @@ function crearEstilos(colores) {
   textoReintentar: { color: colores.primarioOscuro, fontSize: 14, fontWeight: '800' },
   resultados: { paddingHorizontal: 4, paddingTop: 10, paddingBottom: 8, color: colores.secundaria, fontSize: 13 },
   separador: { height: 14 },
+  fondoModalOrden: {
+    flex: 1,
+    justifyContent: 'center',
+    padding: 24,
+    backgroundColor: 'rgba(0, 0, 0, 0.48)',
+  },
+  modalOrden: {
+    padding: 20,
+    borderRadius: 18,
+    backgroundColor: colores.superficie,
+    borderWidth: 1,
+    borderColor: colores.linea,
+    gap: 6,
+  },
+  tituloModalOrden: { color: colores.tinta, fontSize: 20, fontWeight: '800' },
+  descripcionModalOrden: { color: colores.secundaria, marginBottom: 8, lineHeight: 20 },
+  opcionModalOrden: {
+    minHeight: 46,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  opcionModalOrdenSeleccionada: { backgroundColor: colores.primarioClaro },
+  textoOpcionModalOrden: { color: colores.tinta, fontSize: 15, fontWeight: '600' },
+  textoOpcionModalOrdenSeleccionada: { color: colores.primarioOscuro, fontWeight: '800' },
   })
 }

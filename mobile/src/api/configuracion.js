@@ -1,5 +1,31 @@
 import api from './client'
 
+const MINIMO_SEGUNDOS_CARRUSEL = 2
+const MAXIMO_SEGUNDOS_CARRUSEL = 60
+
+function validarConfiguracionCarrusel(data) {
+  const intervalos = data?.productIntervals
+  const intervalosValidos = intervalos
+    && typeof intervalos === 'object'
+    && !Array.isArray(intervalos)
+    && Object.entries(intervalos).every(([id, segundos]) => (
+      /^[1-9]\d*$/.test(id)
+      && Number.isInteger(segundos)
+      && segundos >= MINIMO_SEGUNDOS_CARRUSEL
+      && segundos <= MAXIMO_SEGUNDOS_CARRUSEL
+    ))
+  if (
+    !['synchronized', 'individual'].includes(data?.mode)
+    || !Number.isInteger(data.intervalSeconds)
+    || data.intervalSeconds < MINIMO_SEGUNDOS_CARRUSEL
+    || data.intervalSeconds > MAXIMO_SEGUNDOS_CARRUSEL
+    || !intervalosValidos
+  ) {
+    throw new Error('La API devolvió una configuración de carrusel inválida.')
+  }
+  return data
+}
+
 export async function obtenerConfiguracionPrecios() {
   const { data } = await api.get('/api/precios-config')
   const rangosValidos = Array.isArray(data?.rangos) && data.rangos.every((rango, index) => (
@@ -34,6 +60,23 @@ export async function obtenerConfiguracionPrecios() {
   }
 
   return data
+}
+
+export async function obtenerConfiguracionCarrusel() {
+  const { data } = await api.get('/api/carousel-config')
+  return validarConfiguracionCarrusel(data)
+}
+
+export async function guardarConfiguracionCarrusel(configuracion) {
+  const { data } = await api.post('/api/carousel-config', configuracion)
+  return validarConfiguracionCarrusel(data)
+}
+
+export async function guardarRitmoCarruselProducto(id, intervalSeconds) {
+  const { data } = await api.put(`/api/carousel-config/products/${encodeURIComponent(id)}`, {
+    intervalSeconds,
+  })
+  return validarConfiguracionCarrusel(data)
 }
 
 export async function guardarConfiguracionPrecios(configuracion) {

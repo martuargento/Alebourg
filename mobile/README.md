@@ -22,6 +22,11 @@ el almacenamiento seguro del dispositivo. Una vez autenticado, se puede activar
 **Mostrar precios admin** para ver precio de proveedor y ganancia como en la web,
 y entrar a **Cambiar rangos de precios** para editar y guardar los ajustes,
 incluyendo la regla especial por prefijo y el mínimo de auriculares.
+En **Cuenta**, también se puede elegir un intervalo global de fotos entre 2 y
+60 segundos y sincronizar el cambio de todos los productos. Si se activa el modo
+individual, cada producto puede definir su propio intervalo al editarlo; si se
+deja vacío, usa el intervalo global. Esta configuración se comparte con la web
+y se guarda en la API.
 La administración también permite editar productos y precios, gestionar fotos,
 productos manuales y las listas de más vendidos/ofertas. Los productos
 administrados se guardan como filas en `productos_admin` (y sus fotos como
@@ -127,4 +132,4 @@ sobre otra Alebourg ya instalada, elegí la misma cuenta/proyecto y conservá el
 mismo keystore de Android de la APK anterior; una firma distinta no puede
 actualizar esa instalación. Al terminar, EAS muestra el enlace para descargar
 la APK. Incrementá `versionCode` para cada nueva build; esta versión es
-`1.0.5` (`versionCode` 6).
+`1.0.6` (`versionCode` 7).
