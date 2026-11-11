@@ -140,7 +140,11 @@ export default function AdminProductoScreen({ route, navigation }) {
       setConfiguracion(nuevoConfig)
       await cargarCatalogo()
       if (actualizado.id !== productoId) navigation.setParams({ producto: actualizado })
-      Alert.alert('Producto guardado', 'Los cambios ya están guardados en la base de datos.')
+      if (esProductoNuevo) {
+        Alert.alert('Producto guardado', 'Los cambios ya están guardados en la base de datos.')
+      } else {
+        navigation.popTo('Principal', { screen: 'Tienda' })
+      }
     } catch (errorGuardar) {
       setError(obtenerErrorApi(errorGuardar, 'No se pudo guardar el producto.'))
     } finally {

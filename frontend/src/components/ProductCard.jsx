@@ -1,5 +1,5 @@
 import { Button, Card } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useCarritoStore as usarCarrito } from '../store/carritoStore';
 import { useAdminConfigStore as usarAdminConfig } from '../store/adminConfigStore';
 import Swal from 'sweetalert2';
@@ -8,6 +8,7 @@ import { trackEvent } from '../api/analytics';
 import { useAuth } from '../hooks/useAuth';
 
 const ProductCard = ({ producto, configuracionPrecios }) => {
+  const location = useLocation();
   const { agregarAlCarrito } = usarCarrito();
   const { mostrarPreciosAdmin } = usarAdminConfig();
   const { isAdmin: esAdmin } = useAuth();
@@ -48,6 +49,8 @@ const ProductCard = ({ producto, configuracionPrecios }) => {
   return (
       <Link
         to={`/producto/${producto.id}`}
+        state={{ from: `${location.pathname}${location.search}` }}
+        onClick={() => sessionStorage.setItem('alebourg:product-list-scroll', String(window.scrollY))}
         className="product-card-link"
         style={{ textDecoration: 'none', color: 'inherit' }}
       >

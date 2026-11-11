@@ -1,6 +1,6 @@
-import { useEffect, useState, useMemo, useCallback } from 'react';
+import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { Container, Row, Col, Dropdown, Button } from 'react-bootstrap';
-import { useSearchParams } from 'react-router-dom';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import ProductCard from './ProductCard';
 import Buscador from './Buscador';
@@ -16,8 +16,9 @@ import {
 import { obtenerErrorApi } from '../api/products';
 
 const ProductosLista = ({ categoria = null }) => {
-  const { data: catalogo = [], isLoading, error } = useProductos();
+  const { data: catalogo = [], isLoading, isFetching, error } = useProductos();
   const queryClient = useQueryClient();
+  const location = useLocation();
   const { data: configuracionPrecios } = usePreciosConfig();
   const { isAdmin } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -27,6 +28,7 @@ const ProductosLista = ({ categoria = null }) => {
   const [configuracionAdmin, setConfiguracionAdmin] = useState(null);
   const [productoArrastrado, setProductoArrastrado] = useState(null);
   const [errorAdmin, setErrorAdmin] = useState('');
+  const scrollRestauradoPara = useRef(null);
   const {
     data: destacados = { masVendidos: [], ofertas: [] },
     error: errorDestacados,
@@ -39,6 +41,18 @@ const ProductosLista = ({ categoria = null }) => {
   useEffect(() => {
     sessionStorage.setItem('ordenamiento', ordenamiento);
   }, [ordenamiento]);
+
+  useEffect(() => {
+    const scrollY = location.state?.restoreScrollY;
+    if (
+      typeof scrollY !== 'number'
+      || isFetching
+      || scrollRestauradoPara.current === location.key
+    ) return undefined;
+    scrollRestauradoPara.current = location.key;
+    const frame = requestAnimationFrame(() => window.scrollTo(0, scrollY));
+    return () => cancelAnimationFrame(frame);
+  }, [location.key, location.state, isFetching]);
 
   useEffect(() => {
     if (!isAdmin) {

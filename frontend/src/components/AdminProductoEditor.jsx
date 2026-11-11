@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Alert, Button, Form, Image, Spinner } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   crearProductoManual,
@@ -19,6 +19,7 @@ const MAX_TAMANO_IMAGEN = 4 * 1024 * 1024;
 
 export default function AdminProductoEditor({ producto = null }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
   const [titulo, setTitulo] = useState(producto?.titulo || '');
   const [categoria, setCategoria] = useState(producto?.categoria || '');
@@ -133,6 +134,15 @@ export default function AdminProductoEditor({ producto = null }) {
       await queryClient.invalidateQueries({ queryKey: productQueryKey });
       await queryClient.invalidateQueries({ queryKey: ['productos-destacados'] });
       if (esNuevo) navigate(`/producto/${id}`, { replace: true });
+      else {
+        const scrollGuardado = Number(sessionStorage.getItem('alebourg:product-list-scroll'));
+        const scrollRestaurar = Number.isFinite(scrollGuardado) ? scrollGuardado : 0;
+        sessionStorage.removeItem('alebourg:product-list-scroll');
+        navigate(location.state?.from || '/', {
+          replace: true,
+          state: { restoreScrollY: scrollRestaurar },
+        });
+      }
     } catch (errorGuardar) {
       setError(obtenerErrorApi(errorGuardar, 'No se pudo guardar el producto.'));
     } finally {
