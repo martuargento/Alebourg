@@ -33,7 +33,11 @@ const ProductCard = ({
     ? configuracionCarrusel.productIntervals?.[String(producto.id)] ?? configuracionCarrusel.intervalSeconds
     : configuracionCarrusel?.intervalSeconds ?? 6;
   const intervaloMs = intervaloSegundos * 1000;
-  const duracionTransicionMs = Math.min(1200, Math.round(intervaloMs * 0.3));
+  const tipoTransicion = configuracionCarrusel?.transition ?? 'fade';
+  const duracionTransicionMs = Math.min(
+    configuracionCarrusel?.transitionDurationMs ?? 1200,
+    Math.round(intervaloMs * 0.8),
+  );
   const desfaseMs = configuracionCarrusel?.mode === 'individual'
     ? calcularDesfaseProducto(producto.id, intervaloMs)
     : 0;
@@ -149,7 +153,7 @@ const ProductCard = ({
                 src={imagenes[indiceAnterior]}
                 alt=""
                 aria-hidden="true"
-                className="product-card-image-layer product-card-image-out"
+                className={`product-card-image-layer product-card-image-out product-card-image-out-${tipoTransicion}`}
                 style={{ animationDuration: `${duracionTransicionMs}ms` }}
               />
             )}
@@ -157,14 +161,16 @@ const ProductCard = ({
               key={`actual-${faseCarrusel}`}
               src={imagenes[indiceImagen]}
               alt={`${producto.titulo}, foto ${indiceImagen + 1}`}
-              className={`product-card-image-layer${transicionIniciada ? ' product-card-image-in' : ''}`}
+              className={transicionIniciada
+                ? `product-card-image-layer product-card-image-in product-card-image-in-${tipoTransicion}`
+                : 'product-card-image-layer'}
               style={transicionIniciada
                 ? { animationDuration: `${duracionTransicionMs}ms` }
                 : undefined}
             />
           </div>
           <Card.Body className="d-flex flex-column p-2">
-            <Card.Title className="product-card-title mb-3 text-break">{producto.titulo}</Card.Title>
+            <Card.Title className="product-card-title mb-1 text-break">{producto.titulo}</Card.Title>
             <div>
             {esAdmin && mostrarPreciosAdmin && (
               <div style={{ marginBottom: '4px' }}>
@@ -177,14 +183,16 @@ const ProductCard = ({
               </div>
             )}
               <div>Precio:</div>
-              <div className="product-card-price-meta">
-                {producto.enOferta && <span className="badge text-bg-danger">OFERTA</span>}
-                {tieneDescuento && (
-                  <small className="text-decoration-line-through text-secondary">
-                  ${formatearPrecio(precioRegular)}
-                  </small>
-                )}
-              </div>
+              {(producto.enOferta || tieneDescuento) && (
+                <div className="product-card-price-meta">
+                  {producto.enOferta && <span className="badge text-bg-danger">OFERTA</span>}
+                  {tieneDescuento && (
+                    <small className="text-decoration-line-through text-secondary">
+                      ${formatearPrecio(precioRegular)}
+                    </small>
+                  )}
+                </div>
+              )}
               <h4>${precioAjustado}</h4>
             </div>
             <Button

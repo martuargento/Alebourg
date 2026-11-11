@@ -935,24 +935,56 @@ html[data-theme="light"] button[style*="background: none"]:hover {
   object-fit: contain;
 }
 
+.product-card-image-in,
+.product-card-image-out {
+  animation-duration: 1.2s;
+  animation-timing-function: cubic-bezier(0.33, 1, 0.68, 1);
+  animation-fill-mode: both;
+}
+
 .product-card-image-in {
   z-index: 2;
-  animation: product-card-image-in 1.2s cubic-bezier(0.33, 1, 0.68, 1) both;
 }
 
 .product-card-image-out {
   z-index: 1;
-  animation: product-card-image-out 1.2s cubic-bezier(0.33, 1, 0.68, 1) both;
 }
 
-@keyframes product-card-image-in {
+.product-card-image-in-fade { animation-name: product-card-fade-in; }
+.product-card-image-out-fade { animation-name: product-card-fade-out; }
+.product-card-image-in-slide { animation-name: product-card-slide-in; }
+.product-card-image-out-slide { animation-name: product-card-slide-out; }
+.product-card-image-in-zoom { animation-name: product-card-zoom-in; }
+.product-card-image-out-zoom { animation-name: product-card-zoom-out; }
+
+@keyframes product-card-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes product-card-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes product-card-slide-in {
   from { opacity: 0.9; transform: translateX(100%); }
   to { opacity: 1; transform: translateX(0); }
 }
 
-@keyframes product-card-image-out {
+@keyframes product-card-slide-out {
   from { opacity: 1; transform: translateX(0); }
   to { opacity: 0.9; transform: translateX(-100%); }
+}
+
+@keyframes product-card-zoom-in {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes product-card-zoom-out {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(1.05); }
 }
 
 /* Media queries para ajustar el grid según el tamaño de pantalla */
@@ -1015,7 +1047,6 @@ html[data-theme="light"] button[style*="background: none"]:hover {
 
 .product-card-title {
   display: -webkit-box !important;
-  min-height: 2.8em !important;
   max-height: 2.8em !important;
   overflow: hidden !important;
   -webkit-box-orient: vertical !important;
@@ -1026,7 +1057,6 @@ html[data-theme="light"] button[style*="background: none"]:hover {
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  min-height: 1.5rem;
 }
 
 .card-text {

@@ -12,12 +12,16 @@ import {
 
 const SEGUNDOS_MINIMOS = 2;
 const SEGUNDOS_MAXIMOS = 60;
+const DURACION_MINIMA_MS = 300;
+const DURACION_MAXIMA_MS = 2500;
 
 export default function AdminCarrusel() {
   const configuracionQuery = useCarruselConfig();
   const queryClient = useQueryClient();
   const [modo, setModo] = useState('synchronized');
   const [segundos, setSegundos] = useState('6');
+  const [transicion, setTransicion] = useState('fade');
+  const [duracionTransicion, setDuracionTransicion] = useState(1200);
   const [guardando, setGuardando] = useState(false);
   const [errorGuardar, setErrorGuardar] = useState('');
   const [guardado, setGuardado] = useState(false);
@@ -26,6 +30,8 @@ export default function AdminCarrusel() {
     if (!configuracionQuery.data) return;
     setModo(configuracionQuery.data.mode);
     setSegundos(String(configuracionQuery.data.intervalSeconds));
+    setTransicion(configuracionQuery.data.transition);
+    setDuracionTransicion(configuracionQuery.data.transitionDurationMs);
   }, [configuracionQuery.data]);
 
   async function guardar() {
@@ -34,8 +40,13 @@ export default function AdminCarrusel() {
       !Number.isInteger(intervalSeconds)
       || intervalSeconds < SEGUNDOS_MINIMOS
       || intervalSeconds > SEGUNDOS_MAXIMOS
+      || !Number.isInteger(duracionTransicion)
+      || duracionTransicion < DURACION_MINIMA_MS
+      || duracionTransicion > DURACION_MAXIMA_MS
     ) {
-      setErrorGuardar(`Ingresá un número entero entre ${SEGUNDOS_MINIMOS} y ${SEGUNDOS_MAXIMOS}.`);
+      setErrorGuardar(
+        `El intervalo debe estar entre ${SEGUNDOS_MINIMOS} y ${SEGUNDOS_MAXIMOS} segundos, y la transición entre ${DURACION_MINIMA_MS / 1000} y ${DURACION_MAXIMA_MS / 1000} segundos.`,
+      );
       setGuardado(false);
       return;
     }
@@ -47,6 +58,8 @@ export default function AdminCarrusel() {
       const actualizada = await guardarConfiguracionCarrusel({
         mode: modo,
         intervalSeconds,
+        transition: transicion,
+        transitionDurationMs: duracionTransicion,
       });
       queryClient.setQueryData(carouselConfigQueryKey, actualizada);
       setGuardado(true);
@@ -120,6 +133,46 @@ export default function AdminCarrusel() {
             <Form.Text>
               Usado por todos los productos en modo sincronizado y como valor general en modo individual.
               Elegí entre {SEGUNDOS_MINIMOS} y {SEGUNDOS_MAXIMOS} segundos.
+            </Form.Text>
+          </Form.Group>
+          <Form.Group className="mb-4">
+            <Form.Label htmlFor="carousel-transition">Efecto de transición</Form.Label>
+            <Form.Select
+              id="carousel-transition"
+              value={transicion}
+              onChange={(evento) => {
+                setTransicion(evento.target.value);
+                setGuardado(false);
+              }}
+              disabled={guardando}
+            >
+              <option value="fade">Fundido suave (como en la app)</option>
+              <option value="slide">Deslizamiento lateral</option>
+              <option value="zoom">Zoom suave</option>
+            </Form.Select>
+          </Form.Group>
+          <Form.Group className="mb-4">
+            <Form.Label htmlFor="carousel-transition-duration">
+              Velocidad de transición: {(duracionTransicion / 1000).toFixed(1)} segundos
+            </Form.Label>
+            <Form.Range
+              id="carousel-transition-duration"
+              min={DURACION_MINIMA_MS}
+              max={DURACION_MAXIMA_MS}
+              step="100"
+              value={duracionTransicion}
+              onChange={(evento) => {
+                setDuracionTransicion(Number(evento.target.value));
+                setGuardado(false);
+              }}
+              disabled={guardando}
+            />
+            <div className="d-flex justify-content-between small text-secondary">
+              <span>Más rápida</span>
+              <span>Más lenta</span>
+            </div>
+            <Form.Text>
+              La transición se limita si hace falta para terminar antes del próximo cambio de foto.
             </Form.Text>
           </Form.Group>
           <Button

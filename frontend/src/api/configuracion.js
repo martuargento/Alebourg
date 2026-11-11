@@ -2,6 +2,9 @@ import api from './client';
 
 const MINIMO_SEGUNDOS_CARRUSEL = 2;
 const MAXIMO_SEGUNDOS_CARRUSEL = 60;
+const TIPOS_TRANSICION_CARRUSEL = ['fade', 'slide', 'zoom'];
+const DURACION_TRANSICION_MINIMA_MS = 300;
+const DURACION_TRANSICION_MAXIMA_MS = 2500;
 
 function validarConfiguracionCarrusel(data) {
   const intervalos = data?.productIntervals;
@@ -19,6 +22,10 @@ function validarConfiguracionCarrusel(data) {
     || !Number.isInteger(data.intervalSeconds)
     || data.intervalSeconds < MINIMO_SEGUNDOS_CARRUSEL
     || data.intervalSeconds > MAXIMO_SEGUNDOS_CARRUSEL
+    || !TIPOS_TRANSICION_CARRUSEL.includes(data.transition)
+    || !Number.isInteger(data.transitionDurationMs)
+    || data.transitionDurationMs < DURACION_TRANSICION_MINIMA_MS
+    || data.transitionDurationMs > DURACION_TRANSICION_MAXIMA_MS
     || !intervalosValidos
   ) {
     throw new Error('La API devolvió una configuración de carrusel inválida.');

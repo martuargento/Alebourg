@@ -3,10 +3,15 @@ const { prisma } = require('../lib/prisma');
 const CLAVE_CONFIGURACION_CARRUSEL = 'carousel-config';
 const SEGUNDOS_CARRUSEL_MINIMOS = 2;
 const SEGUNDOS_CARRUSEL_MAXIMOS = 60;
+const DURACION_TRANSICION_MINIMA_MS = 300;
+const DURACION_TRANSICION_MAXIMA_MS = 2500;
+const TIPOS_TRANSICION_CARRUSEL = ['fade', 'slide', 'zoom'];
 const CONFIGURACION_CARRUSEL_PREDETERMINADA = {
   mode: 'synchronized',
   intervalSeconds: 6,
   productIntervals: {},
+  transition: 'fade',
+  transitionDurationMs: 1200,
 };
 
 function segundosCarruselValidos(valor) {
@@ -15,11 +20,19 @@ function segundosCarruselValidos(valor) {
     && valor <= SEGUNDOS_CARRUSEL_MAXIMOS;
 }
 
+function duracionTransicionCarruselValida(valor) {
+  return Number.isInteger(valor)
+    && valor >= DURACION_TRANSICION_MINIMA_MS
+    && valor <= DURACION_TRANSICION_MAXIMA_MS;
+}
+
 function validarConfiguracionCarrusel(configuracion) {
   if (
     !configuracion
     || !['synchronized', 'individual'].includes(configuracion.mode)
     || !segundosCarruselValidos(configuracion.intervalSeconds)
+    || !TIPOS_TRANSICION_CARRUSEL.includes(configuracion.transition)
+    || !duracionTransicionCarruselValida(configuracion.transitionDurationMs)
     || !configuracion.productIntervals
     || typeof configuracion.productIntervals !== 'object'
     || Array.isArray(configuracion.productIntervals)
@@ -46,7 +59,17 @@ async function leerConfiguracionCarrusel() {
       productIntervals: {},
     };
   }
-  return validarConfiguracionCarrusel(JSON.parse(guardado.value));
+  const guardada = JSON.parse(guardado.value);
+  if (!guardada || typeof guardada !== 'object' || Array.isArray(guardada)) {
+    throw new Error('La configuración de carrusel guardada no es válida.');
+  }
+  return validarConfiguracionCarrusel({
+    ...CONFIGURACION_CARRUSEL_PREDETERMINADA,
+    ...guardada,
+    productIntervals: Object.prototype.hasOwnProperty.call(guardada, 'productIntervals')
+      ? guardada.productIntervals
+      : {},
+  });
 }
 
 async function persistirConfiguracionCarrusel(configuracion) {
@@ -133,7 +156,8 @@ async function obtenerConfiguracionCarrusel(req, res) {
 }
 
 async function guardarConfiguracionCarrusel(req, res) {
-  const { mode, intervalSeconds } = req.body || {};
+  const body = req.body || {};
+  const { mode, intervalSeconds } = body;
   if (!['synchronized', 'individual'].includes(mode)) {
     return res.status(400).json({ error: 'El modo de rotación no es válido.' });
   }
@@ -144,10 +168,24 @@ async function guardarConfiguracionCarrusel(req, res) {
   }
 
   const actual = await leerConfiguracionCarrusel();
+  const transition = body.transition === undefined ? actual.transition : body.transition;
+  const transitionDurationMs = body.transitionDurationMs === undefined
+    ? actual.transitionDurationMs
+    : body.transitionDurationMs;
+  if (!TIPOS_TRANSICION_CARRUSEL.includes(transition)) {
+    return res.status(400).json({ error: 'El tipo de transición no es válido.' });
+  }
+  if (!duracionTransicionCarruselValida(transitionDurationMs)) {
+    return res.status(400).json({
+      error: `La duración debe ser un número entero entre ${DURACION_TRANSICION_MINIMA_MS} y ${DURACION_TRANSICION_MAXIMA_MS} milisegundos.`,
+    });
+  }
   const configuracion = {
     ...actual,
     mode,
     intervalSeconds,
+    transition,
+    transitionDurationMs,
   };
   return res.json(await persistirConfiguracionCarrusel(configuracion));
 }
