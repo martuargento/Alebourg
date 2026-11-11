@@ -100,6 +100,16 @@ export default function AdminProductoScreen({ route, navigation }) {
     }
   }
 
+  function moverImagen(indice, desplazamiento) {
+    setImagenes((actuales) => {
+      const destino = indice + desplazamiento
+      if (destino < 0 || destino >= actuales.length) return actuales
+      const reordenadas = [...actuales]
+      ;[reordenadas[indice], reordenadas[destino]] = [reordenadas[destino], reordenadas[indice]]
+      return reordenadas
+    })
+  }
+
   async function guardar() {
     setError('')
     setGuardando(true)
@@ -235,18 +245,43 @@ export default function AdminProductoScreen({ route, navigation }) {
       />
       <View style={estilos.tarjeta}>
         <Text style={estilos.subtitulo}>Fotos ({imagenes.length}/12)</Text>
+        <Text style={estilos.descripcion}>Usá las flechas para cambiar el orden de las fotos.</Text>
         <ScrollView horizontal contentContainerStyle={estilos.galeria}>
           {imagenes.map((url, indice) => (
             <View key={`${url}-${indice}`} style={estilos.fotoContenedor}>
               <Image source={{ uri: url }} style={estilos.foto} />
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={`Quitar foto ${indice + 1}`}
-                style={estilos.quitarFoto}
-                onPress={() => setImagenes((actuales) => actuales.filter((_, posicion) => posicion !== indice))}
-              >
-                <Feather name="x" size={15} color={colores.superficie} />
-              </Pressable>
+              <View style={estilos.controlesFoto}>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={`Mover foto ${indice + 1} a la izquierda`}
+                  disabled={indice === 0 || guardando}
+                  style={[estilos.botonOrdenFoto, (indice === 0 || guardando) && estilos.botonFotoDeshabilitado]}
+                  onPress={() => moverImagen(indice, -1)}
+                >
+                  <Feather name="arrow-left" size={15} color={colores.superficie} />
+                </Pressable>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={`Quitar foto ${indice + 1}`}
+                  disabled={guardando}
+                  style={estilos.botonFoto}
+                  onPress={() => setImagenes((actuales) => actuales.filter((_, posicion) => posicion !== indice))}
+                >
+                  <Feather name="x" size={15} color={colores.superficie} />
+                </Pressable>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={`Mover foto ${indice + 1} a la derecha`}
+                  disabled={indice === imagenes.length - 1 || guardando}
+                  style={[
+                    estilos.botonOrdenFoto,
+                    (indice === imagenes.length - 1 || guardando) && estilos.botonFotoDeshabilitado,
+                  ]}
+                  onPress={() => moverImagen(indice, 1)}
+                >
+                  <Feather name="arrow-right" size={15} color={colores.superficie} />
+                </Pressable>
+              </View>
             </View>
           ))}
         </ScrollView>
@@ -347,10 +382,23 @@ function crearEstilos(colores) {
     galeria: { gap: 8 },
     fotoContenedor: { position: 'relative' },
     foto: { width: 82, height: 82, borderRadius: 8, backgroundColor: colores.fondo },
-    quitarFoto: {
+    controlesFoto: {
       position: 'absolute',
-      top: 3,
+      bottom: 3,
+      left: 3,
       right: 3,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+    },
+    botonOrdenFoto: {
+      width: 23,
+      height: 23,
+      borderRadius: 12,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colores.tinta,
+    },
+    botonFoto: {
       width: 23,
       height: 23,
       borderRadius: 12,
@@ -358,6 +406,7 @@ function crearEstilos(colores) {
       justifyContent: 'center',
       backgroundColor: colores.error,
     },
+    botonFotoDeshabilitado: { opacity: 0.45 },
     revision: {
       padding: 14,
       gap: 8,

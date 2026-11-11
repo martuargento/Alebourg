@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Button, Form, Image, Spinner } from 'react-bootstrap';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -25,8 +25,10 @@ export default function AdminProductoEditor({ producto = null }) {
   const [categoria, setCategoria] = useState(producto?.categoria || '');
   const [precioProveedor, setPrecioProveedor] = useState(producto?.precio || '');
   const [precioFinal, setPrecioFinal] = useState(producto?.precioFinal || '');
-  const [imagenes, setImagenes] = useState(producto?.imagenes || []);
-  const [archivos, setArchivos] = useState([]);
+  const [fotos, setFotos] = useState(() => (
+    (producto?.imagenes || []).map((url, indice) => ({ id: `existente-${indice}`, url }))
+  ));
+  const siguienteIdFoto = useRef(0);
   const [configuracion, setConfiguracion] = useState(null);
   const [masVendido, setMasVendido] = useState(false);
   const [oferta, setOferta] = useState(false);
@@ -50,17 +52,19 @@ export default function AdminProductoEditor({ producto = null }) {
     return () => { activo = false; };
   }, [producto?.id]);
 
-  const cantidadImagenes = imagenes.length + archivos.length;
   const previsualizaciones = useMemo(
-    () => archivos.map((archivo) => ({ archivo, url: URL.createObjectURL(archivo) })),
-    [archivos],
+    () => fotos.map((foto) => ({
+      ...foto,
+      previsualizacion: foto.archivo ? URL.createObjectURL(foto.archivo) : foto.url,
+    })),
+    [fotos],
   );
-  useEffect(() => () => previsualizaciones.forEach(({ url }) => URL.revokeObjectURL(url)), [previsualizaciones]);
+  useEffect(() => () => previsualizaciones.forEach(({ archivo, previsualizacion }) => {
+    if (archivo) URL.revokeObjectURL(previsualizacion);
+  }), [previsualizaciones]);
 
-  function seleccionarArchivos(evento) {
-    const seleccionados = Array.from(evento.target.files || []);
-    evento.target.value = '';
-    if (cantidadImagenes + seleccionados.length > MAX_IMAGENES) {
+  function agregarArchivos(seleccionados) {
+    if (fotos.length + seleccionados.length > MAX_IMAGENES) {
       setError(`Cada producto admite hasta ${MAX_IMAGENES} imágenes.`);
       return;
     }
@@ -76,7 +80,39 @@ export default function AdminProductoEditor({ producto = null }) {
       return;
     }
     setError('');
-    setArchivos((actuales) => [...actuales, ...validos]);
+    setFotos((actuales) => [
+      ...actuales,
+      ...validos.map((archivo) => ({
+        id: `nuevo-${siguienteIdFoto.current++}`,
+        archivo,
+      })),
+    ]);
+  }
+
+  function seleccionarArchivos(evento) {
+    const seleccionados = Array.from(evento.target.files || []);
+    evento.target.value = '';
+    agregarArchivos(seleccionados);
+  }
+
+  function pegarImagenes(evento) {
+    const pegadas = Array.from(evento.clipboardData?.items || [])
+      .filter((elemento) => elemento.kind === 'file' && elemento.type.startsWith('image/'))
+      .map((elemento) => elemento.getAsFile())
+      .filter(Boolean);
+    if (!pegadas.length) return;
+    evento.preventDefault();
+    agregarArchivos(pegadas);
+  }
+
+  function moverFoto(indice, desplazamiento) {
+    setFotos((actuales) => {
+      const destino = indice + desplazamiento;
+      if (destino < 0 || destino >= actuales.length) return actuales;
+      const reordenadas = [...actuales];
+      [reordenadas[indice], reordenadas[destino]] = [reordenadas[destino], reordenadas[indice]];
+      return reordenadas;
+    });
   }
 
   async function guardar(evento) {
@@ -97,7 +133,6 @@ export default function AdminProductoEditor({ producto = null }) {
         categoria: categoria.trim(),
         precioProveedor,
         precioFinal: precioFinal.trim() || null,
-        imagenes,
       };
       let id = producto?.id;
       if (!id) {
@@ -110,13 +145,13 @@ export default function AdminProductoEditor({ producto = null }) {
       }
 
       await guardarEdicionProducto(id, datos);
-      let galeria = [...imagenes];
-      for (const archivo of archivos) {
-        galeria.push(await subirImagenProducto(id, archivo));
+      const galeria = [];
+      for (const foto of fotos) {
+        galeria.push(foto.archivo
+          ? await subirImagenProducto(id, foto.archivo)
+          : foto.url);
       }
-      if (archivos.length) {
-        await guardarEdicionProducto(id, { imagenes: galeria });
-      }
+      await guardarEdicionProducto(id, { imagenes: galeria });
 
       const siguiente = {
         ...configuracion,
@@ -158,10 +193,6 @@ export default function AdminProductoEditor({ producto = null }) {
     }
   }
 
-  function quitarArchivo(indice) {
-    setArchivos((actuales) => actuales.filter((_, posicion) => posicion !== indice));
-  }
-
   async function confirmarRevision() {
     try {
       await marcarProductoRevisado(producto.id);
@@ -193,7 +224,7 @@ export default function AdminProductoEditor({ producto = null }) {
   }
 
   return (
-    <Form onSubmit={guardar} className="container py-4" style={{ maxWidth: 760 }}>
+    <Form onSubmit={guardar} onPaste={pegarImagenes} className="container py-4" style={{ maxWidth: 760 }}>
       <h2 className="mb-4">{esNuevo ? 'Agregar producto manual' : 'Editar producto'}</h2>
       {error && <Alert variant="danger" role="alert">{error}</Alert>}
       {revisionPendiente && (
@@ -227,37 +258,52 @@ export default function AdminProductoEditor({ producto = null }) {
         )}
       </Form.Group>
       <Form.Group className="mb-3">
-        <Form.Label>Fotos (máximo {MAX_IMAGENES})</Form.Label>
+        <Form.Label>Fotos ({fotos.length}/{MAX_IMAGENES})</Form.Label>
         <Form.Control type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={seleccionarArchivos} />
+        <Form.Text>
+          También podés pegar una imagen del portapapeles con Ctrl+V. Usá las flechas para ordenar las fotos.
+        </Form.Text>
         <div className="d-flex flex-wrap gap-2 mt-3">
-          {imagenes.map((url, indice) => (
-            <div key={`${url}-${indice}`} className="position-relative">
-              <Image src={url} alt={`Foto ${indice + 1}`} rounded style={{ width: 90, height: 90, objectFit: 'contain' }} />
-              <Button
-                type="button"
-                variant="danger"
-                size="sm"
-                className="position-absolute top-0 end-0"
-                aria-label={`Quitar foto ${indice + 1}`}
-                onClick={() => setImagenes((actuales) => actuales.filter((_, posicion) => posicion !== indice))}
-              >
-                ×
-              </Button>
-            </div>
-          ))}
-          {previsualizaciones.map(({ archivo, url }, indice) => (
-            <div key={`${archivo.name}-${indice}`} className="position-relative">
-              <Image src={url} alt={archivo.name} rounded style={{ width: 90, height: 90, objectFit: 'contain' }} />
-              <Button
-                type="button"
-                variant="danger"
-                size="sm"
-                className="position-absolute top-0 end-0"
-                aria-label={`Quitar foto nueva ${indice + 1}`}
-                onClick={() => quitarArchivo(indice)}
-              >
-                ×
-              </Button>
+          {previsualizaciones.map((foto, indice) => (
+            <div key={foto.id} className="text-center">
+              <Image
+                src={foto.previsualizacion}
+                alt={`Foto ${indice + 1}`}
+                rounded
+                style={{ width: 90, height: 90, objectFit: 'contain' }}
+              />
+              <div className="d-flex justify-content-center gap-1 mt-1">
+                <Button
+                  type="button"
+                  variant="outline-secondary"
+                  size="sm"
+                  aria-label={`Mover foto ${indice + 1} a la izquierda`}
+                  disabled={indice === 0 || guardando}
+                  onClick={() => moverFoto(indice, -1)}
+                >
+                  ←
+                </Button>
+                  <Button
+                    type="button"
+                    variant="danger"
+                    size="sm"
+                    aria-label={`Quitar foto ${indice + 1}`}
+                    disabled={guardando}
+                    onClick={() => setFotos((actuales) => actuales.filter((_, posicion) => posicion !== indice))}
+                  >
+                    ×
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline-secondary"
+                    size="sm"
+                    aria-label={`Mover foto ${indice + 1} a la derecha`}
+                    disabled={indice === fotos.length - 1 || guardando}
+                    onClick={() => moverFoto(indice, 1)}
+                  >
+                    →
+                  </Button>
+              </div>
             </div>
           ))}
         </div>

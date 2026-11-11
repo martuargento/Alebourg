@@ -102,6 +102,16 @@ en la aplicación.
 
 ## Generar una APK instalable
 
+En Windows, para compilar localmente y copiar la APK a Descargas como
+`alebourg.apk`, abrí PowerShell en esta carpeta y ejecutá:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\generar-apk.ps1
+```
+
+El script detecta el Android SDK, usa una unidad temporal para evitar el límite
+de rutas largas de Windows y quita esa unidad al terminar.
+
 El perfil `preview` de `eas.json` genera una APK de distribución interna.
 Desde esta carpeta, iniciá sesión con tu cuenta de Expo y ejecutá:
 
@@ -116,5 +126,5 @@ configurar la firma de Android. Si querés instalar la APK como actualización
 sobre otra Alebourg ya instalada, elegí la misma cuenta/proyecto y conservá el
 mismo keystore de Android de la APK anterior; una firma distinta no puede
 actualizar esa instalación. Al terminar, EAS muestra el enlace para descargar
-la APK. Incrementá `versionCode` para cada nueva build; esta versión usa
-`versionCode` 3.
+la APK. Incrementá `versionCode` para cada nueva build; esta versión es
+`1.0.5` (`versionCode` 6).

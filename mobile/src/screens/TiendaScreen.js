@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Alert,
   FlatList,
-  Image,
   PanResponder,
   Platform,
   Pressable,
@@ -16,15 +15,16 @@ import {
 } from 'react-native'
 import { Feather } from '@expo/vector-icons'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { useFocusEffect } from '@react-navigation/native'
+import { useFocusEffect, useIsFocused } from '@react-navigation/native'
 import Encabezado from '../components/Encabezado'
 import TarjetaProducto from '../components/TarjetaProducto'
+import CarruselImagenProducto from '../components/CarruselImagenProducto'
 import { Cargando, Mensaje } from '../components/Controles'
 import { obtenerErrorApi } from '../api/client'
 import { useAccionesCarrito } from '../context/CarritoContext'
 import { useCatalogo } from '../context/CatalogoContext'
 import { useTema } from '../context/TemaContext'
-import { obtenerPrecioFinal } from '../utils/precios'
+import { obtenerPrecioFinal, parsearPrecio } from '../utils/precios'
 import { useAuth } from '../context/AuthContext'
 import {
   guardarConfiguracionProductos,
@@ -35,10 +35,15 @@ const CLAVE_PREFERENCIAS_TIENDA = 'alebourg-preferencias-tienda'
 const ORDEN_SIN_ORDENAR = 'original'
 const ORDEN_MENOR_PRECIO = 'asc'
 const ORDEN_MAYOR_PRECIO = 'desc'
+const ORDEN_GANANCIA_MENOR = 'profitAsc'
+const ORDEN_GANANCIA_MAYOR = 'profitDesc'
+const ORDENES_GANANCIA = [ORDEN_GANANCIA_MENOR, ORDEN_GANANCIA_MAYOR]
 const etiquetasOrden = {
   [ORDEN_SIN_ORDENAR]: 'Sin ordenar',
   [ORDEN_MENOR_PRECIO]: 'Menor Precio',
   [ORDEN_MAYOR_PRECIO]: 'Mayor Precio',
+  [ORDEN_GANANCIA_MENOR]: 'Ganancia: menor a mayor',
+  [ORDEN_GANANCIA_MAYOR]: 'Ganancia: mayor a menor',
 }
 
 function normalizar(texto) {
@@ -51,6 +56,7 @@ function normalizar(texto) {
 
 export default function TiendaScreen({ navigation }) {
   const { colores } = useTema()
+  const pantallaEnfocada = useIsFocused()
   const estilos = crearEstilos(colores)
   const {
     productos,
@@ -59,7 +65,7 @@ export default function TiendaScreen({ navigation }) {
     productosDestacados,
     cargarCatalogo,
   } = useCatalogo()
-  const { isAdmin } = useAuth()
+  const { isAdmin, cargandoSesion } = useAuth()
   const { agregarAlCarrito } = useAccionesCarrito()
   const listaRef = useRef(null)
   const [cantidadColumnas, setCantidadColumnas] = useState(2)
@@ -98,7 +104,12 @@ export default function TiendaScreen({ navigation }) {
         if (preferencias.columnas === 1 || preferencias.columnas === 2) {
           setCantidadColumnas(preferencias.columnas)
         }
-        if ([ORDEN_SIN_ORDENAR, ORDEN_MENOR_PRECIO, ORDEN_MAYOR_PRECIO].includes(preferencias.ordenPrecio)) {
+        if ([
+          ORDEN_SIN_ORDENAR,
+          ORDEN_MENOR_PRECIO,
+          ORDEN_MAYOR_PRECIO,
+          ...ORDENES_GANANCIA,
+        ].includes(preferencias.ordenPrecio)) {
           setOrdenPrecio(preferencias.ordenPrecio)
         }
       })
@@ -108,6 +119,12 @@ export default function TiendaScreen({ navigation }) {
       .finally(() => { if (activo) setPreferenciasCargadas(true) })
     return () => { activo = false }
   }, [])
+
+  useEffect(() => {
+    if (!cargandoSesion && !isAdmin && ORDENES_GANANCIA.includes(ordenPrecio)) {
+      setOrdenPrecio(ORDEN_SIN_ORDENAR)
+    }
+  }, [cargandoSesion, isAdmin, ordenPrecio])
 
   useEffect(() => {
     if (!preferenciasCargadas) return
@@ -167,20 +184,40 @@ export default function TiendaScreen({ navigation }) {
         || normalizar(producto.categoria) === normalizar(categoriaSeleccionada))
       && (!texto || normalizar(`${producto.titulo} ${producto.categoria}`).includes(texto))
     ))
-    if (ordenPrecio === ORDEN_SIN_ORDENAR || !configuracionPrecios) return filtrados
+    const ordenarPorGanancia = ORDENES_GANANCIA.includes(ordenPrecio)
+    if (
+      ordenPrecio === ORDEN_SIN_ORDENAR
+      || !configuracionPrecios
+      || (ordenarPorGanancia && (!isAdmin || cargandoSesion))
+    ) return filtrados
 
+    const ascendente = ordenPrecio === ORDEN_MENOR_PRECIO || ordenPrecio === ORDEN_GANANCIA_MENOR
     return filtrados
-      .map((producto, indiceOriginal) => ({
-        producto,
-        indiceOriginal,
-        precio: obtenerPrecioFinal(producto, configuracionPrecios),
-      }))
-      .sort((a, b) => (
-        (ordenPrecio === ORDEN_MENOR_PRECIO ? a.precio - b.precio : b.precio - a.precio)
-        || a.indiceOriginal - b.indiceOriginal
-      ))
+      .map((producto, indiceOriginal) => {
+        const precio = obtenerPrecioFinal(producto, configuracionPrecios)
+        return {
+          producto,
+          indiceOriginal,
+          precio,
+          ganancia: Math.max(0, precio - parsearPrecio(producto.precio)),
+        }
+      })
+      .sort((a, b) => {
+        const diferencia = ordenarPorGanancia
+          ? a.ganancia - b.ganancia
+          : a.precio - b.precio
+        return (ascendente ? diferencia : -diferencia) || a.indiceOriginal - b.indiceOriginal
+      })
       .map(({ producto }) => producto)
-  }, [productos, categoriaSeleccionada, busqueda, ordenPrecio, configuracionPrecios])
+  }, [
+    productos,
+    categoriaSeleccionada,
+    busqueda,
+    ordenPrecio,
+    configuracionPrecios,
+    isAdmin,
+    cargandoSesion,
+  ])
 
   const listaCategorias = [{ nombreOriginal: '', nombre: 'Todos' }, ...categoriasVisibles]
   const abrirDetalle = useCallback((producto) => {
@@ -323,6 +360,7 @@ export default function TiendaScreen({ navigation }) {
         configuracionPrecios={configuracionPrecios}
         compacta={cantidadColumnas === 2}
         centrarContenido={cantidadColumnas === 1}
+        activo={pantallaEnfocada}
         alAbrir={abrirDetalle}
         agregarAlCarrito={agregarProducto}
       />
@@ -361,6 +399,7 @@ export default function TiendaScreen({ navigation }) {
   ), [
     cantidadColumnas,
     configuracionPrecios,
+    pantallaEnfocada,
     abrirDetalle,
     agregarProducto,
     moverProducto,
@@ -416,10 +455,12 @@ export default function TiendaScreen({ navigation }) {
                   accessibilityRole="button"
                   onPress={() => abrirDetalle(producto)}
                 >
-                  <Image
-                    source={producto.imagen ? { uri: producto.imagen } : require('../../assets/icon.png')}
+                  <CarruselImagenProducto
+                    imagenes={producto.imagenes}
+                    imagen={producto.imagen}
+                    activo={pantallaEnfocada}
+                    accessibilityLabel={`${producto.titulo}, foto del producto`}
                     style={estilos.imagenDestacada}
-                    resizeMode="contain"
                   />
                   <Text numberOfLines={2} style={estilos.nombreDestacado}>{producto.titulo}</Text>
                   {producto.enOferta && <Text style={estilos.etiquetaOferta}>OFERTA</Text>}
@@ -542,9 +583,13 @@ export default function TiendaScreen({ navigation }) {
           accessibilityLabel={`Orden actual: ${etiquetasOrden[ordenPrecio]}. Tocar para cambiar`}
           onPress={() => {
             const opciones = [
-            { text: 'Menor Precio', onPress: () => setOrdenPrecio(ORDEN_MENOR_PRECIO) },
-            { text: 'Mayor Precio', onPress: () => setOrdenPrecio(ORDEN_MAYOR_PRECIO) },
-            { text: 'Sin ordenar', onPress: () => setOrdenPrecio(ORDEN_SIN_ORDENAR) },
+              { text: 'Menor Precio', onPress: () => setOrdenPrecio(ORDEN_MENOR_PRECIO) },
+              { text: 'Mayor Precio', onPress: () => setOrdenPrecio(ORDEN_MAYOR_PRECIO) },
+              ...(isAdmin ? [
+                { text: 'Ganancia: menor a mayor', onPress: () => setOrdenPrecio(ORDEN_GANANCIA_MENOR) },
+                { text: 'Ganancia: mayor a menor', onPress: () => setOrdenPrecio(ORDEN_GANANCIA_MAYOR) },
+              ] : []),
+              { text: 'Sin ordenar', onPress: () => setOrdenPrecio(ORDEN_SIN_ORDENAR) },
             ]
             Alert.alert(
               'Ordenar por precio',

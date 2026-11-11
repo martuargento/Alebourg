@@ -36,6 +36,7 @@ export async function subirImagenProducto(id, archivo) {
   const imagen = await respuesta.blob()
   const { data } = await api.post(`/api/productos/${id}/imagenes`, imagen, {
     headers: { 'Content-Type': archivo.mimeType || imagen.type || 'image/jpeg' },
+    transformRequest: [(contenido) => contenido],
     timeout: 60000,
   })
   return data.url

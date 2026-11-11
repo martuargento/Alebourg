@@ -1,13 +1,13 @@
 import { memo } from 'react'
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native'
+import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { Boton } from './Controles'
+import CarruselImagenProducto from './CarruselImagenProducto'
 import { obtenerPrecioFinal, parsearPrecio } from '../utils/precios'
 import { formatearPrecio } from '../utils/formato'
 import { useTema } from '../context/TemaContext'
 import { useAuth } from '../context/AuthContext'
 import { useAdminPreferencias } from '../context/AdminPreferenciasContext'
 
-const imagenSinProducto = require('../../assets/icon.png')
 const MAX_CARACTERES_POR_LINEA = 20
 
 function formatearTituloCompacto(titulo) {
@@ -52,6 +52,7 @@ function TarjetaProducto({
   configuracionPrecios,
   compacta,
   centrarContenido = false,
+  activo = true,
   alAbrir,
   agregarAlCarrito,
 }) {
@@ -59,7 +60,6 @@ function TarjetaProducto({
   const { isAdmin } = useAuth()
   const { mostrarPreciosAdmin } = useAdminPreferencias()
   const estilos = crearEstilos(colores)
-  const imagen = producto.imagen ? { uri: producto.imagen } : imagenSinProducto
   const mostrarDetalleAdmin = isAdmin && mostrarPreciosAdmin
   const precioProveedor = mostrarDetalleAdmin ? parsearPrecio(producto.precio) : 0
   const precio = obtenerPrecioFinal(producto, configuracionPrecios)
@@ -77,14 +77,16 @@ function TarjetaProducto({
         onPress={() => alAbrir(producto)}
         style={estilos.contenidoProducto}
       >
-        <Image
-          source={imagen}
+        <CarruselImagenProducto
+          imagenes={producto.imagenes}
+          imagen={producto.imagen}
+          activo={activo}
+          accessibilityLabel={`${producto.titulo}, foto del producto`}
           style={[
             estilos.imagen,
             compacta && estilos.imagenCompacta,
             compacta && mostrarDetalleAdmin && estilos.imagenCompactaAdmin,
           ]}
-          resizeMode="contain"
         />
         <View style={[
           estilos.detalles,

@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useState } from 'react';
 import { Button, Card } from 'react-bootstrap';
 import { Link, useLocation } from 'react-router-dom';
 import { useCarritoStore as usarCarrito } from '../store/carritoStore';
@@ -9,9 +10,26 @@ import { useAuth } from '../hooks/useAuth';
 
 const ProductCard = ({ producto, configuracionPrecios, cantidadVisible = 20 }) => {
   const location = useLocation();
+  const imagenes = useMemo(() => {
+    const galeria = Array.isArray(producto.imagenes) ? producto.imagenes.filter(Boolean) : [];
+    return galeria.length ? galeria : producto.imagen ? [producto.imagen] : [];
+  }, [producto.imagen, producto.imagenes]);
+  const [indiceImagen, setIndiceImagen] = useState(0);
   const { agregarAlCarrito } = usarCarrito();
   const { mostrarPreciosAdmin } = usarAdminConfig();
   const { isAdmin: esAdmin } = useAuth();
+
+  useEffect(() => {
+    setIndiceImagen(0);
+  }, [producto.id, imagenes]);
+
+  useEffect(() => {
+    if (imagenes.length < 2) return undefined;
+    const intervalo = setInterval(() => {
+      setIndiceImagen((actual) => (actual + 1) % imagenes.length);
+    }, 3000);
+    return () => clearInterval(intervalo);
+  }, [imagenes.length, producto.id]);
 
   // Calcular precios (base proveedor y ajustado)
   const precioProveedor = parsearPrecio(producto.precio);
@@ -69,7 +87,10 @@ const ProductCard = ({ producto, configuracionPrecios, cantidadVisible = 20 }) =
         >
           <Card.Img
             variant="top"
-            src={producto.imagen}
+            key={imagenes[indiceImagen]}
+            src={imagenes[indiceImagen] || ''}
+            alt={`${producto.titulo}, foto ${indiceImagen + 1}`}
+            className="product-card-image-carousel"
             style={{
               height: '200px',
               objectFit: 'contain',

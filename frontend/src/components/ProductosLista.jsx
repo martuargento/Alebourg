@@ -14,6 +14,7 @@ import {
   obtenerProductosDestacados,
 } from '../api/administracionProductos';
 import { obtenerErrorApi } from '../api/products';
+import { obtenerPrecioFinal, parsearPrecio } from '../utils/preciosUtils';
 
 const ProductosLista = ({ categoria = null }) => {
   const { data: catalogo = [], isLoading, isFetching, error } = useProductos();
@@ -46,6 +47,10 @@ const ProductosLista = ({ categoria = null }) => {
   useEffect(() => {
     sessionStorage.setItem('ordenamiento', ordenamiento);
   }, [ordenamiento]);
+
+  useEffect(() => {
+    if (!isAdmin && ordenamiento.startsWith('ganancia-')) setOrdenamiento('');
+  }, [isAdmin, ordenamiento]);
 
   useEffect(() => {
     const scrollY = location.state?.restoreScrollY;
@@ -137,14 +142,24 @@ const ProductosLista = ({ categoria = null }) => {
 
   const productosOrdenados = useMemo(() => {
     if (!ordenamiento) return productosFiltrados;
+    if (ordenamiento.startsWith('ganancia-') && (!isAdmin || !configuracionPrecios)) {
+      return productosFiltrados;
+    }
 
     return [...productosFiltrados].sort((a, b) => {
-      const precioA = parseFloat(a.precio.replace(/,/g, ''));
-      const precioB = parseFloat(b.precio.replace(/,/g, ''));
-      
+      if (ordenamiento.startsWith('ganancia-')) {
+        const gananciaA = Math.max(0, obtenerPrecioFinal(a, configuracionPrecios) - parsearPrecio(a.precio));
+        const gananciaB = Math.max(0, obtenerPrecioFinal(b, configuracionPrecios) - parsearPrecio(b.precio));
+        return ordenamiento === 'ganancia-menor'
+          ? gananciaA - gananciaB
+          : gananciaB - gananciaA;
+      }
+
+      const precioA = parsearPrecio(a.precio);
+      const precioB = parsearPrecio(b.precio);
       return ordenamiento === 'menor' ? precioA - precioB : precioB - precioA;
     });
-  }, [productosFiltrados, ordenamiento]);
+  }, [productosFiltrados, ordenamiento, isAdmin, configuracionPrecios]);
 
   const modoOrdenPersonalizado = Boolean(
     isAdmin
@@ -237,11 +252,23 @@ const ProductosLista = ({ categoria = null }) => {
             <Dropdown.Toggle variant="outline-light" id="dropdown-ordenamiento">
               {ordenamiento === 'menor' ? 'Menor precio' : 
                ordenamiento === 'mayor' ? 'Mayor precio' : 
+               ordenamiento === 'ganancia-menor' ? 'Ganancia: menor a mayor' :
+               ordenamiento === 'ganancia-mayor' ? 'Ganancia: mayor a menor' :
                'Ordenar por precio'}
             </Dropdown.Toggle>
             <Dropdown.Menu>
               <Dropdown.Item onClick={() => setOrdenamiento('menor')}>Menor precio</Dropdown.Item>
               <Dropdown.Item onClick={() => setOrdenamiento('mayor')}>Mayor precio</Dropdown.Item>
+              {isAdmin && (
+                <>
+                  <Dropdown.Item onClick={() => setOrdenamiento('ganancia-menor')}>
+                    Ganancia: menor a mayor
+                  </Dropdown.Item>
+                  <Dropdown.Item onClick={() => setOrdenamiento('ganancia-mayor')}>
+                    Ganancia: mayor a menor
+                  </Dropdown.Item>
+                </>
+              )}
               <Dropdown.Item onClick={() => setOrdenamiento('')}>Sin ordenar</Dropdown.Item>
             </Dropdown.Menu>
           </Dropdown>
