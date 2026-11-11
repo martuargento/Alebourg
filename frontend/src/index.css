@@ -937,32 +937,22 @@ html[data-theme="light"] button[style*="background: none"]:hover {
 
 .product-card-image-in {
   z-index: 2;
-  animation: product-card-image-in 2.2s ease-in-out both;
+  animation: product-card-image-in 1.2s cubic-bezier(0.33, 1, 0.68, 1) both;
 }
 
 .product-card-image-out {
   z-index: 1;
-  animation: product-card-image-out 2.2s ease-in-out both;
+  animation: product-card-image-out 1.2s cubic-bezier(0.33, 1, 0.68, 1) both;
 }
 
 @keyframes product-card-image-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from { opacity: 0.9; transform: translateX(100%); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
 @keyframes product-card-image-out {
-  from { opacity: 1; }
-  to { opacity: 0; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .product-card-image-in,
-  .product-card-image-out {
-    animation: none;
-  }
-
-  .product-card-image-in { opacity: 1; }
-  .product-card-image-out { opacity: 0; }
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0.9; transform: translateX(-100%); }
 }
 
 /* Media queries para ajustar el grid según el tamaño de pantalla */

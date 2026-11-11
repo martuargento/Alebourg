@@ -33,7 +33,7 @@ const ProductCard = ({
     ? configuracionCarrusel.productIntervals?.[String(producto.id)] ?? configuracionCarrusel.intervalSeconds
     : configuracionCarrusel?.intervalSeconds ?? 6;
   const intervaloMs = intervaloSegundos * 1000;
-  const duracionTransicionMs = Math.min(2200, Math.round(intervaloMs * 0.7));
+  const duracionTransicionMs = Math.min(1200, Math.round(intervaloMs * 0.3));
   const desfaseMs = configuracionCarrusel?.mode === 'individual'
     ? calcularDesfaseProducto(producto.id, intervaloMs)
     : 0;
@@ -61,7 +61,7 @@ const ProductCard = ({
         intervaloMs - (transcurrido % intervaloMs),
       );
     };
-    const transcurrido = Math.max(0, Date.now() - inicioCarrusel);
+    const transcurrido = Math.max(0, Date.now() - inicioCarrusel + desfaseMs);
     const demoraInicial = intervaloMs - (transcurrido % intervaloMs);
     temporizador = setTimeout(avanzarSincronizado, demoraInicial);
     return () => clearTimeout(temporizador);
@@ -80,6 +80,16 @@ const ProductCard = ({
   const indiceAnterior = imagenes.length
     ? (indiceImagen + imagenes.length - 1) % imagenes.length
     : 0;
+
+  useEffect(() => {
+    if (imagenes.length < 2) return undefined;
+    const imagenSiguiente = new window.Image();
+    imagenSiguiente.src = imagenes[(indiceImagen + 1) % imagenes.length];
+    return () => {
+      imagenSiguiente.onload = null;
+      imagenSiguiente.onerror = null;
+    };
+  }, [firmaGaleria, imagenes, indiceImagen]);
 
   const manejarClick = (e) => {
     e.preventDefault();
