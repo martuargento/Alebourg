@@ -88,3 +88,21 @@ npm run android
 Para una compilación de producción, mantené la URL HTTPS de Vercel en
 `EXPO_PUBLIC_API_URL` y generá una nueva build; la dirección queda incorporada
 en la aplicación.
+
+## Generar una APK instalable
+
+El perfil `preview` de `eas.json` genera una APK de distribución interna.
+Desde esta carpeta, iniciá sesión con tu cuenta de Expo y ejecutá:
+
+```powershell
+npx eas-cli login
+npx eas-cli whoami
+npx eas-cli build --platform android --profile preview
+```
+
+En la primera ejecución, EAS puede pedir vincular o crear el proyecto Expo y
+configurar la firma de Android. Si querés instalar la APK como actualización
+sobre otra Alebourg ya instalada, elegí la misma cuenta/proyecto y conservá el
+mismo keystore de Android de la APK anterior; una firma distinta no puede
+actualizar esa instalación. Al terminar, EAS muestra el enlace para descargar
+la APK. El `versionCode` ya se incrementó a 2 para esta build.
