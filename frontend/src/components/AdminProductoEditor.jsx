@@ -137,10 +137,18 @@ export default function AdminProductoEditor({ producto = null }) {
       else {
         const scrollGuardado = Number(sessionStorage.getItem('alebourg:product-list-scroll'));
         const scrollRestaurar = Number.isFinite(scrollGuardado) ? scrollGuardado : 0;
+        const cantidadGuardada = Number(sessionStorage.getItem('alebourg:product-list-visible-count'));
+        const cantidadRestaurar = Number.isSafeInteger(cantidadGuardada) && cantidadGuardada > 0
+          ? cantidadGuardada
+          : 20;
         sessionStorage.removeItem('alebourg:product-list-scroll');
+        sessionStorage.removeItem('alebourg:product-list-visible-count');
         navigate(location.state?.from || '/', {
           replace: true,
-          state: { restoreScrollY: scrollRestaurar },
+          state: {
+            restoreScrollY: scrollRestaurar,
+            restoreProductosVisibles: cantidadRestaurar,
+          },
         });
       }
     } catch (errorGuardar) {

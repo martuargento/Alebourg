@@ -24,7 +24,12 @@ const ProductosLista = ({ categoria = null }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const busqueda = searchParams.get('q') || '';
   const [ordenamiento, setOrdenamiento] = useState(sessionStorage.getItem('ordenamiento') || '');
-  const [productosVisibles, setProductosVisibles] = useState(20);
+  const [productosVisibles, setProductosVisibles] = useState(() => {
+    const cantidadRestaurar = location.state?.restoreProductosVisibles;
+    return Number.isSafeInteger(cantidadRestaurar) && cantidadRestaurar > 0
+      ? cantidadRestaurar
+      : 20;
+  });
   const [configuracionAdmin, setConfiguracionAdmin] = useState(null);
   const [productoArrastrado, setProductoArrastrado] = useState(null);
   const [errorAdmin, setErrorAdmin] = useState('');
@@ -173,7 +178,11 @@ const ProductosLista = ({ categoria = null }) => {
               onDragEnd={() => setProductoArrastrado(null)}
               style={{ cursor: puedeReordenar ? 'grab' : undefined }}
             >
-              <ProductCard producto={producto} configuracionPrecios={configuracionPrecios} />
+              <ProductCard
+                producto={producto}
+                configuracionPrecios={configuracionPrecios}
+                cantidadVisible={productosVisibles}
+              />
             </div>
           ))}
         </div>
@@ -271,7 +280,11 @@ const ProductosLista = ({ categoria = null }) => {
                       Arrastrar
                     </small>
                   )}
-                  <ProductCard producto={producto} configuracionPrecios={configuracionPrecios} />
+                  <ProductCard
+                    producto={producto}
+                    configuracionPrecios={configuracionPrecios}
+                    cantidadVisible={productosVisibles}
+                  />
                 </div>
               </div>
             ))}

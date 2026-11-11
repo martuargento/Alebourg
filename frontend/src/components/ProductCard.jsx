@@ -7,7 +7,7 @@ import { obtenerPrecioFinal, formatearPrecio, parsearPrecio } from '../utils/pre
 import { trackEvent } from '../api/analytics';
 import { useAuth } from '../hooks/useAuth';
 
-const ProductCard = ({ producto, configuracionPrecios }) => {
+const ProductCard = ({ producto, configuracionPrecios, cantidadVisible = 20 }) => {
   const location = useLocation();
   const { agregarAlCarrito } = usarCarrito();
   const { mostrarPreciosAdmin } = usarAdminConfig();
@@ -50,7 +50,10 @@ const ProductCard = ({ producto, configuracionPrecios }) => {
       <Link
         to={`/producto/${producto.id}`}
         state={{ from: `${location.pathname}${location.search}` }}
-        onClick={() => sessionStorage.setItem('alebourg:product-list-scroll', String(window.scrollY))}
+        onClick={() => {
+          sessionStorage.setItem('alebourg:product-list-scroll', String(window.scrollY));
+          sessionStorage.setItem('alebourg:product-list-visible-count', String(cantidadVisible));
+        }}
         className="product-card-link"
         style={{ textDecoration: 'none', color: 'inherit' }}
       >
