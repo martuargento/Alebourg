@@ -199,11 +199,11 @@ export default function AdminProductoEditor({ producto = null }) {
       </Form.Group>
       <Form.Group className="mb-3">
         <Form.Label>Costo del proveedor</Form.Label>
-        <Form.Control type="number" min="0" step="any" value={precioProveedor} onChange={(evento) => setPrecioProveedor(evento.target.value)} required />
+        <Form.Control type="text" inputMode="decimal" value={precioProveedor} onChange={(evento) => setPrecioProveedor(evento.target.value)} required />
       </Form.Group>
       <Form.Group className="mb-3">
         <Form.Label>Precio final o promocional (vacío usa los rangos configurados)</Form.Label>
-        <Form.Control type="number" min="0" step="any" value={precioFinal} onChange={(evento) => setPrecioFinal(evento.target.value)} />
+        <Form.Control type="text" inputMode="decimal" value={precioFinal} onChange={(evento) => setPrecioFinal(evento.target.value)} />
         {oferta && (
           <Form.Text>Para mostrar un descuento, ingresá un precio final menor al precio normal.</Form.Text>
         )}
