@@ -139,11 +139,12 @@ const ProductosLista = ({ categoria = null }) => {
     const puedeReordenar = isAdmin && configuracionAdmin && !busqueda;
     return (
       <section className="mb-4" aria-label={titulo}>
-        <h4 className="text-white mb-3">{titulo}</h4>
-        <div className="d-flex gap-3 overflow-auto pb-2">
+        <h4 className="featured-products-title">{titulo}</h4>
+        <div className="featured-products-grid">
           {lista.map((producto) => (
             <div
               key={producto.id}
+              className="featured-product-item"
               draggable={puedeReordenar}
               onDragStart={() => setProductoArrastrado({ id: producto.id, lista: clave })}
               onDragOver={(evento) => { if (puedeReordenar) evento.preventDefault(); }}
@@ -156,7 +157,7 @@ const ProductosLista = ({ categoria = null }) => {
                 setProductoArrastrado(null);
               }}
               onDragEnd={() => setProductoArrastrado(null)}
-              style={{ width: 190, flex: '0 0 190px', cursor: puedeReordenar ? 'grab' : undefined }}
+              style={{ cursor: puedeReordenar ? 'grab' : undefined }}
             >
               <ProductCard producto={producto} configuracionPrecios={configuracionPrecios} />
             </div>
@@ -208,8 +209,6 @@ const ProductosLista = ({ categoria = null }) => {
             No se pudieron cargar las listas destacadas. {obtenerErrorApi(errorDestacados, 'Intentá recargar la tienda.')}
           </div>
         )}
-        {renderizarDestacados('Más vendidos', destacados.masVendidos, 'masVendidos')}
-        {renderizarDestacados('Ofertas', destacados.ofertas, 'ofertas')}
         {(categoria || productosFiltrados.length > 1) && (
           <Dropdown className="ordenamiento-dropdown">
             <Dropdown.Toggle variant="outline-light" id="dropdown-ordenamiento">
@@ -225,6 +224,8 @@ const ProductosLista = ({ categoria = null }) => {
           </Dropdown>
         )}
       </div>
+      {renderizarDestacados('Más vendidos', destacados.masVendidos, 'masVendidos')}
+      {renderizarDestacados('Ofertas', destacados.ofertas, 'ofertas')}
       
       {productosOrdenados.length === 0 ? (
         <div className="text-center text-white mt-5">
