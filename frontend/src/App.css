@@ -348,8 +348,6 @@ body {
 /* Asegurar que las cards tengan tamaño consistente */
 .cardsEstilos {
   width: 100%;
-  min-width: 250px;
-  max-width: 350px;
   margin: 0 auto;
 }
 

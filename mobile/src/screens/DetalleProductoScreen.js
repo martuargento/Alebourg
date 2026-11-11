@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import {
+  Alert,
   Animated,
   Image,
   Modal,
@@ -12,6 +13,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { obtenerProducto } from '../api/productos'
 import { obtenerErrorApi } from '../api/client'
+import { eliminarProducto } from '../api/administracionProductos'
 import { Boton, Cargando, Mensaje } from '../components/Controles'
 import { useAccionesCarrito } from '../context/CarritoContext'
 import { useCatalogo } from '../context/CatalogoContext'
@@ -35,6 +37,7 @@ export default function DetalleProductoScreen({ route, navigation }) {
   const [mostrarImagenCompleta, setMostrarImagenCompleta] = useState(false)
   const [indiceImagen, setIndiceImagen] = useState(0)
   const [anchoGaleria, setAnchoGaleria] = useState(0)
+  const [eliminando, setEliminando] = useState(false)
   const productoDelCatalogo = productos.find((item) => item.id === Number(productoId))
   const [producto, setProducto] = useState(productoDelCatalogo || null)
   const [cargando, setCargando] = useState(!productoDelCatalogo)
@@ -97,6 +100,43 @@ export default function DetalleProductoScreen({ route, navigation }) {
     ? obtenerPrecioFinal({ ...producto, precioFinal: null }, configuracionPrecios)
     : precio
   const tieneDescuento = producto.enOferta && precio < precioRegular
+
+  function solicitarEliminacion() {
+    Alert.alert(
+      'Eliminar producto',
+      'Se eliminará de la base de datos. Si vuelve a aparecer en una importación futura, podrá cargarse nuevamente.',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Eliminar',
+          style: 'destructive',
+          onPress: async () => {
+            setEliminando(true)
+            try {
+              await eliminarProducto(producto.id)
+              let errorRecarga = null
+              try {
+                await cargarCatalogo()
+              } catch (errorCarga) {
+                errorRecarga = errorCarga
+              }
+              navigation.navigate('Principal', { screen: 'Tienda' })
+              if (errorRecarga) {
+                Alert.alert(
+                  'Producto eliminado',
+                  `No se pudo actualizar la tienda. Volvé a cargarla para ver los cambios. ${obtenerErrorApi(errorRecarga, '')}`,
+                )
+              }
+            } catch (errorBorrado) {
+              Alert.alert('No se pudo eliminar', obtenerErrorApi(errorBorrado, 'Intentá de nuevo.'))
+            } finally {
+              setEliminando(false)
+            }
+          },
+        },
+      ],
+    )
+  }
 
   return (
     <View style={estilos.pantalla}>
@@ -165,6 +205,13 @@ export default function DetalleProductoScreen({ route, navigation }) {
                   titulo="Editar producto"
                   variante="secundario"
                   onPress={() => navigation.navigate('AdminProducto', { producto })}
+                />
+                <Boton
+                  titulo="Eliminar producto"
+                  variante="peligro"
+                  cargando={eliminando}
+                  deshabilitado={eliminando}
+                  onPress={solicitarEliminacion}
                 />
               </View>
             )}

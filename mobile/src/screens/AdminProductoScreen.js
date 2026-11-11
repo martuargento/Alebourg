@@ -15,6 +15,7 @@ import { Feather } from '@expo/vector-icons'
 import { Boton, Cargando } from '../components/Controles'
 import {
   crearProductoManual,
+  eliminarProducto,
   guardarConfiguracionProductos,
   guardarEdicionProducto,
   marcarProductoRevisado,
@@ -157,6 +158,33 @@ export default function AdminProductoScreen({ route, navigation }) {
     }
   }
 
+  function solicitarEliminacion() {
+    Alert.alert(
+      'Eliminar producto',
+      'Se eliminará el producto y sus personalizaciones actuales de la base de datos. Si vuelve a aparecer en una importación futura, se podrá cargar nuevamente.',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Eliminar',
+          style: 'destructive',
+          onPress: async () => {
+            setGuardando(true)
+            setError('')
+            try {
+              await eliminarProducto(productoId)
+              await cargarCatalogo()
+              navigation.navigate('Principal', { screen: 'Tienda' })
+            } catch (errorArchivo) {
+              setError(obtenerErrorApi(errorArchivo, 'No se pudo eliminar el producto.'))
+            } finally {
+              setGuardando(false)
+            }
+          },
+        },
+      ],
+    )
+  }
+
   if (cargando || cargandoSesion) return <Cargando mensaje="Cargando edición..." />
   if (!isAdmin) {
     return (
@@ -233,6 +261,14 @@ export default function AdminProductoScreen({ route, navigation }) {
         </Text>
       )}
       <Boton titulo={guardando ? 'Guardando...' : 'Guardar cambios'} onPress={guardar} deshabilitado={guardando} />
+      {!esProductoNuevo && (
+        <Boton
+          titulo="Eliminar producto"
+          variante="secundario"
+          onPress={solicitarEliminacion}
+          deshabilitado={guardando}
+        />
+      )}
     </ScrollView>
   )
 }

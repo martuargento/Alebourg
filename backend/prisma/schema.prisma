@@ -8,14 +8,14 @@ datasource db {
 }
 
 model Producto {
-  id         Int      @id
-  titulo     String
-  imagen     String   @default("")
-  precio     String
-  categoria  String
-  orden      Int      @default(0)
-  createdAt  DateTime @default(now()) @map("created_at")
-  updatedAt  DateTime @updatedAt @map("updated_at")
+  id        Int      @id
+  titulo    String
+  imagen    String   @default("")
+  precio    String
+  categoria String
+  orden     Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("productos")
 }
@@ -28,28 +28,65 @@ model AppSetting {
   @@map("app_settings")
 }
 
+model ProductoAdmin {
+  id                   Int                   @id
+  legacyId             Int?                  @unique @map("legacy_id")
+  manual               Boolean               @default(false)
+  titulo               String?
+  categoria            String?
+  precioProveedor      String?               @map("precio_proveedor")
+  precioFinal          String?               @map("precio_final")
+  imagen               String?
+  galeriaPersonalizada Boolean               @default(false) @map("galeria_personalizada")
+  ordenPersonalizado   Int?                  @map("orden_personalizado")
+  masVendido           Boolean               @default(false) @map("mas_vendido")
+  ordenMasVendidos     Int?                  @map("orden_mas_vendidos")
+  enOferta             Boolean               @default(false) @map("en_oferta")
+  ordenOfertas         Int?                  @map("orden_ofertas")
+  baseTitulo           String?               @map("base_titulo")
+  basePrecio           String?               @map("base_precio")
+  baseCategoria        String?               @map("base_categoria")
+  baseImagen           String?               @map("base_imagen")
+  createdAt            DateTime              @default(now()) @map("created_at")
+  updatedAt            DateTime              @updatedAt @map("updated_at")
+  imagenes             ProductoAdminImagen[]
+
+  @@map("productos_admin")
+}
+
+model ProductoAdminImagen {
+  id         Int           @id @default(autoincrement())
+  productoId Int           @map("producto_id")
+  url        String
+  orden      Int           @default(0)
+  producto   ProductoAdmin @relation(fields: [productoId], references: [id], onDelete: Cascade)
+
+  @@unique([productoId, orden])
+  @@map("productos_admin_imagenes")
+}
+
 model AnalyticsVisit {
-  id        Int      @id @default(autoincrement())
-  ipHash    String   @map("ip_hash")
-  userAgent String   @default("") @map("user_agent")
-  referer   String   @default("")
-  path      String   @default("/")
-  isBot     Boolean  @default(false) @map("is_bot")
-  country   String   @default("")
-  ts        BigInt   @default(0)
+  id        Int     @id @default(autoincrement())
+  ipHash    String  @map("ip_hash")
+  userAgent String  @default("") @map("user_agent")
+  referer   String  @default("")
+  path      String  @default("/")
+  isBot     Boolean @default(false) @map("is_bot")
+  country   String  @default("")
+  ts        BigInt  @default(0)
 
   @@index([ts])
   @@map("analytics_visits")
 }
 
 model AnalyticsEvent {
-  id        Int      @id @default(autoincrement())
-  ipHash    String   @map("ip_hash")
-  userAgent String   @default("") @map("user_agent")
-  sessionId String   @default("") @map("session_id")
-  eventType String   @map("event_type")
-  payload   String   @default("{}")
-  ts        BigInt   @default(0)
+  id        Int    @id @default(autoincrement())
+  ipHash    String @map("ip_hash")
+  userAgent String @default("") @map("user_agent")
+  sessionId String @default("") @map("session_id")
+  eventType String @map("event_type")
+  payload   String @default("{}")
+  ts        BigInt @default(0)
 
   @@index([ts])
   @@index([eventType, ts])

@@ -9,6 +9,7 @@ import {
   RefreshControl,
   ScrollView,
   StyleSheet,
+  Switch,
   Text,
   TextInput,
   View,
@@ -214,6 +215,26 @@ export default function TiendaScreen({ navigation }) {
     }
   }, [configuracionAdmin, guardandoOrden, productos, cargarCatalogo])
   moverProductoRef.current = moverProductoAlLugar
+
+  async function cambiarOrdenPersonalizado(activo) {
+    if (!isAdmin || !configuracionAdmin || guardandoOrden) return
+    setGuardandoOrden(true)
+    try {
+      const actualizada = await guardarConfiguracionProductos({
+        ...configuracionAdmin,
+        ordenPersonalizadoActivo: activo,
+        orden: configuracionAdmin.orden.length
+          ? configuracionAdmin.orden
+          : productos.map((producto) => producto.id),
+      })
+      setConfiguracionAdmin(actualizada)
+      await cargarCatalogo()
+    } catch (errorOrden) {
+      Alert.alert('No se pudo guardar la configuración', obtenerErrorApi(errorOrden, 'Intentá de nuevo.'))
+    } finally {
+      setGuardandoOrden(false)
+    }
+  }
 
   const moverProducto = useCallback((id, desplazamiento) => {
     const ordenBase = configuracionAdmin?.orden.length
@@ -489,6 +510,26 @@ export default function TiendaScreen({ navigation }) {
           )
         }}
       />
+      {isAdmin && (
+        <View style={estilos.ordenPersonalizado}>
+          <View style={estilos.detalleOrdenPersonalizado}>
+            <Text style={estilos.tituloOrdenPersonalizado}>Orden personalizado</Text>
+            <Text style={estilos.ayudaOrdenPersonalizado}>
+              {configuracionAdmin?.ordenPersonalizadoActivo
+                ? 'El orden se guarda automáticamente. Elegí “Sin ordenar” para mover productos.'
+                : 'Activá para acomodar los productos; el orden guardado se mantiene al desactivar.'}
+            </Text>
+          </View>
+          <Switch
+            accessibilityLabel="Activar orden personalizado"
+            value={Boolean(configuracionAdmin?.ordenPersonalizadoActivo)}
+            disabled={!configuracionAdmin || guardandoOrden}
+            onValueChange={cambiarOrdenPersonalizado}
+            trackColor={{ false: colores.linea, true: colores.primarioClaro }}
+            thumbColor={configuracionAdmin?.ordenPersonalizadoActivo ? colores.primario : colores.superficie}
+          />
+        </View>
+      )}
       <View style={estilos.opcionesLista}>
         <Pressable
           accessibilityRole="button"
@@ -677,6 +718,22 @@ function crearEstilos(colores) {
     alignItems: 'center',
     gap: 8,
   },
+  ordenPersonalizado: {
+    marginHorizontal: 4,
+    marginTop: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    borderRadius: 12,
+    backgroundColor: colores.superficie,
+    borderWidth: 1,
+    borderColor: colores.linea,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  detalleOrdenPersonalizado: { flex: 1, gap: 2 },
+  tituloOrdenPersonalizado: { color: colores.tinta, fontSize: 13, fontWeight: '700' },
+  ayudaOrdenPersonalizado: { color: colores.secundaria, fontSize: 11, lineHeight: 15 },
   selectorOrden: {
     flex: 1,
     minHeight: 40,

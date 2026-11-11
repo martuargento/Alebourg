@@ -20,6 +20,11 @@ export async function crearProductoManual(producto) {
   return data
 }
 
+export async function eliminarProducto(id) {
+  const { data } = await api.delete(`/api/productos/${id}/admin`)
+  return data
+}
+
 export async function marcarProductoRevisado(id) {
   const { data } = await api.post(`/api/productos/${id}/revisado`)
   return data

@@ -1,22 +1,14 @@
 const { prisma } = require('../lib/prisma');
 
 async function listaDeCategorias(req, res) {
-  const [base, personalizaciones] = await Promise.all([
+  const [base, productosAdmin] = await Promise.all([
     prisma.producto.findMany({ select: { id: true, categoria: true } }),
-    prisma.appSetting.findMany({
-      where: { key: { startsWith: 'producto-admin:' } },
-      select: { value: true },
+    prisma.productoAdmin.findMany({
+      select: { id: true, categoria: true, manual: true },
     }),
   ]);
   const personalizacionesPorId = new Map(
-    personalizaciones.map((fila) => {
-      try {
-        const producto = JSON.parse(fila.value);
-        return [Number(producto.id), producto];
-      } catch {
-        throw new Error('Hay una personalización de producto dañada.');
-      }
-    }),
+    productosAdmin.map((producto) => [producto.id, producto]),
   );
   const productosPorId = new Map(base.map((producto) => {
     const personalizacion = personalizacionesPorId.get(producto.id);
@@ -24,11 +16,12 @@ async function listaDeCategorias(req, res) {
       categoria: personalizacion?.categoria ?? producto.categoria,
     }];
   }));
-  personalizacionesPorId.forEach((personalizacion) => {
-    if (personalizacion.manual) {
-      productosPorId.set(Number(personalizacion.id), { categoria: personalizacion.categoria });
+  productosAdmin.forEach((producto) => {
+    if (producto.manual) {
+      productosPorId.set(producto.id, { categoria: producto.categoria });
     }
   });
+
   const conteo = new Map();
   for (const producto of productosPorId.values()) {
     const nombreOriginal = String(producto.categoria || '').trim();

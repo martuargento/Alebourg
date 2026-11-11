@@ -1,18 +1,22 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Button } from 'react-bootstrap';
+import { useQueryClient } from '@tanstack/react-query';
 import { useCarritoStore as usarCarrito } from '../store/carritoStore';
 import { obtenerPrecioFinal, formatearPrecio, parsearPrecio } from '../utils/preciosUtils';
 import Swal from 'sweetalert2';
-import { useProducto } from '../hooks/useProductos';
+import { productQueryKey, useProducto } from '../hooks/useProductos';
 import { useAdminConfigStore as usarAdminConfig } from '../store/adminConfigStore';
 import { useAuth } from '../hooks/useAuth';
 import { usePreciosConfig } from '../hooks/useConfiguracion';
 import AdminProductoEditor from '../components/AdminProductoEditor';
+import { eliminarProducto } from '../api/administracionProductos';
+import { obtenerErrorApi } from '../api/products';
 
 const DetalleProducto = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { data: producto, isLoading: loading, error } = useProducto(id);
   const { data: configuracionPrecios } = usePreciosConfig();
   const { agregarAlCarrito } = usarCarrito();
@@ -23,6 +27,8 @@ const DetalleProducto = () => {
   );
   const [indiceImagen, setIndiceImagen] = useState(0);
   const [editando, setEditando] = useState(false);
+  const [eliminando, setEliminando] = useState(false);
+  const [errorEliminacion, setErrorEliminacion] = useState('');
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -50,6 +56,36 @@ const DetalleProducto = () => {
       background: '#1e1e1e',
       color: '#fff',
     });
+  };
+
+  const manejarEliminar = async () => {
+    const confirmacion = await Swal.fire({
+      title: '¿Eliminar producto?',
+      text: 'Se eliminará de la base de datos. Si vuelve a aparecer en una importación futura, podrá cargarse nuevamente.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Eliminar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#dc3545',
+      background: '#1e1e1e',
+      color: '#fff',
+    });
+    if (!confirmacion.isConfirmed) return;
+
+    setEliminando(true);
+    setErrorEliminacion('');
+    try {
+      await eliminarProducto(producto.id);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: productQueryKey }),
+        queryClient.invalidateQueries({ queryKey: ['productos-destacados'] }),
+      ]);
+      navigate('/', { replace: true });
+    } catch (errorBorrado) {
+      setErrorEliminacion(obtenerErrorApi(errorBorrado, 'No se pudo eliminar el producto.'));
+    } finally {
+      setEliminando(false);
+    }
   };
 
   if (loading) {
@@ -243,13 +279,24 @@ const DetalleProducto = () => {
                     </Button>
                   </div>
                   {esAdmin && (
-                    <Button
-                      variant="outline-primary"
-                      className="mt-3 w-100"
-                      onClick={() => setEditando((actual) => !actual)}
-                    >
-                      {editando ? 'Cerrar edición' : 'Editar producto'}
-                    </Button>
+                    <div className="d-grid gap-2 mt-3">
+                      <Button
+                        variant="outline-primary"
+                        onClick={() => setEditando((actual) => !actual)}
+                      >
+                        {editando ? 'Cerrar edición' : 'Editar producto'}
+                      </Button>
+                      <Button
+                        variant="outline-danger"
+                        onClick={manejarEliminar}
+                        disabled={eliminando}
+                      >
+                        {eliminando ? 'Eliminando...' : 'Eliminar producto'}
+                      </Button>
+                    </div>
+                  )}
+                  {errorEliminacion && (
+                    <div className="alert alert-danger mt-2" role="alert">{errorEliminacion}</div>
                   )}
                 </div>
               </Col>

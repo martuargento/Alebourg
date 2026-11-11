@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   crearProductoManual,
+  eliminarProducto,
   guardarConfiguracionProductos,
   guardarEdicionProducto,
   marcarProductoRevisado,
@@ -153,6 +154,26 @@ export default function AdminProductoEditor({ producto = null }) {
     }
   }
 
+  async function confirmarEliminacion() {
+    if (!window.confirm('Se eliminará el producto y sus personalizaciones actuales de la base de datos. Si vuelve a aparecer en una importación futura, se podrá cargar nuevamente. ¿Continuar?')) {
+      return;
+    }
+    setGuardando(true);
+    setError('');
+    try {
+      await eliminarProducto(producto.id);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: productQueryKey }),
+        queryClient.invalidateQueries({ queryKey: ['productos-destacados'] }),
+      ]);
+      navigate('/', { replace: true });
+    } catch (errorArchivo) {
+      setError(obtenerErrorApi(errorArchivo, 'No se pudo eliminar el producto.'));
+    } finally {
+      setGuardando(false);
+    }
+  }
+
   return (
     <Form onSubmit={guardar} className="container py-4" style={{ maxWidth: 760 }}>
       <h2 className="mb-4">{esNuevo ? 'Agregar producto manual' : 'Editar producto'}</h2>
@@ -243,6 +264,17 @@ export default function AdminProductoEditor({ producto = null }) {
       <Button type="button" variant="outline-secondary" className="ms-2" onClick={() => navigate(-1)}>
         Volver
       </Button>
+      {!esNuevo && (
+        <Button
+          type="button"
+          variant="outline-danger"
+          className="ms-2"
+          onClick={confirmarEliminacion}
+          disabled={guardando}
+        >
+          Eliminar producto
+        </Button>
+      )}
     </Form>
   );
 }

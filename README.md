@@ -82,13 +82,39 @@ proveedores de hosting.
 
 ### Administración de productos
 
-Los cambios administrativos, productos manuales y el orden de la tienda se
-guardan en `app_settings`, separado del catálogo `productos`, para que una
-reimportación del catálogo no borre esas personalizaciones. La web y la app
-móvil permiten editar título, categoría, costo del proveedor, precio final y
-galería; las listas de Más vendidos y Ofertas se ordenan independientemente.
-En la tienda web se arrastran los productos para ordenarlos; en la app móvil se
-usan las flechas de posición.
+El catálogo del proveedor sigue en `productos`. Los productos manuales y las
+personalizaciones administrativas se guardan como filas en `productos_admin`;
+las fotos adicionales se guardan como filas en `productos_admin_imagenes`.
+Así, una reimportación de `productos` no borra los cambios. La web y la app
+móvil permiten editar título, categoría, costo, precio final y galería. El
+orden y las listas destacadas también tienen columnas editables en Supabase:
+`orden_personalizado`, `mas_vendido`, `orden_mas_vendidos`, `en_oferta` y
+`orden_ofertas`. La preferencia que activa el orden manual se guarda como
+configuración global en `app_settings`. Arrastrar productos guarda cada cambio
+en Supabase automáticamente; apagar la opción solo desactiva el reordenamiento
+y no restaura el orden anterior.
+
+En cada actualización del proveedor, reemplazá únicamente las filas de
+`productos` usando como `id` el código estable del proveedor. En el archivo del
+scraping, `id: 10734` debe corresponder a `Cod.: 10734` y al código de la URL de
+la foto, por ejemplo `/fotos/10734.jpg`; conservá ese mismo valor al convertir
+el JSON a CSV e importarlo. No borres la base completa ni las tablas
+`productos_admin`, `productos_admin_imagenes` o `app_settings`. Las ediciones y
+los productos manuales se administran desde `productos_admin`; la tienda los
+combina con el catálogo importado.
+
+Eliminar un producto desde la web o la app borra sus filas actuales de
+`productos` y `productos_admin`, junto con las filas de su galería. Una
+importación futura puede volver a insertarlo si el proveedor lo publica otra
+vez. Las imágenes originales del proveedor pueden seguir usando su URL externa;
+Storage se usa para fotos propias o adicionales. No reemplaces ni borres
+`productos_admin` al importar el catálogo.
+
+Antes de desplegar esta versión del backend, ejecutá una sola vez
+`backend/prisma/migrate-productos-admin.sql` desde el SQL Editor de Supabase.
+La migración crea las tablas nuevas y copia de forma no destructiva las
+personalizaciones JSON actuales y los registros de `productos_agregados_a_mano`;
+no borra las tablas ni claves de origen.
 
 Para habilitar cargas de imágenes, creá un bucket público de Supabase Storage y
 configurá `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` y, opcionalmente,

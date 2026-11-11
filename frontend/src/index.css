@@ -866,7 +866,19 @@ html[data-theme="light"] button[style*="background: none"]:hover {
 .producto-item {
   width: 100% !important;
   min-width: 280px !important;
+  height: 100% !important;
   margin: 0 auto !important;
+}
+
+.producto-item > div {
+  display: flex !important;
+  height: 100% !important;
+}
+
+.product-card-link {
+  display: flex !important;
+  width: 100% !important;
+  height: 100% !important;
 }
 
 .cardsEstilos {
@@ -926,7 +938,22 @@ html[data-theme="light"] button[style*="background: none"]:hover {
   font-size: 1rem !important;
   line-height: 1.4 !important;
   margin-bottom: 0.5rem !important;
-  flex-grow: 1 !important;
+}
+
+.product-card-title {
+  display: -webkit-box !important;
+  min-height: 2.8em !important;
+  max-height: 2.8em !important;
+  overflow: hidden !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+}
+
+.product-card-price-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 1.5rem;
 }
 
 .card-text {

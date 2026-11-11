@@ -46,11 +46,15 @@ const ProductCard = ({ producto, configuracionPrecios }) => {
   };
 
   return (
-      <Link to={`/producto/${producto.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+      <Link
+        to={`/producto/${producto.id}`}
+        className="product-card-link"
+        style={{ textDecoration: 'none', color: 'inherit' }}
+      >
         <Card
           className='cardsEstilos'
           style={{
-            minHeight: '100%',
+            height: '100%',
             cursor: 'pointer',
             width: '100%',
             maxWidth: '100%',
@@ -68,7 +72,7 @@ const ProductCard = ({ producto, configuracionPrecios }) => {
             }}
           />
           <Card.Body className="d-flex flex-column p-2">
-            <Card.Title className="mb-3 text-break">{producto.titulo}</Card.Title>
+            <Card.Title className="product-card-title mb-3 text-break">{producto.titulo}</Card.Title>
             <div className="mt-auto">
             {esAdmin && mostrarPreciosAdmin && (
               <div style={{ marginBottom: '4px' }}>
@@ -81,12 +85,14 @@ const ProductCard = ({ producto, configuracionPrecios }) => {
               </div>
             )}
               <div>Precio:</div>
-              {producto.enOferta && <span className="badge text-bg-danger mb-1 align-self-start">OFERTA</span>}
-              {tieneDescuento && (
-                <small className="text-decoration-line-through text-secondary">
+              <div className="product-card-price-meta">
+                {producto.enOferta && <span className="badge text-bg-danger">OFERTA</span>}
+                {tieneDescuento && (
+                  <small className="text-decoration-line-through text-secondary">
                   ${formatearPrecio(precioRegular)}
-                </small>
-              )}
+                  </small>
+                )}
+              </div>
               <h4>${precioAjustado}</h4>
             </div>
             <Button

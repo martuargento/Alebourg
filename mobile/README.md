@@ -23,9 +23,15 @@ el almacenamiento seguro del dispositivo. Una vez autenticado, se puede activar
 y entrar a **Cambiar rangos de precios** para editar y guardar los ajustes,
 incluyendo la regla especial por prefijo y el mínimo de auriculares.
 La administración también permite editar productos y precios, gestionar fotos,
-productos manuales y las listas de más vendidos/ofertas. En **Tienda**, al
-activar **Orden personalizado**, los controles de flecha permiten guardar el
-orden principal y el orden de cada lista destacada.
+productos manuales y las listas de más vendidos/ofertas. Los productos
+administrados se guardan como filas en `productos_admin` (y sus fotos como
+filas en `productos_admin_imagenes`) para que sean editables en Supabase y no
+se pierdan al reimportar el catálogo. En **Tienda**, al activar **Orden
+personalizado**, se puede mover con las flechas y cada cambio se guarda
+automáticamente. Desactivar la opción solo bloquea el reordenamiento; conserva
+el orden guardado.
+Al eliminar un producto desde la app se borran sus filas actuales; si aparece
+en un scraping futuro, se puede importar nuevamente.
 
 ## Requisitos
 
@@ -70,6 +76,10 @@ del frontend ni al repositorio. La API solo acepta JPG, PNG y WebP de hasta
 4 MB por imagen y exige sesión de administrador. El límite permite que la
 carga pase por la función de Vercel sin exceder su tamaño máximo de solicitud.
 
+Antes de desplegar una versión del backend que use las tablas administrativas,
+ejecutá una sola vez `backend/prisma/migrate-productos-admin.sql` en el SQL
+Editor de Supabase. El script migra los datos actuales sin borrar las fuentes.
+
 ## Ejecutar
 
 Desde esta carpeta:
@@ -105,4 +115,5 @@ configurar la firma de Android. Si querés instalar la APK como actualización
 sobre otra Alebourg ya instalada, elegí la misma cuenta/proyecto y conservá el
 mismo keystore de Android de la APK anterior; una firma distinta no puede
 actualizar esa instalación. Al terminar, EAS muestra el enlace para descargar
-la APK. El `versionCode` ya se incrementó a 2 para esta build.
+la APK. Incrementá `versionCode` para cada nueva build; esta versión usa
+`versionCode` 3.

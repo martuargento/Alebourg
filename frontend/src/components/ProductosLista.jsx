@@ -197,6 +197,9 @@ const ProductosLista = ({ categoria = null }) => {
               }).catch(() => {})}
             />
             <span className="text-white">Orden personalizado</span>
+            {configuracionAdmin?.ordenPersonalizadoActivo && (
+              <small className="text-white-50">Elegí “Sin ordenar”; se guarda automáticamente al soltar cada producto.</small>
+            )}
           </div>
         )}
         {errorAdmin && <div className="alert alert-danger mx-2" role="alert">{errorAdmin}</div>}
