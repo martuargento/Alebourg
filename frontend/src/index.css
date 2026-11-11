@@ -889,19 +889,23 @@ html[data-theme="light"] button[style*="background: none"]:hover {
 .producto-item {
   width: 100% !important;
   min-width: 280px !important;
+  height: 100% !important;
   margin: 0 auto !important;
 }
 
 .producto-item > div {
   display: flex !important;
+  height: 100% !important;
 }
 
 .product-card-link {
   display: flex !important;
   width: 100% !important;
+  height: 100% !important;
 }
 
 .cardsEstilos {
+  height: 100% !important;
   width: 100% !important;
   margin: 0 !important;
   padding: 0 !important;
@@ -1038,6 +1042,7 @@ html[data-theme="light"] button[style*="background: none"]:hover {
 .product-card-body {
   justify-content: flex-start !important;
   height: auto !important;
+  flex: 1 1 auto;
 }
 
 .card-title {
@@ -1048,6 +1053,7 @@ html[data-theme="light"] button[style*="background: none"]:hover {
 
 .product-card-title {
   display: -webkit-box !important;
+  min-height: 2.8em !important;
   max-height: 2.8em !important;
   overflow: hidden !important;
   -webkit-box-orient: vertical !important;
@@ -1058,6 +1064,7 @@ html[data-theme="light"] button[style*="background: none"]:hover {
   display: flex;
   align-items: center;
   gap: 0.4rem;
+  min-height: 1.5rem;
 }
 
 .card-text {

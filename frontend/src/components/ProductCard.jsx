@@ -129,6 +129,7 @@ const ProductCard = ({
         <Card
           className='cardsEstilos'
           style={{
+            height: '100%',
             cursor: 'pointer',
             width: '100%',
             maxWidth: '100%',
@@ -179,16 +180,14 @@ const ProductCard = ({
               </div>
             )}
               <div>Precio:</div>
-              {(producto.enOferta || tieneDescuento) && (
-                <div className="product-card-price-meta">
-                  {producto.enOferta && <span className="badge text-bg-danger">OFERTA</span>}
-                  {tieneDescuento && (
-                    <small className="text-decoration-line-through text-secondary">
-                      ${formatearPrecio(precioRegular)}
-                    </small>
-                  )}
-                </div>
-              )}
+              <div className="product-card-price-meta">
+                {producto.enOferta && <span className="badge text-bg-danger">OFERTA</span>}
+                {tieneDescuento && (
+                  <small className="text-decoration-line-through text-secondary">
+                    ${formatearPrecio(precioRegular)}
+                  </small>
+                )}
+              </div>
               <h4>${precioAjustado}</h4>
             </div>
             <Button
