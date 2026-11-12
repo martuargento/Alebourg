@@ -15,7 +15,8 @@ function validarConfiguracionCarrusel(data) {
       && segundos <= MAXIMO_SEGUNDOS_CARRUSEL
     ))
   if (
-    !['synchronized', 'individual'].includes(data?.mode)
+    !data
+    || !['synchronized', 'individual'].includes(data.mode)
     || !Number.isInteger(data.intervalSeconds)
     || data.intervalSeconds < MINIMO_SEGUNDOS_CARRUSEL
     || data.intervalSeconds > MAXIMO_SEGUNDOS_CARRUSEL

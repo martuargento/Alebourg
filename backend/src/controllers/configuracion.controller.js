@@ -197,7 +197,10 @@ async function guardarRitmoCarruselProducto(req, res) {
   }
 
   const intervalSeconds = req.body?.intervalSeconds;
-  if (intervalSeconds !== null && !segundosCarruselValidos(intervalSeconds)) {
+  if (
+    intervalSeconds === undefined
+    || (intervalSeconds !== null && !segundosCarruselValidos(intervalSeconds))
+  ) {
     return res.status(400).json({
       error: `El intervalo debe ser nulo o un número entero entre ${SEGUNDOS_CARRUSEL_MINIMOS} y ${SEGUNDOS_CARRUSEL_MAXIMOS} segundos.`,
     });
