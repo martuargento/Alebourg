@@ -2,7 +2,7 @@
   "expo": {
     "name": "Alebourg",
     "slug": "alebourg-mobile",
-    "version": "1.0.7",
+    "version": "1.0.8",
     "scheme": "alebourg",
     "orientation": "portrait",
     "icon": "./assets/app-icon.png",
@@ -13,7 +13,7 @@
     },
     "android": {
       "package": "com.alebourg.mobile",
-      "versionCode": 8,
+      "versionCode": 9,
       "adaptiveIcon": {
         "backgroundColor": "#FFFFFF",
         "foregroundImage": "./assets/app-icon.png"

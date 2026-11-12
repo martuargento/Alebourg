@@ -2,12 +2,14 @@ import { useState } from 'react'
 import {
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from 'react-native'
+import { Feather } from '@expo/vector-icons'
 import { useTema } from '../context/TemaContext'
 import { useAuth } from '../context/AuthContext'
 import { obtenerErrorApi } from '../api/client'
@@ -19,6 +21,7 @@ export default function LoginAdminScreen({ navigation }) {
   const { login } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [mostrarPassword, setMostrarPassword] = useState(false)
   const [error, setError] = useState('')
   const [enviando, setEnviando] = useState(false)
 
@@ -78,18 +81,33 @@ export default function LoginAdminScreen({ navigation }) {
 
         <View style={estilos.campo}>
           <Text style={estilos.etiqueta}>Contraseña</Text>
-          <TextInput
-            accessibilityLabel="Contraseña"
-            autoComplete="current-password"
-            onChangeText={setPassword}
-            onSubmitEditing={enviarFormulario}
-            placeholder="Tu contraseña"
-            placeholderTextColor={colores.secundaria}
-            returnKeyType="done"
-            secureTextEntry
-            style={estilos.entrada}
-            value={password}
-          />
+          <View style={estilos.entradaPasswordContenedor}>
+            <TextInput
+              accessibilityLabel="Contraseña"
+              autoComplete="current-password"
+              onChangeText={setPassword}
+              onSubmitEditing={enviarFormulario}
+              placeholder="Tu contraseña"
+              placeholderTextColor={colores.secundaria}
+              returnKeyType="done"
+              secureTextEntry={!mostrarPassword}
+              style={[estilos.entrada, estilos.entradaPassword]}
+              value={password}
+            />
+            <Pressable
+              accessibilityLabel={mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+              accessibilityRole="button"
+              hitSlop={10}
+              onPress={() => setMostrarPassword((actual) => !actual)}
+              style={estilos.botonMostrarPassword}
+            >
+              <Feather
+                name={mostrarPassword ? 'eye-off' : 'eye'}
+                size={20}
+                color={colores.secundaria}
+              />
+            </Pressable>
+          </View>
         </View>
 
         {!!error && (
@@ -129,6 +147,15 @@ function crearEstilos(colores) {
       backgroundColor: colores.superficie,
       color: colores.tinta,
       fontSize: 16,
+    },
+    entradaPasswordContenedor: { position: 'relative' },
+    entradaPassword: { paddingRight: 48 },
+    botonMostrarPassword: {
+      position: 'absolute',
+      top: 0,
+      right: 12,
+      bottom: 0,
+      justifyContent: 'center',
     },
   })
 }
